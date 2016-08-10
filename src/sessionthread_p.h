@@ -20,7 +20,6 @@
 #ifndef KIMAP_SESSIONTHREAD_P_H
 #define KIMAP_SESSIONTHREAD_P_H
 
-#include <QtCore/QMutex>
 #include <QtCore/QQueue>
 
 #include <ktcpsocket.h>
@@ -68,8 +67,6 @@ Q_SIGNALS:
 
 private Q_SLOTS:
     void reconnect();
-    void threadInit();
-    void threadQuit();
     void readMessage();
     void writeDataQueue();
     void sslConnected();
@@ -87,9 +84,6 @@ private:
     ImapStreamParser *m_stream;
 
     QQueue<QByteArray> m_dataQueue;
-
-    // Protects m_dataQueue
-    QMutex m_mutex;
 
     bool m_encryptedMode;
 };
