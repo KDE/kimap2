@@ -95,7 +95,7 @@ private:
     bool isSocketConnected;
     Session::State state;
 
-    SessionLogger *logger;
+    QSharedPointer<SessionLogger> logger;
 
     bool jobRunning;
     Job *currentJob;
@@ -117,8 +117,8 @@ private:
     QString hostName;
     quint16 port;
 
-    QSslSocket *socket;
-    ImapStreamParser *stream;
+    QSharedPointer<QSslSocket> socket;
+    QSharedPointer<ImapStreamParser> stream;
 
     QQueue<QByteArray> dataQueue;
 };

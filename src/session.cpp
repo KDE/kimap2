@@ -45,7 +45,7 @@ Session::Session(const QString &hostName, quint16 port, QObject *parent)
     : QObject(parent), d(new SessionPrivate(this))
 {
     if (!qEnvironmentVariableIsEmpty("KIMAP_LOGFILE")) {
-        d->logger = new SessionLogger;
+        d->logger = QSharedPointer<SessionLogger>::create();
     }
 
     d->isSocketConnected = false;
@@ -54,27 +54,27 @@ Session::Session(const QString &hostName, quint16 port, QObject *parent)
     d->hostName =hostName;
     d->port = port;
 
-    d->socket = new QSslSocket;
-    d->stream = new ImapStreamParser(d->socket);
+    d->socket = QSharedPointer<QSslSocket>::create();
+    d->stream = QSharedPointer<ImapStreamParser>::create(d->socket.data());
 
-    connect(d->socket, &QIODevice::readyRead,
+    connect(d->socket.data(), &QIODevice::readyRead,
             d, &SessionPrivate::readMessage, Qt::QueuedConnection);
 
     // Delay the call to socketDisconnected so that it finishes disconnecting before we call reconnect()
-    connect(d->socket, &QSslSocket::disconnected,
+    connect(d->socket.data(), &QSslSocket::disconnected,
             d, &SessionPrivate::socketDisconnected, Qt::QueuedConnection);
-    connect(d->socket, &QSslSocket::connected,
+    connect(d->socket.data(), &QSslSocket::connected,
             d, &SessionPrivate::socketConnected);
-    connect(d->socket, static_cast<void (QSslSocket::*)(const QList<QSslError>&)>(&QSslSocket::sslErrors),
+    connect(d->socket.data(), static_cast<void (QSslSocket::*)(const QList<QSslError>&)>(&QSslSocket::sslErrors),
             d, &SessionPrivate::handleSslErrors);
-    connect(d->socket, static_cast<void (QSslSocket::*)(QAbstractSocket::SocketError)>(&QSslSocket::error),
+    connect(d->socket.data(), static_cast<void (QSslSocket::*)(QAbstractSocket::SocketError)>(&QSslSocket::error),
             d, &SessionPrivate::socketError);
 
-    connect(d->socket, &QIODevice::bytesWritten,
+    connect(d->socket.data(), &QIODevice::bytesWritten,
             d, &SessionPrivate::socketActivity);
-    connect(d->socket, &QSslSocket::encryptedBytesWritten,
+    connect(d->socket.data(), &QSslSocket::encryptedBytesWritten,
             d, &SessionPrivate::socketActivity);
-    connect(d->socket, &QIODevice::readyRead,
+    connect(d->socket.data(), &QIODevice::readyRead,
             d, &SessionPrivate::socketActivity);
 
     d->socketTimer.setSingleShot(true);
@@ -162,7 +162,6 @@ SessionPrivate::SessionPrivate(Session *session)
 
 SessionPrivate::~SessionPrivate()
 {
-    delete logger;
 }
 
 void SessionPrivate::handleSslErrors(const QList<QSslError> &errors)
@@ -465,7 +464,7 @@ void SessionPrivate::startSsl(const QSsl::SslProtocol &version)
         return;
     }
 
-    connect(socket, &QSslSocket::encrypted, this, &SessionPrivate::sslConnected);
+    connect(socket.data(), &QSslSocket::encrypted, this, &SessionPrivate::sslConnected);
     socket->startClientEncryption();
 }
 
