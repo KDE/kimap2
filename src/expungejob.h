@@ -17,14 +17,14 @@
     02110-1301, USA.
 */
 
-#ifndef KIMAP_EXPUNGEJOB_H
-#define KIMAP_EXPUNGEJOB_H
+#ifndef KIMAP2_EXPUNGEJOB_H
+#define KIMAP2_EXPUNGEJOB_H
 
-#include "kimap_export.h"
+#include "kimap2_export.h"
 
 #include "job.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 
 class Session;
@@ -43,7 +43,7 @@ class ExpungeJobPrivate;
  * If the server supports ACLs, the user will need the
  * Acl::Expunge right on the mailbox.
  */
-class KIMAP_EXPORT ExpungeJob : public Job
+class KIMAP2_EXPORT ExpungeJob : public Job
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(ExpungeJob)

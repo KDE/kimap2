@@ -17,15 +17,15 @@
     02110-1301, USA.
 */
 
-#ifndef KIMAP_METADATAJOBBASE_P_H
-#define KIMAP_METADATAJOBBASE_P_H
+#ifndef KIMAP2_METADATAJOBBASE_P_H
+#define KIMAP2_METADATAJOBBASE_P_H
 
 #include "metadatajobbase.h"
 #include "job_p.h"
 #include "message_p.h"
 #include "session.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 class MetaDataJobBasePrivate : public JobPrivate
 {

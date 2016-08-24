@@ -19,13 +19,13 @@
 
 #include <qtest.h>
 
-#include "kimaptest/fakeserver.h"
+#include "kimap2test/fakeserver.h"
 #include "kimap/session.h"
 #include "kimap/fetchjob.h"
 
 #include <QtTest>
 
-Q_DECLARE_METATYPE(KIMAP::FetchJob::FetchScope)
+Q_DECLARE_METATYPE(KIMAP2::FetchJob::FetchScope)
 
 class FetchJobTest: public QObject
 {
@@ -36,18 +36,18 @@ private:
 
     QMap<qint64, qint64> m_uids;
     QMap<qint64, qint64> m_sizes;
-    QMap<qint64, KIMAP::MessageFlags> m_flags;
-    QMap<qint64, KIMAP::MessagePtr> m_messages;
-    QMap<qint64, KIMAP::MessageParts> m_parts;
-    QMap<qint64, KIMAP::MessageAttribute> m_attrs;
+    QMap<qint64, KIMAP2::MessageFlags> m_flags;
+    QMap<qint64, KIMAP2::MessagePtr> m_messages;
+    QMap<qint64, KIMAP2::MessageParts> m_parts;
+    QMap<qint64, KIMAP2::MessageAttribute> m_attrs;
 
 public Q_SLOTS:
     void onHeadersReceived(const QString &/*mailBox*/,
                            const QMap<qint64, qint64> &uids,
                            const QMap<qint64, qint64> &sizes,
-                           const QMap<qint64, KIMAP::MessageAttribute> &attrs,
-                           const QMap<qint64, KIMAP::MessageFlags> &flags,
-                           const QMap<qint64, KIMAP::MessagePtr> &messages)
+                           const QMap<qint64, KIMAP2::MessageAttribute> &attrs,
+                           const QMap<qint64, KIMAP2::MessageFlags> &flags,
+                           const QMap<qint64, KIMAP2::MessagePtr> &messages)
     {
         m_signals << QStringLiteral("headersReceived");
         m_uids.unite(uids);
@@ -59,8 +59,8 @@ public Q_SLOTS:
 
     void onMessagesReceived(const QString &/*mailbox*/,
                             const QMap<qint64, qint64> uids,
-                            const QMap<qint64, KIMAP::MessageAttribute> &attrs,
-                            const QMap<qint64, KIMAP::MessagePtr> &messages)
+                            const QMap<qint64, KIMAP2::MessageAttribute> &attrs,
+                            const QMap<qint64, KIMAP2::MessagePtr> &messages)
     {
         m_signals << QStringLiteral("messagesReceived");
         m_uids.unite(uids);
@@ -70,8 +70,8 @@ public Q_SLOTS:
 
     void onPartsReceived(const QString &/*mailbox*/,
                          const QMap<qint64, qint64> &/*uids*/,
-                         const QMap<qint64, KIMAP::MessageAttribute> &attrs,
-                         const QMap<qint64, KIMAP::MessageParts> &parts)
+                         const QMap<qint64, KIMAP2::MessageAttribute> &attrs,
+                         const QMap<qint64, KIMAP2::MessageParts> &parts)
     {
         m_signals << QStringLiteral("partsReceived");
         m_attrs.unite(attrs);
@@ -82,16 +82,16 @@ private Q_SLOTS:
 
     void testFetch_data()
     {
-        qRegisterMetaType<KIMAP::FetchJob::FetchScope>();
+        qRegisterMetaType<KIMAP2::FetchJob::FetchScope>();
 
         QTest::addColumn<bool>("uidBased");
-        QTest::addColumn< KIMAP::ImapSet >("set");
+        QTest::addColumn< KIMAP2::ImapSet >("set");
         QTest::addColumn<int>("expectedMessageCount");
         QTest::addColumn< QList<QByteArray> >("scenario");
-        QTest::addColumn<KIMAP::FetchJob::FetchScope>("scope");
+        QTest::addColumn<KIMAP2::FetchJob::FetchScope>("scope");
 
-        KIMAP::FetchJob::FetchScope scope;
-        scope.mode = KIMAP::FetchJob::FetchScope::Flags;
+        KIMAP2::FetchJob::FetchScope scope;
+        scope.mode = KIMAP2::FetchJob::FetchScope::Flags;
         scope.changedSince = 123456789;
 
         QList<QByteArray> scenario;
@@ -103,7 +103,7 @@ private Q_SLOTS:
                  << "S: * 4 FETCH ( FLAGS () UID 4 )"
                  << "S: A000001 OK fetch done";
 
-        QTest::newRow("messages have empty flags (with changedsince)") << false << KIMAP::ImapSet(1, 4) << 4
+        QTest::newRow("messages have empty flags (with changedsince)") << false << KIMAP2::ImapSet(1, 4) << 4
                 << scenario << scope;
 
         scenario.clear();
@@ -116,7 +116,7 @@ private Q_SLOTS:
                  << "S: * 4 FETCH ( FLAGS () UID 4 )"
                  << "S: A000001 OK fetch done";
 
-        QTest::newRow("messages have empty flags") << false << KIMAP::ImapSet(1, 4) << 4
+        QTest::newRow("messages have empty flags") << false << KIMAP2::ImapSet(1, 4) << 4
                 << scenario << scope;
 
         scenario.clear();
@@ -128,8 +128,8 @@ private Q_SLOTS:
                  << "S: * 11 FETCH (RFC822.SIZE 770 INTERNALDATE \"11-Oct-2010 03:33:50 +0100\" BODY[HEADER.FIELDS (TO FROM MESSAGE-ID REFERENCES IN-REPLY-TO SUBJECT DATE)] {246}"
                  << "S: From: John Smith <jonathanr.smith@foobarbaz.com>\r\nTo: \"amagicemailaddress@foobarbazbarfoo.com\"\r\n\t<amagicemailaddress@foobarbazbarfoo.com>\r\nDate: Mon, 11 Oct 2010 03:34:48 +0100\r\nSubject: unsubscribe\r\nMessage-ID: <ASDFFDSASDFFDS@foobarbaz.com>\r\n\r\n"
                  << "X";
-        scope.mode = KIMAP::FetchJob::FetchScope::Headers;
-        QTest::newRow("connection drop") << false << KIMAP::ImapSet(11, 11) << 1 << scenario << scope;
+        scope.mode = KIMAP2::FetchJob::FetchScope::Headers;
+        QTest::newRow("connection drop") << false << KIMAP2::ImapSet(11, 11) << 1 << scenario << scope;
 
         scenario.clear();
         // Important bit here if "([127.0.0.1])" which used to crash the stream parser
@@ -138,8 +138,8 @@ private Q_SLOTS:
                  << "S: * 11 FETCH (RFC822.SIZE 770 INTERNALDATE \"11-Oct-2010 03:33:50 +0100\" BODY[HEADER.FIELDS (TO FROM MESSAGE-ID REFERENCES IN-REPLY-TO SUBJECT DATE)] {246}"
                  << "S: ([127.0.0.1])\r\nDate: Mon, 11 Oct 2010 03:34:48 +0100\r\nSubject: unsubscribe\r\nMessage-ID: <ASDFFDSASDFFDS@foobarbaz.com>\r\n\r\n"
                  << "X";
-        scope.mode = KIMAP::FetchJob::FetchScope::Headers;
-        QTest::newRow("buffer overwrite") << false << KIMAP::ImapSet(11, 11) << 1 << scenario << scope;
+        scope.mode = KIMAP2::FetchJob::FetchScope::Headers;
+        QTest::newRow("buffer overwrite") << false << KIMAP2::ImapSet(11, 11) << 1 << scenario << scope;
 
         scenario.clear();
         // We're assuming a buffer overwrite here which made us miss the opening parenthesis
@@ -148,8 +148,8 @@ private Q_SLOTS:
                  << "C: A000001 FETCH 11 (RFC822.SIZE INTERNALDATE BODY.PEEK[HEADER.FIELDS (TO FROM MESSAGE-ID REFERENCES IN-REPLY-TO SUBJECT DATE)] FLAGS UID)"
                  << "S: * 11 FETCH {10}doh!\r\n\r\n\r\n)\r\n"
                  << "X";
-        scope.mode = KIMAP::FetchJob::FetchScope::Headers;
-        QTest::newRow("buffer overwrite 2") << false << KIMAP::ImapSet(11, 11) << 1 << scenario << scope;
+        scope.mode = KIMAP2::FetchJob::FetchScope::Headers;
+        QTest::newRow("buffer overwrite 2") << false << KIMAP2::ImapSet(11, 11) << 1 << scenario << scope;
 
         scenario.clear();
         scenario << FakeServer::preauth()
@@ -157,27 +157,27 @@ private Q_SLOTS:
                  << "S: * 11 FETCH (UID 123 RFC822.SIZE 770 INTERNALDATE \"11-Oct-2010 03:33:50 +0100\" BODY[HEADER] {245}"
                  << "S: From: John Smith <jonathanr.smith@foobarbaz.com>\r\nTo: \"amagicemailaddress@foobarbazbarfoo.com\"\r\n\t<amagicemailaddress@foobarbazbarfoo.com>\r\nDate: Mon, 11 Oct 2010 03:34:48 +0100\r\nSubject: unsubscribe\r\nMessage-ID: <ASDFFDSASDFFDS@foobarbaz.com>\r\n\r\n  FLAGS ())"
                  << "S: A000001 OK fetch done";
-        scope.mode = KIMAP::FetchJob::FetchScope::FullHeaders;
+        scope.mode = KIMAP2::FetchJob::FetchScope::FullHeaders;
         scope.changedSince = 123456789;
-        QTest::newRow("fetch full headers") << false << KIMAP::ImapSet(11, 11) << 1
+        QTest::newRow("fetch full headers") << false << KIMAP2::ImapSet(11, 11) << 1
                                             << scenario << scope;
     }
 
     void testFetch()
     {
         QFETCH(bool, uidBased);
-        QFETCH(KIMAP::ImapSet, set);
+        QFETCH(KIMAP2::ImapSet, set);
         QFETCH(int, expectedMessageCount);
         QFETCH(QList<QByteArray>, scenario);
-        QFETCH(KIMAP::FetchJob::FetchScope, scope);
+        QFETCH(KIMAP2::FetchJob::FetchScope, scope);
 
         FakeServer fakeServer;
         fakeServer.setScenario(scenario);
         fakeServer.startAndWait();
 
-        KIMAP::Session session(QStringLiteral("127.0.0.1"), 5989);
+        KIMAP2::Session session(QStringLiteral("127.0.0.1"), 5989);
 
-        KIMAP::FetchJob *job = new KIMAP::FetchJob(&session);
+        KIMAP2::FetchJob *job = new KIMAP2::FetchJob(&session);
         job->setUidBased(uidBased);
         job->setSequenceSet(set);
         job->setScope(scope);
@@ -185,15 +185,15 @@ private Q_SLOTS:
         connect(job, SIGNAL(headersReceived(QString,
                                             QMap<qint64, qint64>,
                                             QMap<qint64, qint64>,
-                                            QMap<qint64, KIMAP::MessageAttribute>,
-                                            QMap<qint64, KIMAP::MessageFlags>,
-                                            QMap<qint64, KIMAP::MessagePtr>)),
+                                            QMap<qint64, KIMAP2::MessageAttribute>,
+                                            QMap<qint64, KIMAP2::MessageFlags>,
+                                            QMap<qint64, KIMAP2::MessagePtr>)),
                 this, SLOT(onHeadersReceived(QString,
                                              QMap<qint64, qint64>,
                                              QMap<qint64, qint64>,
-                                             QMap<qint64, KIMAP::MessageAttribute>,
-                                             QMap<qint64, KIMAP::MessageFlags>,
-                                             QMap<qint64, KIMAP::MessagePtr>)));
+                                             QMap<qint64, KIMAP2::MessageAttribute>,
+                                             QMap<qint64, KIMAP2::MessageFlags>,
+                                             QMap<qint64, KIMAP2::MessagePtr>)));
 
         bool result = job->exec();
         QEXPECT_FAIL("connection drop", "Expected failure on connection drop", Continue);
@@ -226,28 +226,28 @@ private Q_SLOTS:
                  << "S: * 2 FETCH (UID 20 BODYSTRUCTURE ((((\"TEXT\" \"PLAIN\" (\"CHARSET\" \"ISO-8859-1\") NIL NIL \"7BIT\" 72 4 NIL NIL NIL)(\"TEXT\" \"HTML\" (\"CHARSET\" \"ISO-8859-1\") NIL NIL \"QUOTED-PRINTABLE\" 281 5 NIL NIL NIL) \"ALTERNATIVE\" (\"BOUNDARY\" \"0001\") NIL NIL)(\"IMAGE\" \"GIF\" (\"NAME\" \"B56.gif\") \"<B56@goomoji.gmail>\" NIL \"BASE64\" 528 NIL NIL NIL) \"RELATED\" (\"BOUNDARY\" \"0002\") NIL NIL)(\"IMAGE\" \"JPEG\" (\"NAME\" \"photo.jpg\") NIL NIL \"BASE64\" 53338 NIL (\"ATTACHMENT\" (\"FILENAME\" \"photo.jpg\")) NIL) \"MIXED\" (\"BOUNDARY\" \"0003\") NIL NIL))"
                  << "S: A000001 OK fetch done";
 
-        KIMAP::FetchJob::FetchScope scope;
-        scope.mode = KIMAP::FetchJob::FetchScope::Structure;
+        KIMAP2::FetchJob::FetchScope scope;
+        scope.mode = KIMAP2::FetchJob::FetchScope::Structure;
 
         FakeServer fakeServer;
         fakeServer.setScenario(scenario);
         fakeServer.startAndWait();
 
-        KIMAP::Session session(QStringLiteral("127.0.0.1"), 5989);
+        KIMAP2::Session session(QStringLiteral("127.0.0.1"), 5989);
 
-        KIMAP::FetchJob *job = new KIMAP::FetchJob(&session);
+        KIMAP2::FetchJob *job = new KIMAP2::FetchJob(&session);
         job->setUidBased(false);
-        job->setSequenceSet(KIMAP::ImapSet(1, 2));
+        job->setSequenceSet(KIMAP2::ImapSet(1, 2));
         job->setScope(scope);
 
         connect(job, SIGNAL(messagesReceived(QString,
                                              QMap<qint64, qint64>,
-                                             QMap<qint64, KIMAP::MessageAttribute>,
-                                             QMap<qint64, KIMAP::MessagePtr>)),
+                                             QMap<qint64, KIMAP2::MessageAttribute>,
+                                             QMap<qint64, KIMAP2::MessagePtr>)),
                 this, SLOT(onMessagesReceived(QString,
                                               QMap<qint64, qint64>,
-                                              QMap<qint64, KIMAP::MessageAttribute>,
-                                              QMap<qint64, KIMAP::MessagePtr>)));
+                                              QMap<qint64, KIMAP2::MessageAttribute>,
+                                              QMap<qint64, KIMAP2::MessagePtr>)));
 
         bool result = job->exec();
         QVERIFY(result);
@@ -278,8 +278,8 @@ private Q_SLOTS:
                  << "S: * 2 FETCH (UID 20 FLAGS (\\Seen) BODY[HEADER.FIELDS (TO FROM MESSAGE-ID REFERENCES IN-REPLY-TO SUBJECT DATE)] {154}\r\nFrom: Joe Smith <smith@example.com>\r\nDate: Wed, 2 Mar 2011 11:33:24 +0700\r\nMessage-ID: <1234@example.com>\r\nSubject: hello\r\nTo: Jane <jane@example.com>\r\n\r\n BODY[1.1.1] {28}\r\nHi Jane, nice to meet you!\r\n BODY[1.1.1.MIME] {48}\r\nContent-Type: text/plain; charset=ISO-8859-1\r\n\r\n)\r\n"
                  << "S: A000001 OK fetch done";
 
-        KIMAP::FetchJob::FetchScope scope;
-        scope.mode = KIMAP::FetchJob::FetchScope::HeaderAndContent;
+        KIMAP2::FetchJob::FetchScope scope;
+        scope.mode = KIMAP2::FetchJob::FetchScope::HeaderAndContent;
         scope.parts.clear();
         scope.parts.append("1.1.1");
 
@@ -287,33 +287,33 @@ private Q_SLOTS:
         fakeServer.setScenario(scenario);
         fakeServer.startAndWait();
 
-        KIMAP::Session session(QStringLiteral("127.0.0.1"), 5989);
+        KIMAP2::Session session(QStringLiteral("127.0.0.1"), 5989);
 
-        KIMAP::FetchJob *job = new KIMAP::FetchJob(&session);
+        KIMAP2::FetchJob *job = new KIMAP2::FetchJob(&session);
         job->setUidBased(false);
-        job->setSequenceSet(KIMAP::ImapSet(2, 2));
+        job->setSequenceSet(KIMAP2::ImapSet(2, 2));
         job->setScope(scope);
 
         connect(job, SIGNAL(headersReceived(QString,
                                             QMap<qint64, qint64>,
                                             QMap<qint64, qint64>,
-                                            QMap<qint64, KIMAP::MessageAttribute>,
-                                            QMap<qint64, KIMAP::MessageFlags>,
-                                            QMap<qint64, KIMAP::MessagePtr>)),
+                                            QMap<qint64, KIMAP2::MessageAttribute>,
+                                            QMap<qint64, KIMAP2::MessageFlags>,
+                                            QMap<qint64, KIMAP2::MessagePtr>)),
                 this, SLOT(onHeadersReceived(QString,
                                              QMap<qint64, qint64>,
                                              QMap<qint64, qint64>,
-                                             QMap<qint64, KIMAP::MessageAttribute>,
-                                             QMap<qint64, KIMAP::MessageFlags>,
-                                             QMap<qint64, KIMAP::MessagePtr>)));
+                                             QMap<qint64, KIMAP2::MessageAttribute>,
+                                             QMap<qint64, KIMAP2::MessageFlags>,
+                                             QMap<qint64, KIMAP2::MessagePtr>)));
         connect(job, SIGNAL(partsReceived(QString,
                                           QMap<qint64, qint64>,
-                                          QMap<qint64, KIMAP::MessageAttribute>,
-                                          QMap<qint64, KIMAP::MessageParts>)),
+                                          QMap<qint64, KIMAP2::MessageAttribute>,
+                                          QMap<qint64, KIMAP2::MessageParts>)),
                 this, SLOT(onPartsReceived(QString,
                                            QMap<qint64, qint64>,
-                                           QMap<qint64, KIMAP::MessageAttribute>,
-                                           QMap<qint64, KIMAP::MessageParts>)));
+                                           QMap<qint64, KIMAP2::MessageAttribute>,
+                                           QMap<qint64, KIMAP2::MessageParts>)));
 
         bool result = job->exec();
 
@@ -327,8 +327,8 @@ private Q_SLOTS:
         QCOMPARE(m_messages[2]->messageID()->identifier(), QByteArray("1234@example.com"));
 
         // Check that we recieved the flags
-        QMap<qint64, KIMAP::MessageFlags> expectedFlags;
-        expectedFlags.insert(2, KIMAP::MessageFlags() << "\\Seen");
+        QMap<qint64, KIMAP2::MessageFlags> expectedFlags;
+        expectedFlags.insert(2, KIMAP2::MessageFlags() << "\\Seen");
         QCOMPARE(m_flags, expectedFlags);
 
         // Check that we didn't received the full message body, since we only requested a specific part

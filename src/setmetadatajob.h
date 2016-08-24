@@ -17,14 +17,14 @@
     02110-1301, USA.
 */
 
-#ifndef KIMAP_SETMETADATAJOB_H
-#define KIMAP_SETMETADATAJOB_H
+#ifndef KIMAP2_SETMETADATAJOB_H
+#define KIMAP2_SETMETADATAJOB_H
 
-#include "kimap_export.h"
+#include "kimap2_export.h"
 
 #include "metadatajobbase.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 
 class Session;
@@ -66,7 +66,7 @@ class SetMetaDataJobPrivate;
  * version of the extension, only Acl::Lookup rights are
  * required (ie: the user must be able to list the mailbox).
  */
-class KIMAP_EXPORT SetMetaDataJob : public MetaDataJobBase
+class KIMAP2_EXPORT SetMetaDataJob : public MetaDataJobBase
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(SetMetaDataJob)
@@ -173,7 +173,7 @@ public:
      * @deprecated Use a /shared or /private prefix with addMetaData instead.
      */
     // KDE5: remove
-    KIMAP_DEPRECATED void setEntry(const QByteArray &entry);
+    KIMAP2_DEPRECATED void setEntry(const QByteArray &entry);
 
     /**
      * Possible error codes that may be returned by the server.
@@ -213,6 +213,6 @@ protected:
 
 }
 
-Q_DECLARE_OPERATORS_FOR_FLAGS(KIMAP::SetMetaDataJob::MetaDataErrors)
+Q_DECLARE_OPERATORS_FOR_FLAGS(KIMAP2::SetMetaDataJob::MetaDataErrors)
 
 #endif

@@ -17,21 +17,21 @@
     02110-1301, USA.
 */
 
-#ifndef KIMAP_LISTJOB_H
-#define KIMAP_LISTJOB_H
+#ifndef KIMAP2_LISTJOB_H
+#define KIMAP2_LISTJOB_H
 
-#include "kimap_export.h"
+#include "kimap2_export.h"
 
 #include "job.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 
 class Session;
 struct Message;
 class ListJobPrivate;
 
-struct KIMAP_EXPORT MailBoxDescriptor {
+struct KIMAP2_EXPORT MailBoxDescriptor {
     QString name;
     QChar separator;
 
@@ -46,7 +46,7 @@ struct KIMAP_EXPORT MailBoxDescriptor {
     }
 };
 
-class KIMAP_EXPORT ListJob : public Job
+class KIMAP2_EXPORT ListJob : public Job
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(ListJob)
@@ -64,8 +64,8 @@ public:
     explicit ListJob(Session *session);
     virtual ~ListJob();
 
-    KIMAP_DEPRECATED void setIncludeUnsubscribed(bool include);
-    KIMAP_DEPRECATED bool isIncludeUnsubscribed() const;
+    KIMAP2_DEPRECATED void setIncludeUnsubscribed(bool include);
+    KIMAP2_DEPRECATED bool isIncludeUnsubscribed() const;
 
     void setOption(Option option);
     Option option() const;
@@ -73,11 +73,11 @@ public:
     void setQueriedNamespaces(const QList<MailBoxDescriptor> &namespaces);
     QList<MailBoxDescriptor> queriedNamespaces() const;
 
-    KIMAP_DEPRECATED QList<MailBoxDescriptor> mailBoxes() const;
-    KIMAP_DEPRECATED QMap< MailBoxDescriptor, QList<QByteArray> > flags() const;
+    KIMAP2_DEPRECATED QList<MailBoxDescriptor> mailBoxes() const;
+    KIMAP2_DEPRECATED QMap< MailBoxDescriptor, QList<QByteArray> > flags() const;
 
 Q_SIGNALS:
-    void mailBoxesReceived(const QList<KIMAP::MailBoxDescriptor> &descriptors,
+    void mailBoxesReceived(const QList<KIMAP2::MailBoxDescriptor> &descriptors,
                            const QList< QList<QByteArray> > &flags);
 
 protected:
@@ -93,7 +93,7 @@ private:
     *
     * @param descriptor the descriptor to convert, conversion happens in place
     **/
-    void convertInboxName(KIMAP::MailBoxDescriptor &descriptor);
+    void convertInboxName(KIMAP2::MailBoxDescriptor &descriptor);
 };
 
 }

@@ -17,14 +17,14 @@
     02110-1301, USA.
 */
 
-#ifndef KIMAP_NAMESPACEJOB_H
-#define KIMAP_NAMESPACEJOB_H
+#ifndef KIMAP2_NAMESPACEJOB_H
+#define KIMAP2_NAMESPACEJOB_H
 
-#include "kimap_export.h"
+#include "kimap2_export.h"
 
 #include "job.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 
 class Session;
@@ -32,7 +32,7 @@ struct Message;
 struct MailBoxDescriptor;
 class NamespaceJobPrivate;
 
-class KIMAP_EXPORT NamespaceJob : public Job
+class KIMAP2_EXPORT NamespaceJob : public Job
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(NamespaceJob)

@@ -19,7 +19,7 @@
 
 #include <qtest.h>
 
-#include "kimaptest/fakeserver.h"
+#include "kimap2test/fakeserver.h"
 #include "kimap/loginjob.h"
 #include "kimap/session.h"
 #include "kimap/statusjob.h"
@@ -98,8 +98,8 @@ private Q_SLOTS:
         fakeServer.setScenario(scenario);
         fakeServer.startAndWait();
 
-        KIMAP::Session session(QStringLiteral("127.0.0.1"), 5989);
-        KIMAP::StatusJob *job = new KIMAP::StatusJob(&session);
+        KIMAP2::Session session(QStringLiteral("127.0.0.1"), 5989);
+        KIMAP2::StatusJob *job = new KIMAP2::StatusJob(&session);
         job->setMailBox(QStringLiteral("INBOX"));
         job->setDataItems(dataItems);
         bool result = job->exec();

@@ -21,7 +21,7 @@
 
 #include <qtest.h>
 
-#include "kimaptest/fakeserver.h"
+#include "kimap2test/fakeserver.h"
 #include "kimap/loginjob.h"
 #include "kimap/session.h"
 #include "kimap/selectjob.h"
@@ -100,9 +100,9 @@ private Q_SLOTS:
         fakeServer.setScenario(scenario);
         fakeServer.startAndWait();
 
-        KIMAP::Session session(QStringLiteral("127.0.0.1"), 5989);
+        KIMAP2::Session session(QStringLiteral("127.0.0.1"), 5989);
 
-        KIMAP::SelectJob *job = new KIMAP::SelectJob(&session);
+        KIMAP2::SelectJob *job = new KIMAP2::SelectJob(&session);
         job->setCondstoreEnabled(condstoreEnabled);
         job->setMailBox(QStringLiteral("INBOX"));
         bool result = job->exec();
@@ -135,13 +135,13 @@ private Q_SLOTS:
                               );
         fakeServer.startAndWait();
 
-        KIMAP::Session session(QStringLiteral("127.0.0.1"), 5989);
+        KIMAP2::Session session(QStringLiteral("127.0.0.1"), 5989);
 
-        KIMAP::SelectJob *job = new KIMAP::SelectJob(&session);
+        KIMAP2::SelectJob *job = new KIMAP2::SelectJob(&session);
         job->setMailBox(QStringLiteral("INBOX"));
         QVERIFY(job->exec());
 
-        job = new KIMAP::SelectJob(&session);
+        job = new KIMAP2::SelectJob(&session);
         job->setMailBox(QStringLiteral("INBOX/Foo"));
         QVERIFY(job->exec());
     }

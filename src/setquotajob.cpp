@@ -25,7 +25,7 @@
 #include "message_p.h"
 #include "session_p.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 class SetQuotaJobPrivate : public QuotaJobBasePrivate
 {
@@ -38,7 +38,7 @@ public:
 };
 }
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 SetQuotaJob::SetQuotaJob(Session *session)
     : QuotaJobBase(*new SetQuotaJobPrivate(session, "SetQuota"))
@@ -63,7 +63,7 @@ void SetQuotaJob::doStart()
         s[s.length() - 1] = ')';
     }
 
-    qCDebug(KIMAP_LOG) << "SETQUOTA " << '\"' + d->root + "\" " + s;
+    qCDebug(KIMAP2_LOG) << "SETQUOTA " << '\"' + d->root + "\" " + s;
     //XXX: [alexmerry, 2010-07-24]: should d->root be quoted properly?
     d->tags << d->sessionInternal()->sendCommand("SETQUOTA", '\"' + d->root + "\" " + s);
 }

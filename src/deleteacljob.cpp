@@ -24,7 +24,7 @@
 #include "session_p.h"
 #include "rfccodecs.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 class DeleteAclJobPrivate : public AclJobBasePrivate
 {
@@ -34,7 +34,7 @@ public:
 };
 }
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 DeleteAclJob::DeleteAclJob(Session *session)
     : AclJobBase(session)
@@ -51,7 +51,7 @@ void DeleteAclJob::doStart()
 {
     Q_D(DeleteAclJob);
 
-    d->tags << d->sessionInternal()->sendCommand("DELETEACL", '\"' + KIMAP::encodeImapFolderName(d->mailBox.toUtf8()) + "\" \"" + d->id);
+    d->tags << d->sessionInternal()->sendCommand("DELETEACL", '\"' + KIMAP2::encodeImapFolderName(d->mailBox.toUtf8()) + "\" \"" + d->id);
 }
 
 void DeleteAclJob::setIdentifier(const QByteArray &identifier)

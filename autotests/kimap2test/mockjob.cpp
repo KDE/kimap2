@@ -28,11 +28,11 @@
 #include "session_p.h"
 #include <QtCore/QTimer>
 
-class MockJobPrivate : public KIMAP::JobPrivate
+class MockJobPrivate : public KIMAP2::JobPrivate
 {
 public:
-    MockJobPrivate(KIMAP::Session *session, const QString &name)
-        : KIMAP::JobPrivate(session, name),
+    MockJobPrivate(KIMAP2::Session *session, const QString &name)
+        : KIMAP2::JobPrivate(session, name),
           timeout(10)
     { }
 
@@ -42,8 +42,8 @@ public:
     int timeout;
 };
 
-MockJob::MockJob(KIMAP::Session *session)
-    : KIMAP::Job(*new MockJobPrivate(session, "Mock"))
+MockJob::MockJob(KIMAP2::Session *session)
+    : KIMAP2::Job(*new MockJobPrivate(session, "Mock"))
 {
 }
 

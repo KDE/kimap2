@@ -16,7 +16,7 @@
    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "kimaptest/fakeserver.h"
+#include "kimap2test/fakeserver.h"
 #include "kimap/session.h"
 #include "kimap/idjob.h"
 
@@ -53,9 +53,9 @@ void testId()
     FakeServer fakeServer;
     fakeServer.setScenario(scenario);
     fakeServer.startAndWait();
-    KIMAP::Session session(QStringLiteral("127.0.0.1"), 5989);
+    KIMAP2::Session session(QStringLiteral("127.0.0.1"), 5989);
 
-    KIMAP::IdJob *job = new KIMAP::IdJob(&session);
+    KIMAP2::IdJob *job = new KIMAP2::IdJob(&session);
     foreach (const QByteArray &key, values.keys()) {
         job->setField(key, values.value(key));
     }

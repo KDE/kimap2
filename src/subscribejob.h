@@ -17,20 +17,20 @@
     02110-1301, USA.
 */
 
-#ifndef KIMAP_SUBSCRIBEJOB_H
-#define KIMAP_SUBSCRIBEJOB_H
+#ifndef KIMAP2_SUBSCRIBEJOB_H
+#define KIMAP2_SUBSCRIBEJOB_H
 
-#include "kimap_export.h"
+#include "kimap2_export.h"
 
 #include "job.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 
 class Session;
 class SubscribeJobPrivate;
 
-class KIMAP_EXPORT SubscribeJob : public Job
+class KIMAP2_EXPORT SubscribeJob : public Job
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(SubscribeJob)

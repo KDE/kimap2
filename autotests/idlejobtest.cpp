@@ -19,7 +19,7 @@
 
 #include <qtest.h>
 
-#include "kimaptest/fakeserver.h"
+#include "kimap2test/fakeserver.h"
 #include "kimap/session.h"
 #include "kimap/selectjob.h"
 #include "kimap/idlejob.h"
@@ -28,7 +28,7 @@
 
 Q_DECLARE_METATYPE(QList<int>)
 Q_DECLARE_METATYPE(QList<qint64>)
-Q_DECLARE_METATYPE(KIMAP::IdleJob *)
+Q_DECLARE_METATYPE(KIMAP2::IdleJob *)
 
 class IdleJobTest: public QObject
 {
@@ -38,7 +38,7 @@ public:
     explicit IdleJobTest(QObject *parent = 0)
         : QObject(parent)
     {
-        qRegisterMetaType<KIMAP::IdleJob *>();
+        qRegisterMetaType<KIMAP2::IdleJob *>();
     }
 
 private Q_SLOTS:
@@ -194,16 +194,16 @@ private Q_SLOTS:
         fakeServer.setScenario(scenario);
         fakeServer.startAndWait();
 
-        KIMAP::Session session(QStringLiteral("127.0.0.1"), 5989);
+        KIMAP2::Session session(QStringLiteral("127.0.0.1"), 5989);
 
-        KIMAP::SelectJob *select = new KIMAP::SelectJob(&session);
+        KIMAP2::SelectJob *select = new KIMAP2::SelectJob(&session);
         select->setMailBox(expectedMailBox);
         QVERIFY(select->exec());
 
-        KIMAP::IdleJob *idle = new KIMAP::IdleJob(&session);
+        KIMAP2::IdleJob *idle = new KIMAP2::IdleJob(&session);
 
-        QSignalSpy statsSpy(idle, SIGNAL(mailBoxStats(KIMAP::IdleJob*,QString,int,int)));
-        QSignalSpy flagsSpy(idle, SIGNAL(mailBoxMessageFlagsChanged(KIMAP::IdleJob*,qint64)));
+        QSignalSpy statsSpy(idle, SIGNAL(mailBoxStats(KIMAP2::IdleJob*,QString,int,int)));
+        QSignalSpy flagsSpy(idle, SIGNAL(mailBoxMessageFlagsChanged(KIMAP2::IdleJob*,qint64)));
 
         bool result = idle->exec();
 
@@ -212,7 +212,7 @@ private Q_SLOTS:
             QCOMPARE(flagsSpy.count(), expectedFlagsNotifications.size());
 
             for (int i = 0 ; i < statsSpy.count(); i++) {
-                const KIMAP::IdleJob *job = statsSpy.at(i).at(0).value<KIMAP::IdleJob *>();
+                const KIMAP2::IdleJob *job = statsSpy.at(i).at(0).value<KIMAP2::IdleJob *>();
                 const QString mailBox = statsSpy.at(i).at(1).toString();
                 const int messageCount = statsSpy.at(i).at(2).toInt();
                 const int recentCount = statsSpy.at(i).at(3).toInt();
@@ -224,7 +224,7 @@ private Q_SLOTS:
             }
 
             for (int i = 0; i < flagsSpy.count(); i++) {
-                const KIMAP::IdleJob *job = flagsSpy.at(i).at(0).value<KIMAP::IdleJob *>();
+                const KIMAP2::IdleJob *job = flagsSpy.at(i).at(0).value<KIMAP2::IdleJob *>();
                 const qint64 uid = flagsSpy.at(i).at(1).toLongLong();
 
                 QCOMPARE(job, idle);
@@ -271,14 +271,14 @@ private Q_SLOTS:
         fakeServer.setScenario(scenario);
         fakeServer.startAndWait();
 
-        KIMAP::Session session(QStringLiteral("127.0.0.1"), 5989);
+        KIMAP2::Session session(QStringLiteral("127.0.0.1"), 5989);
         const int originalTimeout = session.timeout();
 
-        KIMAP::SelectJob *select = new KIMAP::SelectJob(&session);
+        KIMAP2::SelectJob *select = new KIMAP2::SelectJob(&session);
         select->setMailBox(QStringLiteral("INBOX"));
         QVERIFY(select->exec());
 
-        KIMAP::IdleJob *idle = new KIMAP::IdleJob(&session);
+        KIMAP2::IdleJob *idle = new KIMAP2::IdleJob(&session);
         idle->exec();
 
         QCOMPARE(session.timeout(), originalTimeout);

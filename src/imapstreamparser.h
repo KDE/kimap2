@@ -18,10 +18,10 @@
     02110-1301, USA.
 */
 
-#ifndef KIMAP_IMAPSTREAMPARSER_P_H
-#define KIMAP_IMAPSTREAMPARSER_P_H
+#ifndef KIMAP2_IMAPSTREAMPARSER_P_H
+#define KIMAP2_IMAPSTREAMPARSER_P_H
 
-#include "kimap_export.h"
+#include "kimap2_export.h"
 
 #include <exception>
 
@@ -31,7 +31,7 @@
 
 class QIODevice;
 
-namespace KIMAP
+namespace KIMAP2
 {
 
 class ImapParserException : public std::exception
@@ -57,7 +57,7 @@ private:
 /**
   Parser for IMAP messages that operates on a local socket stream.
 */
-class KIMAP_EXPORT ImapStreamParser
+class KIMAP2_EXPORT ImapStreamParser
 {
 public:
     /**

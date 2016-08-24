@@ -26,7 +26,7 @@
 #include "session_p.h"
 #include "rfccodecs.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 class GetMetaDataJobPrivate : public MetaDataJobBasePrivate
 {
@@ -43,7 +43,7 @@ public:
 };
 }
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 GetMetaDataJob::GetMetaDataJob(Session *session)
     : MetaDataJobBase(*new GetMetaDataJobPrivate(session, "GetMetaData"))
@@ -65,7 +65,7 @@ void GetMetaDataJob::doStart()
 {
     Q_D(GetMetaDataJob);
     QByteArray parameters;
-    parameters = '\"' + KIMAP::encodeImapFolderName(d->mailBox.toUtf8()) + "\" ";
+    parameters = '\"' + KIMAP2::encodeImapFolderName(d->mailBox.toUtf8()) + "\" ";
 
     QByteArray command = "GETMETADATA";
     if (d->serverCapability == Annotatemore) {
@@ -123,20 +123,20 @@ void GetMetaDataJob::doStart()
     }
 
     d->tags << d->sessionInternal()->sendCommand(command, parameters);
-//  qCDebug(KIMAP_LOG) << "SENT: " << command << " " << parameters;
+//  qCDebug(KIMAP2_LOG) << "SENT: " << command << " " << parameters;
 }
 
 void GetMetaDataJob::handleResponse(const Message &response)
 {
     Q_D(GetMetaDataJob);
-//  qCDebug(KIMAP_LOG) << "GOT: " << response.toString();
+//  qCDebug(KIMAP2_LOG) << "GOT: " << response.toString();
 
     //TODO: handle NO error messages having [METADATA MAXSIZE NNN], [METADATA TOOMANY], [METADATA NOPRIVATE] (see rfc5464)
     // or [ANNOTATEMORE TOOBIG], [ANNOTATEMORE TOOMANY] respectively
     if (handleErrorReplies(response) == NotHandled) {
         if (response.content.size() >= 4) {
             if (d->serverCapability == Annotatemore && response.content[1].toString() == "ANNOTATION") {
-                QString mailBox = QString::fromUtf8(KIMAP::decodeImapFolderName(response.content[2].toString()));
+                QString mailBox = QString::fromUtf8(KIMAP2::decodeImapFolderName(response.content[2].toString()));
 
                 int i = 3;
                 while (i < response.content.size() - 1) {
@@ -150,7 +150,7 @@ void GetMetaDataJob::handleResponse(const Message &response)
                     i += 2;
                 }
             } else if (d->serverCapability == Metadata && response.content[1].toString() == "METADATA") {
-                QString mailBox = QString::fromUtf8(KIMAP::decodeImapFolderName(response.content[2].toString()));
+                QString mailBox = QString::fromUtf8(KIMAP2::decodeImapFolderName(response.content[2].toString()));
 
                 const QList<QByteArray> &entries = response.content[3].toList();
                 int i = 0;
@@ -171,7 +171,7 @@ void GetMetaDataJob::addEntry(const QByteArray &entry, const QByteArray &attribu
 {
     Q_D(GetMetaDataJob);
     if (d->serverCapability == Annotatemore && attribute.isNull()) {
-        qCWarning(KIMAP_LOG) << "In ANNOTATEMORE mode an attribute must be specified with addEntry!";
+        qCWarning(KIMAP2_LOG) << "In ANNOTATEMORE mode an attribute must be specified with addEntry!";
     }
     d->entries.insert(entry);
     d->attributes.insert(attribute);
@@ -226,7 +226,7 @@ QByteArray GetMetaDataJob::metaData(const QString &mailBox, const QByteArray &en
 
 QByteArray GetMetaDataJob::metaData(const QByteArray &entry) const
 {
-    qCDebug(KIMAP_LOG) << entry;
+    qCDebug(KIMAP2_LOG) << entry;
     Q_D(const GetMetaDataJob);
     return d->metadata.value(d->mailBox).value(d->removePrefix(entry)).value(d->getAttribute(entry));
 }

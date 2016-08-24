@@ -2,7 +2,7 @@
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR} ${CMAKE_MODULE_PATH})
 
-find_dependency(KF5CoreAddons "@KF5_VERSION@")
+find_dependency(KF5CoreAddons "@KF5CoreAddons_VERSION@")
 find_dependency(KF5Mime "@KMIME_LIBS_VERSION@")
 find_dependency(Sasl2)
 
@@ -13,4 +13,4 @@ set_package_properties(Sasl2 PROPERTIES
                              URL "http://www.cyrussasl.org"
 )
 
-include("${CMAKE_CURRENT_LIST_DIR}/KF5IMAPTargets.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/KIMAP2Targets.cmake")

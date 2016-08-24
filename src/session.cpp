@@ -39,12 +39,12 @@ Q_DECLARE_METATYPE(QSsl::SslProtocol)
 Q_DECLARE_METATYPE(QSslSocket::SslMode)
 static const int _kimap_sslVersionId = qRegisterMetaType<QSsl::SslProtocol>();
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 Session::Session(const QString &hostName, quint16 port, QObject *parent)
     : QObject(parent), d(new SessionPrivate(this))
 {
-    if (!qEnvironmentVariableIsEmpty("KIMAP_LOGFILE")) {
+    if (!qEnvironmentVariableIsEmpty("KIMAP2_LOGFILE")) {
         d->logger = QSharedPointer<SessionLogger>::create();
     }
 
@@ -215,7 +215,7 @@ void SessionPrivate::jobDone(KJob *job)
 
 void SessionPrivate::jobDestroyed(QObject *job)
 {
-    queue.removeAll(static_cast<KIMAP::Job *>(job));
+    queue.removeAll(static_cast<KIMAP2::Job *>(job));
     if (currentJob == job) {
         currentJob = Q_NULLPTR;
     }
@@ -246,7 +246,7 @@ void SessionPrivate::responseReceived(const Message &response)
             simplified.content.removeFirst(); // Strip the tag
             simplified.content.removeFirst(); // Strip the code
         }
-        qCDebug(KIMAP_LOG) << "Received BYE: " << simplified.toString();
+        qCDebug(KIMAP2_LOG) << "Received BYE: " << simplified.toString();
         return;
     }
 
@@ -314,7 +314,7 @@ void SessionPrivate::responseReceived(const Message &response)
         restartSocketTimer();
         currentJob->handleResponse(response);
     } else {
-        qCWarning(KIMAP_LOG) << "A message was received from the server with no job to handle it:"
+        qCWarning(KIMAP2_LOG) << "A message was received from the server with no job to handle it:"
                              << response.toString()
                              << '(' + response.toString().toHex() + ')';
     }
@@ -347,7 +347,7 @@ QByteArray SessionPrivate::sendCommand(const QByteArray &command, const QByteArr
         upcomingMailBox = args;
         upcomingMailBox.remove(0, 1);
         upcomingMailBox = upcomingMailBox.left(upcomingMailBox.indexOf('\"'));
-        upcomingMailBox = KIMAP::decodeImapFolderName(upcomingMailBox);
+        upcomingMailBox = KIMAP2::decodeImapFolderName(upcomingMailBox);
     } else if (command == "CLOSE") {
         closeTag = tag;
     }
@@ -374,7 +374,7 @@ void SessionPrivate::socketConnected()
 
     bool willUseSsl = false;
     if (!queue.isEmpty()) {
-        KIMAP::LoginJob *login = qobject_cast<KIMAP::LoginJob *>(queue.first());
+        KIMAP2::LoginJob *login = qobject_cast<KIMAP2::LoginJob *>(queue.first());
         if (login) {
             qWarning() << "got a login job";
             willUseSsl = login->encryptionMode() != QSsl::UnknownProtocol;
@@ -578,8 +578,8 @@ void SessionPrivate::readMessage()
 
         responseReceived(message);
 
-    } catch (KIMAP::ImapParserException e) {
-        qCWarning(KIMAP_LOG) << "The stream parser raised an exception:" << e.what();
+    } catch (KIMAP2::ImapParserException e) {
+        qCWarning(KIMAP2_LOG) << "The stream parser raised an exception:" << e.what();
     }
 
     if (stream->availableDataSize() > 1) {
@@ -598,7 +598,7 @@ void SessionPrivate::doCloseSocket()
     if (!socket) {
         return;
     }
-    qCDebug(KIMAP_LOG) << "close";
+    qCDebug(KIMAP2_LOG) << "close";
     socket->close();
 }
 

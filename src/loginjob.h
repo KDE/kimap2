@@ -18,22 +18,22 @@
     02110-1301, USA.
 */
 
-#ifndef KIMAP_LOGINJOB_H
-#define KIMAP_LOGINJOB_H
+#ifndef KIMAP2_LOGINJOB_H
+#define KIMAP2_LOGINJOB_H
 
-#include "kimap_export.h"
+#include "kimap2_export.h"
 
 #include "job.h"
 #include <QtNetwork/QSsl>
 
-namespace KIMAP
+namespace KIMAP2
 {
 
 class Session;
 struct Message;
 class LoginJobPrivate;
 
-class KIMAP_EXPORT LoginJob : public Job
+class KIMAP2_EXPORT LoginJob : public Job
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(LoginJob)

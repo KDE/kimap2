@@ -28,7 +28,7 @@
 #include "session_p.h"
 #include "imapstreamparser.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 class NamespaceJobPrivate : public JobPrivate
 {
@@ -54,9 +54,9 @@ public:
                 descriptor.separator = QLatin1Char(parts[1][0]);
 
                 result << descriptor;
-            } catch (KIMAP::ImapParserException e) {
-                qCWarning(KIMAP_LOG) << "The stream parser raised an exception during namespace list parsing:" << e.what();
-                qCWarning(KIMAP_LOG) << "namespacelist:" << namespaceList;
+            } catch (KIMAP2::ImapParserException e) {
+                qCWarning(KIMAP2_LOG) << "The stream parser raised an exception during namespace list parsing:" << e.what();
+                qCWarning(KIMAP2_LOG) << "namespacelist:" << namespaceList;
             }
 
         }
@@ -70,7 +70,7 @@ public:
 };
 }
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 NamespaceJob::NamespaceJob(Session *session)
     : Job(*new NamespaceJobPrivate(session, "Namespace"))

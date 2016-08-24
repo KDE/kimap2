@@ -17,13 +17,13 @@
     02110-1301, USA.
 */
 
-#ifndef KIMAP_JOB_P_H
-#define KIMAP_JOB_P_H
+#ifndef KIMAP2_JOB_P_H
+#define KIMAP2_JOB_P_H
 
 #include "session.h"
 #include <QtNetwork/QAbstractSocket>
 
-namespace KIMAP
+namespace KIMAP2
 {
 
 class SessionPrivate;

@@ -85,7 +85,7 @@ void FakeServer::newConnection()
 
     m_clientSockets << m_tcpServer->nextPendingConnection();
     connect(m_clientSockets.last(), SIGNAL(readyRead()), this, SLOT(dataAvailable()));
-    m_clientParsers << new KIMAP::ImapStreamParser(m_clientSockets.last(), true);
+    m_clientParsers << new KIMAP2::ImapStreamParser(m_clientSockets.last(), true);
 
     QVERIFY(m_clientSockets.size() <= m_scenarios.size());
 
@@ -224,7 +224,7 @@ void FakeServer::compareReceived(const QByteArray &received, const QByteArray &e
 void FakeServer::readClientPart(int scenarioNumber)
 {
     QList<QByteArray> scenario = m_scenarios[scenarioNumber];
-    KIMAP::ImapStreamParser *clientParser = m_clientParsers[scenarioNumber];
+    KIMAP2::ImapStreamParser *clientParser = m_clientParsers[scenarioNumber];
 
     while (!scenario.isEmpty() &&
             scenario.first().startsWith("C: ")) {

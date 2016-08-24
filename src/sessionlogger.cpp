@@ -24,7 +24,7 @@
 
 #include <unistd.h>
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 SessionLogger::SessionLogger()
     : m_id(0)
@@ -32,11 +32,11 @@ SessionLogger::SessionLogger()
     static qint64 nextId = 0;
     m_id = ++nextId;
 
-    m_file.setFileName(QLatin1String(qgetenv("KIMAP_LOGFILE"))
+    m_file.setFileName(QLatin1String(qgetenv("KIMAP2_LOGFILE"))
                        + QLatin1Char('.') + QString::number(getpid())
                        + QLatin1Char('.') + QString::number(m_id));
     if (!m_file.open(QFile::WriteOnly)) {
-        qCDebug(KIMAP_LOG) << " m_file can be open in write only";
+        qCDebug(KIMAP2_LOG) << " m_file can be open in write only";
     }
 }
 

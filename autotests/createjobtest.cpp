@@ -21,7 +21,7 @@
 
 #include <qtest.h>
 
-#include "kimaptest/fakeserver.h"
+#include "kimap2test/fakeserver.h"
 #include "kimap/session.h"
 #include "kimap/createjob.h"
 
@@ -65,9 +65,9 @@ private Q_SLOTS:
         FakeServer fakeServer;
         fakeServer.setScenario(scenario);
         fakeServer.startAndWait();
-        KIMAP::Session session(QStringLiteral("127.0.0.1"), 5989);
+        KIMAP2::Session session(QStringLiteral("127.0.0.1"), 5989);
 
-        KIMAP::CreateJob *job = new KIMAP::CreateJob(&session);
+        KIMAP2::CreateJob *job = new KIMAP2::CreateJob(&session);
         job->setMailBox(mailbox);
         bool result = job->exec();
         QEXPECT_FAIL("bad" , "Expected failure on BAD response", Continue);

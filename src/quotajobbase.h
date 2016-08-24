@@ -17,14 +17,14 @@
     02110-1301, USA.
 */
 
-#ifndef KIMAP_QUOTAJOBBASE_H
-#define KIMAP_QUOTAJOBBASE_H
+#ifndef KIMAP2_QUOTAJOBBASE_H
+#define KIMAP2_QUOTAJOBBASE_H
 
-#include "kimap_export.h"
+#include "kimap2_export.h"
 
 #include "job.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 
 class Session;
@@ -40,7 +40,7 @@ class QuotaJobBasePrivate;
  * This class cannot be used directly, you must subclass it and reimplement
  * at least the doStart() method.
 */
-class KIMAP_EXPORT QuotaJobBase : public Job
+class KIMAP2_EXPORT QuotaJobBase : public Job
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(QuotaJobBase)

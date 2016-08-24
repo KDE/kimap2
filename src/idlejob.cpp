@@ -25,7 +25,7 @@
 #include "message_p.h"
 #include "session_p.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 class IdleJobPrivate : public JobPrivate
 {
@@ -70,7 +70,7 @@ public:
 };
 }
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 IdleJob::IdleJob(Session *session)
     : Job(*new IdleJobPrivate(this, session, "Idle"))
@@ -87,7 +87,7 @@ IdleJob::~IdleJob()
 {
 }
 
-void KIMAP::IdleJob::stop()
+void KIMAP2::IdleJob::stop()
 {
     Q_D(IdleJob);
     d->sessionInternal()->setSocketTimeout(d->originalSocketTimeout);
@@ -148,19 +148,19 @@ void IdleJob::handleResponse(const Message &response)
     }
 }
 
-QString KIMAP::IdleJob::lastMailBox() const
+QString KIMAP2::IdleJob::lastMailBox() const
 {
     Q_D(const IdleJob);
     return d->m_session->selectedMailBox();
 }
 
-int KIMAP::IdleJob::lastMessageCount() const
+int KIMAP2::IdleJob::lastMessageCount() const
 {
     Q_D(const IdleJob);
     return d->lastMessageCount;
 }
 
-int KIMAP::IdleJob::lastRecentCount() const
+int KIMAP2::IdleJob::lastRecentCount() const
 {
     Q_D(const IdleJob);
     return d->lastRecentCount;

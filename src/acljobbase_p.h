@@ -17,14 +17,14 @@
     02110-1301, USA.
 */
 
-#ifndef KIMAP_ACLJOBBASE_P_H
-#define KIMAP_ACLJOBBASE_P_H
+#ifndef KIMAP2_ACLJOBBASE_P_H
+#define KIMAP2_ACLJOBBASE_P_H
 
 #include "acljobbase.h"
 #include "job_p.h"
 #include "session.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 class AclJobBasePrivate : public JobPrivate
 {

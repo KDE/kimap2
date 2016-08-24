@@ -24,7 +24,7 @@
 #include "session_p.h"
 #include "rfccodecs.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 class UnsubscribeJobPrivate : public JobPrivate
 {
@@ -36,7 +36,7 @@ public:
 };
 }
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 UnsubscribeJob::UnsubscribeJob(Session *session)
     : Job(*new UnsubscribeJobPrivate(session, "Unsubscribe"))
@@ -50,7 +50,7 @@ UnsubscribeJob::~UnsubscribeJob()
 void UnsubscribeJob::doStart()
 {
     Q_D(UnsubscribeJob);
-    d->tags << d->sessionInternal()->sendCommand("UNSUBSCRIBE", '\"' + KIMAP::encodeImapFolderName(d->mailBox.toUtf8()) + '\"');
+    d->tags << d->sessionInternal()->sendCommand("UNSUBSCRIBE", '\"' + KIMAP2::encodeImapFolderName(d->mailBox.toUtf8()) + '\"');
 }
 
 void UnsubscribeJob::setMailBox(const QString &mailBox)

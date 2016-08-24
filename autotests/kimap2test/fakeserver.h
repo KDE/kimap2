@@ -28,7 +28,7 @@
 #include <QMutex>
 #include <QSsl>
 
-namespace KIMAP
+namespace KIMAP2
 {
 class ImapStreamParser;
 }
@@ -90,8 +90,8 @@ Q_DECLARE_METATYPE(QList<QByteArray>)
  * fakeServer.setScenario( scenario );
  * fakeServer.startAndWait();
  *
- * KIMAP::Session session( QStringLiteral("127.0.0.1"), 5989 );
- * KIMAP::CapabilitiesJob *job = new KIMAP::CapabilitiesJob(&session);
+ * KIMAP2::Session session( QStringLiteral("127.0.0.1"), 5989 );
+ * KIMAP2::CapabilitiesJob *job = new KIMAP2::CapabilitiesJob(&session);
  * QVERIFY( job->exec() );
  * // check the returned capabilities
  *
@@ -226,7 +226,7 @@ private:
     QTcpServer *m_tcpServer;
     mutable QMutex m_mutex;
     QList<QTcpSocket *> m_clientSockets;
-    QList<KIMAP::ImapStreamParser *> m_clientParsers;
+    QList<KIMAP2::ImapStreamParser *> m_clientParsers;
     bool m_encrypted;
     bool m_starttls;
     bool m_receivedStarttls;

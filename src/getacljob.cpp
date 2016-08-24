@@ -26,7 +26,7 @@
 #include "session_p.h"
 #include "rfccodecs.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 class GetAclJobPrivate : public AclJobBasePrivate
 {
@@ -38,7 +38,7 @@ public:
 };
 }
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 GetAclJob::GetAclJob(Session *session)
     : AclJobBase(*new GetAclJobPrivate(session, "GetAcl"))
@@ -53,13 +53,13 @@ void GetAclJob::doStart()
 {
     Q_D(GetAclJob);
 
-    d->tags << d->sessionInternal()->sendCommand("GETACL", '\"' + KIMAP::encodeImapFolderName(d->mailBox.toUtf8()) + '\"');
+    d->tags << d->sessionInternal()->sendCommand("GETACL", '\"' + KIMAP2::encodeImapFolderName(d->mailBox.toUtf8()) + '\"');
 }
 
 void GetAclJob::handleResponse(const Message &response)
 {
     Q_D(GetAclJob);
-//   qCDebug(KIMAP_LOG) << response.toString();
+//   qCDebug(KIMAP2_LOG) << response.toString();
 
     if (handleErrorReplies(response) == NotHandled) {
         if (response.content.size() >= 4 &&

@@ -17,14 +17,14 @@
     02110-1301, USA.
 */
 
-#ifndef KIMAP_METADATAJOBBASE_H
-#define KIMAP_METADATAJOBBASE_H
+#ifndef KIMAP2_METADATAJOBBASE_H
+#define KIMAP2_METADATAJOBBASE_H
 
-#include "kimap_export.h"
+#include "kimap2_export.h"
 
 #include "job.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 
 class Session;
@@ -45,7 +45,7 @@ class MetaDataJobBasePrivate;
  * This class cannot be used directly, you must subclass it and reimplement
  * at least the doStart() method.
 */
-class KIMAP_EXPORT MetaDataJobBase : public Job
+class KIMAP2_EXPORT MetaDataJobBase : public Job
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(MetaDataJobBase)

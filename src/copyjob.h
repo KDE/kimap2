@@ -17,15 +17,15 @@
     02110-1301, USA.
 */
 
-#ifndef KIMAP_COPYJOB_H
-#define KIMAP_COPYJOB_H
+#ifndef KIMAP2_COPYJOB_H
+#define KIMAP2_COPYJOB_H
 
-#include "kimap_export.h"
+#include "kimap2_export.h"
 
 #include "job.h"
 #include "imapset.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 
 class Session;
@@ -44,7 +44,7 @@ class CopyJobPrivate;
  * Acl::KeepSeen and Acl::Write on the
  * target mailbox.
  */
-class KIMAP_EXPORT CopyJob : public Job
+class KIMAP2_EXPORT CopyJob : public Job
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(CopyJob)

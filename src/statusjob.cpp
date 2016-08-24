@@ -24,7 +24,7 @@
 #include "rfccodecs.h"
 #include "kimap_debug.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 
 class StatusJobPrivate : public JobPrivate
@@ -46,7 +46,7 @@ public:
 
 }
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 StatusJob::StatusJob(Session *session)
     : Job(*new StatusJobPrivate(session, "Status"))
@@ -91,7 +91,7 @@ void StatusJob::doStart()
 {
     Q_D(StatusJob);
 
-    const QByteArray params = '\"' + KIMAP::encodeImapFolderName(d->mailBox.toUtf8()) + "\" ("
+    const QByteArray params = '\"' + KIMAP2::encodeImapFolderName(d->mailBox.toUtf8()) + "\" ("
                             + d->dataItems.join(' ') + ')';
 
     d->tags << d->sessionInternal()->sendCommand("STATUS", params);
@@ -114,7 +114,7 @@ void StatusJob::handleResponse(const Message &response)
             } else if (code == "OK") {
                 return;
             } else {
-                qCDebug(KIMAP_LOG) << response.toString();
+                qCDebug(KIMAP2_LOG) << response.toString();
             }
         }
     }

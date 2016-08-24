@@ -17,15 +17,15 @@
     02110-1301, USA.
 */
 
-#ifndef KIMAP_JOB_H
-#define KIMAP_JOB_H
+#ifndef KIMAP2_JOB_H
+#define KIMAP2_JOB_H
 
-#include "kimap_export.h"
+#include "kimap2_export.h"
 
 #include <KJob>
 #include <QtNetwork/QAbstractSocket>
 
-namespace KIMAP
+namespace KIMAP2
 {
 
 class Session;
@@ -33,7 +33,7 @@ class SessionPrivate;
 class JobPrivate;
 struct Message;
 
-class KIMAP_EXPORT Job : public KJob
+class KIMAP2_EXPORT Job : public KJob
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(Job)

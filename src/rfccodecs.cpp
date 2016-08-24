@@ -44,7 +44,7 @@
 #include <QtCore/QLatin1Char>
 #include <kcodecs.h>
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 // This part taken from rfc 2192 IMAP URL Scheme. C. Newman. September 1997.
 // adapted to QT-Toolkit by Sven Carstens <s.carstens@gmx.de> 2000
@@ -67,7 +67,7 @@ static const char especials[17] = "()<>@,;:\"/[]?.= ";
 //@endcond
 
 //-----------------------------------------------------------------------------
-QByteArray KIMAP::decodeImapFolderName(const QByteArray &inSrc)
+QByteArray KIMAP2::decodeImapFolderName(const QByteArray &inSrc)
 {
     unsigned char c, i, bitcount;
     unsigned long ucs4, utf16, bitbuf;
@@ -151,14 +151,14 @@ QByteArray KIMAP::decodeImapFolderName(const QByteArray &inSrc)
     return dst;
 }
 
-QString KIMAP::decodeImapFolderName(const QString &inSrc)
+QString KIMAP2::decodeImapFolderName(const QString &inSrc)
 {
     return QString::fromUtf8(decodeImapFolderName(inSrc.toUtf8()).constData());
 }
 
 //-----------------------------------------------------------------------------
 
-QByteArray KIMAP::quoteIMAP(const QByteArray &src)
+QByteArray KIMAP2::quoteIMAP(const QByteArray &src)
 {
     uint len = src.length();
     QByteArray result;
@@ -173,7 +173,7 @@ QByteArray KIMAP::quoteIMAP(const QByteArray &src)
     return result;
 }
 
-QString KIMAP::quoteIMAP(const QString &src)
+QString KIMAP2::quoteIMAP(const QString &src)
 {
     uint len = src.length();
     QString result;
@@ -189,12 +189,12 @@ QString KIMAP::quoteIMAP(const QString &src)
 }
 
 //-----------------------------------------------------------------------------
-QString KIMAP::encodeImapFolderName(const QString &inSrc)
+QString KIMAP2::encodeImapFolderName(const QString &inSrc)
 {
     return QString::fromUtf8(encodeImapFolderName(inSrc.toUtf8()).constData());
 }
 
-QByteArray KIMAP::encodeImapFolderName(const QByteArray &inSrc)
+QByteArray KIMAP2::encodeImapFolderName(const QByteArray &inSrc)
 {
     unsigned int utf8pos, utf8total, c, utf7mode, bitstogo, utf16flag;
     unsigned int ucs4, bitbuf;
@@ -291,7 +291,7 @@ QByteArray KIMAP::encodeImapFolderName(const QByteArray &inSrc)
 }
 
 //-----------------------------------------------------------------------------
-QTextCodec *KIMAP::codecForName(const QString &str)
+QTextCodec *KIMAP2::codecForName(const QString &str)
 {
     if (str.isEmpty()) {
         return Q_NULLPTR;
@@ -301,7 +301,7 @@ QTextCodec *KIMAP::codecForName(const QString &str)
 }
 
 //-----------------------------------------------------------------------------
-const QString KIMAP::decodeRFC2047String(const QString &str)
+const QString KIMAP2::decodeRFC2047String(const QString &str)
 {
     QString throw_away;
 
@@ -309,7 +309,7 @@ const QString KIMAP::decodeRFC2047String(const QString &str)
 }
 
 //-----------------------------------------------------------------------------
-const QString KIMAP::decodeRFC2047String(const QString &str,
+const QString KIMAP2::decodeRFC2047String(const QString &str,
         QString &charset)
 {
     QString throw_away;
@@ -318,7 +318,7 @@ const QString KIMAP::decodeRFC2047String(const QString &str,
 }
 
 //-----------------------------------------------------------------------------
-const QString KIMAP::decodeRFC2047String(const QString &str,
+const QString KIMAP2::decodeRFC2047String(const QString &str,
         QString &charset,
         QString &language)
 {
@@ -374,7 +374,7 @@ const QString KIMAP::decodeRFC2047String(const QString &str,
             }
             pos += 3;
             i += 3;
-//  qCDebug(KIMAP_LOG) << "Charset:" << charset << "- Language:" << language << "-'" << pos << "'";
+//  qCDebug(KIMAP2_LOG) << "Charset:" << charset << "- Language:" << language << "-'" << pos << "'";
         }
         if (valid) {
             mid = pos;
@@ -399,10 +399,10 @@ const QString KIMAP::decodeRFC2047String(const QString &str,
                         cstr[i] = ' ';
                     }
                 }
-//    qCDebug(KIMAP_LOG) << "before QP '"
+//    qCDebug(KIMAP2_LOG) << "before QP '"
 //    << cstr << "'";
                 cstr = KCodecs::quotedPrintableDecode(cstr);
-//    qCDebug(KIMAP_LOG) << "after QP '"
+//    qCDebug(KIMAP2_LOG) << "after QP '"
 //    << cstr << "'";
             } else {
                 // decode base64 text
@@ -416,7 +416,7 @@ const QString KIMAP::decodeRFC2047String(const QString &str,
 
             pos = end - 1;
         } else {
-//    qCDebug(KIMAP_LOG) << "invalid";
+//    qCDebug(KIMAP2_LOG) << "invalid";
             //result += "=?";
             //pos = beg -1; // because pos gets increased shortly afterwards
             pos = beg - 2;
@@ -427,7 +427,7 @@ const QString KIMAP::decodeRFC2047String(const QString &str,
     if (!charset.isEmpty()) {
         QTextCodec *aCodec = codecForName(QLatin1String(charset.toLatin1()));
         if (aCodec) {
-//    qCDebug(KIMAP_LOG) << "Codec is" << aCodec->name();
+//    qCDebug(KIMAP2_LOG) << "Codec is" << aCodec->name();
             return aCodec->toUnicode(result);
         }
     }
@@ -435,13 +435,13 @@ const QString KIMAP::decodeRFC2047String(const QString &str,
 }
 
 //-----------------------------------------------------------------------------
-const QString KIMAP::encodeRFC2047String(const QString &str)
+const QString KIMAP2::encodeRFC2047String(const QString &str)
 {
     return QLatin1String(encodeRFC2047String(str.toLatin1()));
 }
 
 //-----------------------------------------------------------------------------
-const QByteArray KIMAP::encodeRFC2047String(const QByteArray &str)
+const QByteArray KIMAP2::encodeRFC2047String(const QByteArray &str)
 {
     if (str.isEmpty()) {
         return str;
@@ -559,7 +559,7 @@ const QByteArray KIMAP::encodeRFC2047String(const QByteArray &str)
 }
 
 //-----------------------------------------------------------------------------
-const QString KIMAP::encodeRFC2231String(const QString &str)
+const QString KIMAP2::encodeRFC2231String(const QString &str)
 {
     if (str.isEmpty()) {
         return str;
@@ -613,7 +613,7 @@ const QString KIMAP::encodeRFC2231String(const QString &str)
 }
 
 //-----------------------------------------------------------------------------
-const QString KIMAP::decodeRFC2231String(const QString &str)
+const QString KIMAP2::decodeRFC2231String(const QString &str)
 {
     int p = str.indexOf(QLatin1Char('\''));
 
@@ -634,7 +634,7 @@ const QString KIMAP::decodeRFC2231String(const QString &str)
     QString st = str.mid(l + 1);
     //QString language = str.mid ( p + 1, l - p - 1 );
 
-    //qCDebug(KIMAP_LOG) << "Charset:" << charset << "Language:" << language;
+    //qCDebug(KIMAP2_LOG) << "Charset:" << charset << "Language:" << language;
 
     char ch, ch2;
     p = 0;

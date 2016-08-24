@@ -17,14 +17,14 @@
     02110-1301, USA.
 */
 
-#ifndef KIMAP_CREATEJOB_H
-#define KIMAP_CREATEJOB_H
+#ifndef KIMAP2_CREATEJOB_H
+#define KIMAP2_CREATEJOB_H
 
-#include "kimap_export.h"
+#include "kimap2_export.h"
 
 #include "job.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 
 class Session;
@@ -45,7 +45,7 @@ class CreateJobPrivate;
  * depends on the server: . and / are typical hierachy
  * delimiters.
  */
-class KIMAP_EXPORT CreateJob : public Job
+class KIMAP2_EXPORT CreateJob : public Job
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(CreateJob)

@@ -31,13 +31,13 @@ class MockJobPrivate;
 /**
  * Provides an easy way to send an arbitrary IMAP client command.
  */
-class MockJob : public KIMAP::Job
+class MockJob : public KIMAP2::Job
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(MockJob)
 
 public:
-    MockJob(KIMAP::Session *session);
+    MockJob(KIMAP2::Session *session);
 
     /**
      * Sets the command to execute.

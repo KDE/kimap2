@@ -17,8 +17,8 @@
     02110-1301, USA.
 */
 
-#ifndef KIMAP_SESSION_P_H
-#define KIMAP_SESSION_P_H
+#ifndef KIMAP2_SESSION_P_H
+#define KIMAP2_SESSION_P_H
 
 #include "session.h"
 
@@ -31,7 +31,7 @@
 
 class KJob;
 
-namespace KIMAP
+namespace KIMAP2
 {
 
 class Job;
@@ -39,7 +39,7 @@ struct Message;
 class SessionLogger;
 class ImapStreamParser;
 
-class KIMAP_EXPORT SessionPrivate : public QObject
+class KIMAP2_EXPORT SessionPrivate : public QObject
 {
     Q_OBJECT
 
@@ -81,7 +81,7 @@ private Q_SLOTS:
     void sslConnected();
 
 private:
-    void responseReceived(const KIMAP::Message &);
+    void responseReceived(const KIMAP2::Message &);
     void startNext();
     void clearJobQueue();
     void setState(Session::State state);

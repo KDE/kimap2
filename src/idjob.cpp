@@ -23,7 +23,7 @@
 #include "message_p.h"
 #include "session_p.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
     class IdJobPrivate : public JobPrivate
     {
@@ -35,7 +35,7 @@ namespace KIMAP
     };
 }
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 IdJob::IdJob(Session *session)
     : Job(*new IdJobPrivate(session, "Id"))

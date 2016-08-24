@@ -17,15 +17,15 @@
     02110-1301, USA.
 */
 
-#ifndef KIMAP_ACLJOBBASE_H
-#define KIMAP_ACLJOBBASE_H
+#ifndef KIMAP2_ACLJOBBASE_H
+#define KIMAP2_ACLJOBBASE_H
 
-#include "kimap_export.h"
+#include "kimap2_export.h"
 
 #include "acl.h"
 #include "job.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 
 class Session;
@@ -41,7 +41,7 @@ class AclJobBasePrivate;
  * This class cannot be used directly, you must subclass it and reimplement
  * at least the doStart() method.
 */
-class KIMAP_EXPORT AclJobBase : public Job
+class KIMAP2_EXPORT AclJobBase : public Job
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(AclJobBase)

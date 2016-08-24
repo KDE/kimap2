@@ -22,7 +22,7 @@
 #include "message_p.h"
 #include "session_p.h"
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 QByteArray MetaDataJobBasePrivate::addPrefix(const QByteArray &entry, const QByteArray &attribute) const
 {

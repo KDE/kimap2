@@ -50,7 +50,7 @@
 #include "setmetadatajob.h"
 #include "getmetadatajob.h"
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 void dumpContentHelper(KMime::Content *part, const QString &partId = QString())
 {
@@ -386,7 +386,7 @@ int main(int argc, char **argv)
     QCoreApplication app(argc, argv);
     Session session(server, port);
 
-    QObject::connect(&session, &KIMAP::Session::sslErrors, [&session](const QList<QSslError> &errors) {
+    QObject::connect(&session, &KIMAP2::Session::sslErrors, [&session](const QList<QSslError> &errors) {
         qWarning() << "Got ssl error: " << errors;
         session.ignoreErrors(errors);
     });

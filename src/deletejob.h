@@ -17,14 +17,14 @@
     02110-1301, USA.
 */
 
-#ifndef KIMAP_DELETEJOB_H
-#define KIMAP_DELETEJOB_H
+#ifndef KIMAP2_DELETEJOB_H
+#define KIMAP2_DELETEJOB_H
 
-#include "kimap_export.h"
+#include "kimap2_export.h"
 
 #include "job.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 
 class Session;
@@ -44,7 +44,7 @@ class DeleteJobPrivate;
  * If the server supports ACLs, you will need the
  * Acl::DeleteMailbox right on the mailbox.
  */
-class KIMAP_EXPORT DeleteJob : public Job
+class KIMAP2_EXPORT DeleteJob : public Job
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(DeleteJob)

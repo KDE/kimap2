@@ -17,20 +17,20 @@
     02110-1301, USA.
 */
 
-#ifndef KIMAP_STATUSJOB_H
-#define KIMAP_STATUSJOB_H
+#ifndef KIMAP2_STATUSJOB_H
+#define KIMAP2_STATUSJOB_H
 
-#include "kimap_export.h"
+#include "kimap2_export.h"
 
 #include "job.h"
 #include <QList>
 
-namespace KIMAP
+namespace KIMAP2
 {
 class Session;
 class StatusJobPrivate;
 
-class KIMAP_EXPORT StatusJob : public Job
+class KIMAP2_EXPORT StatusJob : public Job
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(StatusJob)
@@ -56,4 +56,4 @@ protected:
 
 }
 
-#endif // KIMAP_STATUSJOB_H
+#endif // KIMAP2_STATUSJOB_H

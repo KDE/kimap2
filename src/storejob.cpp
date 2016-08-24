@@ -25,7 +25,7 @@
 #include "message_p.h"
 #include "session_p.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 class StoreJobPrivate : public JobPrivate
 {
@@ -70,7 +70,7 @@ public:
 };
 }
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 StoreJob::StoreJob(Session *session)
     : Job(*new StoreJobPrivate(session, "Store"))
@@ -155,7 +155,7 @@ void StoreJob::doStart()
     Q_D(StoreJob);
 
     if (d->set.isEmpty()) {
-        qCWarning(KIMAP_LOG) << "Empty uid set passed to store job";
+        qCWarning(KIMAP2_LOG) << "Empty uid set passed to store job";
         setError(KJob::UserDefinedError);
         setErrorText(QStringLiteral("Empty uid set passed to store job"));
         emitResult();
@@ -174,7 +174,7 @@ void StoreJob::doStart()
         parameters += d->addFlags("X-GM-LABELS", d->gmLabels);
     }
 
-    qCDebug(KIMAP_LOG) << parameters;
+    qCDebug(KIMAP2_LOG) << parameters;
 
     QByteArray command = "STORE";
     if (d->uidBased) {
@@ -224,7 +224,7 @@ void StoreJob::handleResponse(const Message &response)
             } else if (uidFound) {
                 d->resultingFlags[uid] = resultingFlags;
             } else {
-                qCWarning(KIMAP_LOG) << "We asked for UID but the server didn't give it back, resultingFlags not stored.";
+                qCWarning(KIMAP2_LOG) << "We asked for UID but the server didn't give it back, resultingFlags not stored.";
             }
         }
     }

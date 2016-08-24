@@ -23,7 +23,7 @@
 #include <QtTest>
 #include <QDebug>
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 class ImapSetTest : public QObject
 {

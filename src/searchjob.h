@@ -18,17 +18,17 @@
     02110-1301, USA.
 */
 
-#ifndef KIMAP_SEARCHJOB_H
-#define KIMAP_SEARCHJOB_H
+#ifndef KIMAP2_SEARCHJOB_H
+#define KIMAP2_SEARCHJOB_H
 
-#include "kimap_export.h"
+#include "kimap2_export.h"
 
 #include "job.h"
 #include <QSharedPointer>
 
 class QDate;
 
-namespace KIMAP
+namespace KIMAP2
 {
 
 class ImapSet;
@@ -42,7 +42,7 @@ class SearchJobPrivate;
  * Refer to the IMAP RFC for the meaning of the individual terms.
  * @since 4.13
  */
-class KIMAP_EXPORT Term
+class KIMAP2_EXPORT Term
 {
 public:
     enum Relation {
@@ -97,7 +97,7 @@ public:
     Term(BooleanSearchKey key);
     Term(DateSearchKey key, const QDate &date);
     Term(NumberSearchKey key, int value);
-    Term(SequenceSearchKey key, const KIMAP::ImapSet &);
+    Term(SequenceSearchKey key, const KIMAP2::ImapSet &);
     Term(const QString &header, const QString &value);
 
     Term(const Term &other);
@@ -117,7 +117,7 @@ private:
     QSharedPointer<Private> d;
 };
 
-class KIMAP_EXPORT SearchJob : public Job
+class KIMAP2_EXPORT SearchJob : public Job
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(SearchJob)
@@ -189,7 +189,7 @@ public:
      * @param criteria a criteria from SearchCriterias
      * @deprecated since 4.13
      */
-    KIMAP_DEPRECATED void addSearchCriteria(SearchCriteria criteria);
+    KIMAP2_DEPRECATED void addSearchCriteria(SearchCriteria criteria);
 
     /**
      * Add a search criteria that has one or more space separate string arguments.
@@ -199,7 +199,7 @@ public:
      * @param argument the arguments
      * @deprecated since 4.13
      */
-    KIMAP_DEPRECATED void addSearchCriteria(SearchCriteria criteria, const QByteArray &argument);
+    KIMAP2_DEPRECATED void addSearchCriteria(SearchCriteria criteria, const QByteArray &argument);
 
     /**
      * Add a search criteria that has an integer argument.
@@ -209,7 +209,7 @@ public:
      * @param argument a number argument
      * @deprecated since 4.13
      */
-    KIMAP_DEPRECATED void addSearchCriteria(SearchCriteria criteria, int argument);
+    KIMAP2_DEPRECATED void addSearchCriteria(SearchCriteria criteria, int argument);
 
     /**
      * Add a search criteria that has a date as argument.
@@ -219,7 +219,7 @@ public:
      * @param argument a date
      * @deprecated since 4.13
      */
-    KIMAP_DEPRECATED void addSearchCriteria(SearchCriteria criteria, const QDate &argument);
+    KIMAP2_DEPRECATED void addSearchCriteria(SearchCriteria criteria, const QDate &argument);
 
     /**
      * Add a custom criteria. No checks are done, the data is sent as it is
@@ -227,14 +227,14 @@ public:
      * @param searchCriteria free form search criteria.
      * @deprecated since 4.13
      */
-    KIMAP_DEPRECATED void addSearchCriteria(const QByteArray &searchCriteria);
+    KIMAP2_DEPRECATED void addSearchCriteria(const QByteArray &searchCriteria);
 
     /**
      * Set the logic combining the search criterias.
      * @param logic AND (the default), OR, NOT. See SearchLogics.
      * @deprecated since 4.13
      */
-    KIMAP_DEPRECATED void setSearchLogic(SearchLogic logic);
+    KIMAP2_DEPRECATED void setSearchLogic(SearchLogic logic);
 
     /**
      * Sets the search term.

@@ -26,7 +26,7 @@
 #include "message_p.h"
 #include "session_p.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 class FetchJobPrivate : public JobPrivate
 {
@@ -103,7 +103,7 @@ public:
 };
 }
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 FetchJob::FetchScope::FetchScope():
     mode(FetchScope::Content),
@@ -303,7 +303,7 @@ void FetchJob::handleResponse(const Message &response)
                 ++it;
 
                 if (it == content.constEnd()) {   // Uh oh, message was truncated?
-                    qCWarning(KIMAP_LOG) << "FETCH reply got truncated, skipping.";
+                    qCWarning(KIMAP2_LOG) << "FETCH reply got truncated, skipping.";
                     break;
                 }
 

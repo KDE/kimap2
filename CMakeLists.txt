@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 2.8.12)
 
-project(KIMAP)
+project(KIMAP2)
 
 # ECM setup
 find_package(ECM 5.19.0 CONFIG REQUIRED)
-set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH} ${KIMAP_SOURCE_DIR}/cmake)
+set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH} ${KIMAP2_SOURCE_DIR}/cmake)
 
 include(GenerateExportHeader)
 include(ECMGenerateHeaders)
@@ -17,21 +17,21 @@ include(KDECMakeSettings)
 include(KDEFrameworkCompilerSettings NO_POLICY_SCOPE)
 include(ECMQtDeclareLoggingCategory)
 
-set(PIM_VERSION "5.1.20")
-
-set(KF5_VERSION "5.19.0")
-set(KIMAP_LIB_VERSION ${PIM_VERSION})
-ecm_setup_version(${KIMAP_LIB_VERSION} VARIABLE_PREFIX KIMAP
-                        VERSION_HEADER "${CMAKE_CURRENT_BINARY_DIR}/kimap_version.h"
-                        PACKAGE_VERSION_FILE "${CMAKE_CURRENT_BINARY_DIR}/KF5IMAPConfigVersion.cmake"
-                        SOVERSION 5
+set(KIMAP2_LIB_VERSION "0.0.1")
+ecm_setup_version(${KIMAP2_LIB_VERSION} VARIABLE_PREFIX KIMAP2
+                        VERSION_HEADER "${CMAKE_CURRENT_BINARY_DIR}/kimap2_version.h"
+                        PACKAGE_VERSION_FILE "${CMAKE_CURRENT_BINARY_DIR}/KIMAP2ConfigVersion.cmake"
+                        SOVERSION 0
 )
 
 ########### Find packages ###########
+set(KF5CoreAddons_VERSION "5.19.0")
+set(KF5Mime_VERSION "5.1.40")
+
 find_package(Qt5 5.2 COMPONENTS REQUIRED Core Network)
-find_package(KF5CoreAddons ${KF5_VERSION} CONFIG REQUIRED)
-find_package(KF5Codecs ${KF5_VERSION} CONFIG REQUIRED)
-find_package(KF5Mime "5.1.40" CONFIG REQUIRED)
+find_package(KF5CoreAddons ${KF5CoreAddons_VERSION} CONFIG REQUIRED)
+find_package(KF5Codecs "5.19.0" CONFIG REQUIRED)
+find_package(KF5Mime ${KF5Mime_VERSION} CONFIG REQUIRED)
 
 find_package(Sasl2)
 set_package_properties(Sasl2 PROPERTIES
@@ -41,12 +41,11 @@ set_package_properties(Sasl2 PROPERTIES
 )
 
 ########### CMake Config Files ###########
-set(CMAKECONFIG_INSTALL_DIR "${KDE_INSTALL_CMAKEPACKAGEDIR}/KF5IMAP")
-add_definitions(-DTRANSLATION_DOMAIN=\"libkimap5\")
+set(CMAKECONFIG_INSTALL_DIR "${KDE_INSTALL_CMAKEPACKAGEDIR}/KIMAP2")
 
 ecm_configure_package_config_file(
-  "${CMAKE_CURRENT_SOURCE_DIR}/KF5IMAPConfig.cmake.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/KF5IMAPConfig.cmake"
+  "${CMAKE_CURRENT_SOURCE_DIR}/KIMAP2Config.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/KIMAP2Config.cmake"
   INSTALL_DESTINATION  ${CMAKECONFIG_INSTALL_DIR}
 )
 
@@ -62,17 +61,17 @@ add_subdirectory(cmake)
 
 ########### Install Files ###########
 install(FILES
-  "${CMAKE_CURRENT_BINARY_DIR}/KF5IMAPConfig.cmake"
-  "${CMAKE_CURRENT_BINARY_DIR}/KF5IMAPConfigVersion.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/KIMAP2Config.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/KIMAP2ConfigVersion.cmake"
   DESTINATION "${CMAKECONFIG_INSTALL_DIR}"
   COMPONENT Devel
 )
 
-install(EXPORT KF5IMAPTargets DESTINATION "${CMAKECONFIG_INSTALL_DIR}" FILE KF5IMAPTargets.cmake NAMESPACE KF5::)
+install(EXPORT KIMAP2Targets DESTINATION "${CMAKECONFIG_INSTALL_DIR}" FILE KIMAP2Targets.cmake)
 
 install(FILES
-   ${CMAKE_CURRENT_BINARY_DIR}/kimap_version.h
-  DESTINATION ${KDE_INSTALL_INCLUDEDIR_KF5} COMPONENT Devel
+   ${CMAKE_CURRENT_BINARY_DIR}/kimap2_version.h
+  DESTINATION ${KDE_INSTALL_INCLUDEDIR} COMPONENT Devel
 )
 
 feature_summary(WHAT ALL FATAL_ON_MISSING_REQUIRED_PACKAGES)

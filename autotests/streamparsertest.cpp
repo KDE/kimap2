@@ -23,7 +23,7 @@
 
 #include <QtTest>
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 class StreamParserTest: public QObject
 {

@@ -22,7 +22,7 @@
 #include <QtCore/QByteArray>
 #include <QtCore/QMap>
 
-namespace KIMAP
+namespace KIMAP2
 {
 namespace Acl
 {
@@ -66,7 +66,7 @@ Q_GLOBAL_STATIC(RightsMap, globalRights)
 }
 }
 
-KIMAP::Acl::Rights KIMAP::Acl::rightsFromString(const QByteArray &string)
+KIMAP2::Acl::Rights KIMAP2::Acl::rightsFromString(const QByteArray &string)
 {
     Rights result;
 
@@ -88,7 +88,7 @@ KIMAP::Acl::Rights KIMAP::Acl::rightsFromString(const QByteArray &string)
     return result;
 }
 
-QByteArray KIMAP::Acl::rightsToString(Rights rights)
+QByteArray KIMAP2::Acl::rightsToString(Rights rights)
 {
     QByteArray result;
 
@@ -101,7 +101,7 @@ QByteArray KIMAP::Acl::rightsToString(Rights rights)
     return result;
 }
 
-KIMAP::Acl::Rights KIMAP::Acl::normalizedRights(KIMAP::Acl::Rights rights)
+KIMAP2::Acl::Rights KIMAP2::Acl::normalizedRights(KIMAP2::Acl::Rights rights)
 {
     Rights normalized = rights;
     if (normalized & Create) {
@@ -115,7 +115,7 @@ KIMAP::Acl::Rights KIMAP::Acl::normalizedRights(KIMAP::Acl::Rights rights)
     return normalized;
 }
 
-KIMAP::Acl::Rights KIMAP::Acl::denormalizedRights(KIMAP::Acl::Rights rights)
+KIMAP2::Acl::Rights KIMAP2::Acl::denormalizedRights(KIMAP2::Acl::Rights rights)
 {
     Rights denormalized = normalizedRights(rights);
     if (denormalized & (CreateMailbox | DeleteMailbox)) {

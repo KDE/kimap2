@@ -17,14 +17,14 @@
     02110-1301, USA.
 */
 
-#ifndef KIMAP_CLOSEJOB_H
-#define KIMAP_CLOSEJOB_H
+#ifndef KIMAP2_CLOSEJOB_H
+#define KIMAP2_CLOSEJOB_H
 
-#include "kimap_export.h"
+#include "kimap2_export.h"
 
 #include "job.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 
 class Session;
@@ -50,7 +50,7 @@ class CloseJobPrivate;
  * state, or if the server supports ACLs and the user does not
  * have the Acl::Expunge right on the mailbox.
  */
-class KIMAP_EXPORT CloseJob : public Job
+class KIMAP2_EXPORT CloseJob : public Job
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(CloseJob)

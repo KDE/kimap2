@@ -24,7 +24,7 @@
 
 #include "kimap_debug.h"
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 Job::Job(Session *session)
     : KJob(session), d_ptr(new JobPrivate(session, "Job"))
@@ -74,7 +74,7 @@ void Job::setSocketError(QAbstractSocket::SocketError error)
 Job::HandlerResponse Job::handleErrorReplies(const Message &response)
 {
     Q_D(Job);
-//   qCDebug(KIMAP_LOG) << response.toString();
+//   qCDebug(KIMAP2_LOG) << response.toString();
 
     if (!response.content.isEmpty() &&
             d->tags.contains(response.content.first().toString())) {

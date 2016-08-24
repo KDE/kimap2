@@ -30,7 +30,7 @@
 #include "selectjob.h"
 #include "closejob.h"
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 int main(int argc, char **argv)
 {
@@ -55,7 +55,7 @@ int main(int argc, char **argv)
     QCoreApplication app(argc, argv);
     Session session(server, port);
 
-    QObject::connect(&session, &KIMAP::Session::sslErrors, [&session](const QList<QSslError> &errors) {
+    QObject::connect(&session, &KIMAP2::Session::sslErrors, [&session](const QList<QSslError> &errors) {
         qWarning() << "Got ssl error: " << errors;
         session.ignoreErrors(errors);
     });
@@ -96,7 +96,7 @@ int main(int argc, char **argv)
 
     qDebug() << "Start idling...";
     IdleJob *idle = new IdleJob(&session);
-    QObject::connect(idle, SIGNAL(mailBoxStats(KIMAP::IdleJob*,QString,int,int)),
+    QObject::connect(idle, SIGNAL(mailBoxStats(KIMAP2::IdleJob*,QString,int,int)),
                      idle, SLOT(stop()));
     idle->exec();
     qDebug() << "Idling done for" << idle->lastMailBox()

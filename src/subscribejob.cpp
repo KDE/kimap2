@@ -24,7 +24,7 @@
 #include "session_p.h"
 #include "rfccodecs.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 class SubscribeJobPrivate : public JobPrivate
 {
@@ -36,7 +36,7 @@ public:
 };
 }
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 SubscribeJob::SubscribeJob(Session *session)
     : Job(*new SubscribeJobPrivate(session, "Subscribe"))
@@ -50,7 +50,7 @@ SubscribeJob::~SubscribeJob()
 void SubscribeJob::doStart()
 {
     Q_D(SubscribeJob);
-    d->tags << d->sessionInternal()->sendCommand("SUBSCRIBE", '\"' + KIMAP::encodeImapFolderName(d->mailBox.toUtf8()) + '\"');
+    d->tags << d->sessionInternal()->sendCommand("SUBSCRIBE", '\"' + KIMAP2::encodeImapFolderName(d->mailBox.toUtf8()) + '\"');
 }
 
 void SubscribeJob::setMailBox(const QString &mailBox)

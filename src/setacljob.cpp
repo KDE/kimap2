@@ -24,7 +24,7 @@
 #include "session_p.h"
 #include "rfccodecs.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 class SetAclJobPrivate : public AclJobBasePrivate
 {
@@ -34,7 +34,7 @@ public:
 };
 }
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 SetAclJob::SetAclJob(Session *session)
     : AclJobBase(*new SetAclJobPrivate(session, "SetAcl"))
@@ -54,7 +54,7 @@ void SetAclJob::doStart()
     } else if (d->modifier == Remove) {
         r.prepend('-');
     }
-    d->tags << d->sessionInternal()->sendCommand("SETACL", '\"' + KIMAP::encodeImapFolderName(d->mailBox.toUtf8()) + "\" \"" + d->id + "\" \"" + r + '\"');
+    d->tags << d->sessionInternal()->sendCommand("SETACL", '\"' + KIMAP2::encodeImapFolderName(d->mailBox.toUtf8()) + "\" \"" + d->id + "\" \"" + r + '\"');
 }
 
 void SetAclJob::setRights(AclModifier modifier, Acl::Rights rights)

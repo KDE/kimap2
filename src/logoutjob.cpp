@@ -23,7 +23,7 @@
 #include "message_p.h"
 #include "session_p.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 class LogoutJobPrivate : public JobPrivate
 {
@@ -33,7 +33,7 @@ public:
 };
 }
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 LogoutJob::LogoutJob(Session *session)
     : Job(*new LogoutJobPrivate(session, "Logout"))

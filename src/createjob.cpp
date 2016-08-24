@@ -24,7 +24,7 @@
 #include "rfccodecs.h"
 #include "session_p.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 class CreateJobPrivate : public JobPrivate
 {
@@ -36,7 +36,7 @@ public:
 };
 }
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 CreateJob::CreateJob(Session *session)
     : Job(*new CreateJobPrivate(session, "Create"))
@@ -50,7 +50,7 @@ CreateJob::~CreateJob()
 void CreateJob::doStart()
 {
     Q_D(CreateJob);
-    d->tags << d->sessionInternal()->sendCommand("CREATE", '\"' + KIMAP::encodeImapFolderName(d->mailBox.toUtf8()) + '\"');
+    d->tags << d->sessionInternal()->sendCommand("CREATE", '\"' + KIMAP2::encodeImapFolderName(d->mailBox.toUtf8()) + '\"');
 }
 
 void CreateJob::setMailBox(const QString &mailBox)

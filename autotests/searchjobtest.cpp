@@ -19,20 +19,20 @@
 
 #include <qtest.h>
 
-#include "kimaptest/fakeserver.h"
+#include "kimap2test/fakeserver.h"
 #include "kimap/loginjob.h"
 #include "kimap/session.h"
 #include "kimap/searchjob.h"
 
 #include <QtTest>
 
-typedef QPair< KIMAP::SearchJob::SearchCriteria, QByteArray > SearchCriteriaValuePair;
+typedef QPair< KIMAP2::SearchJob::SearchCriteria, QByteArray > SearchCriteriaValuePair;
 
 Q_DECLARE_METATYPE(QList<SearchCriteriaValuePair>)
-Q_DECLARE_METATYPE(KIMAP::SearchJob::SearchLogic)
-Q_DECLARE_METATYPE(KIMAP::Term)
+Q_DECLARE_METATYPE(KIMAP2::SearchJob::SearchLogic)
+Q_DECLARE_METATYPE(KIMAP2::Term)
 
-#define searchPair(a,b) qMakePair<KIMAP::SearchJob::SearchCriteria, QByteArray>( a, b )
+#define searchPair(a,b) qMakePair<KIMAP2::SearchJob::SearchCriteria, QByteArray>( a, b )
 
 class SearchJobTest: public QObject
 {
@@ -45,7 +45,7 @@ private Q_SLOTS:
         QTest::addColumn<QList<QByteArray> >("scenario");
         QTest::addColumn<bool>("uidbased");
         QTest::addColumn<int>("expectedResultsCount");
-        QTest::addColumn<KIMAP::SearchJob::SearchLogic>("searchLogic");
+        QTest::addColumn<KIMAP2::SearchJob::SearchLogic>("searchLogic");
         QTest::addColumn<QList<SearchCriteriaValuePair> >("searchCriteria");
 
         QList<QByteArray> scenario;
@@ -55,8 +55,8 @@ private Q_SLOTS:
                  << "S: * SEARCH 10 12"
                  << "S: A000001 OK search done";
 
-        criteria << searchPair(KIMAP::SearchJob::Header, "Message-Id <12345678@mail.box>");
-        QTest::newRow("uidbased header search") << scenario << true << 2 << KIMAP::SearchJob::And << criteria;
+        criteria << searchPair(KIMAP2::SearchJob::Header, "Message-Id <12345678@mail.box>");
+        QTest::newRow("uidbased header search") << scenario << true << 2 << KIMAP2::SearchJob::And << criteria;
 
         scenario.clear();
         criteria.clear();
@@ -65,9 +65,9 @@ private Q_SLOTS:
                  << "S: * SEARCH"
                  << "S: A000001 OK search done";
 
-        criteria << searchPair(KIMAP::SearchJob::New, QByteArray())
-                 << searchPair(KIMAP::SearchJob::Header, "Message-Id <12345678@mail.box>");
-        QTest::newRow("OR search with no results") << scenario << false << 0 << KIMAP::SearchJob::Or << criteria;
+        criteria << searchPair(KIMAP2::SearchJob::New, QByteArray())
+                 << searchPair(KIMAP2::SearchJob::Header, "Message-Id <12345678@mail.box>");
+        QTest::newRow("OR search with no results") << scenario << false << 0 << KIMAP2::SearchJob::Or << criteria;
 
         scenario.clear();
         criteria.clear();
@@ -75,8 +75,8 @@ private Q_SLOTS:
                  << "C: A000001 SEARCH TO {25}\r\n<testuser@kde.testserver>"
                  << "S: * SEARCH 1"
                  << "S: A000001 OK search done";
-        criteria << searchPair(KIMAP::SearchJob::To, "<testuser@kde.testserver>");
-        QTest::newRow("literal data search") << scenario << false << 1 << KIMAP::SearchJob::And << criteria;
+        criteria << searchPair(KIMAP2::SearchJob::To, "<testuser@kde.testserver>");
+        QTest::newRow("literal data search") << scenario << false << 1 << KIMAP2::SearchJob::And << criteria;
 
         scenario.clear();
         criteria.clear();
@@ -84,8 +84,8 @@ private Q_SLOTS:
                  << "C: A000001 UID SEARCH NOT (NEW)"
                  << "S: * SEARCH 1 2 3 4 5 6"
                  << "S: A000001 OK search done";
-        criteria << searchPair(KIMAP::SearchJob::New, QByteArray());
-        QTest::newRow("uidbased NOT NEW search") << scenario << true << 6 << KIMAP::SearchJob::Not << criteria;
+        criteria << searchPair(KIMAP2::SearchJob::New, QByteArray());
+        QTest::newRow("uidbased NOT NEW search") << scenario << true << 6 << KIMAP2::SearchJob::Not << criteria;
     }
 
     void testSearch()
@@ -93,16 +93,16 @@ private Q_SLOTS:
         QFETCH(QList<QByteArray>, scenario);
         QFETCH(bool, uidbased);
         QFETCH(int, expectedResultsCount);
-        QFETCH(KIMAP::SearchJob::SearchLogic, searchLogic);
+        QFETCH(KIMAP2::SearchJob::SearchLogic, searchLogic);
         QFETCH(QList<SearchCriteriaValuePair>, searchCriteria);
 
         FakeServer fakeServer;
         fakeServer.setScenario(scenario);
         fakeServer.startAndWait();
 
-        KIMAP::Session session(QLatin1String("127.0.0.1"), 5989);
+        KIMAP2::Session session(QLatin1String("127.0.0.1"), 5989);
 
-        KIMAP::SearchJob *job = new KIMAP::SearchJob(&session);
+        KIMAP2::SearchJob *job = new KIMAP2::SearchJob(&session);
         job->setUidBased(uidbased);
         job->setSearchLogic(searchLogic);
         Q_FOREACH (const SearchCriteriaValuePair &pair, searchCriteria) {
@@ -128,7 +128,7 @@ private Q_SLOTS:
         QTest::addColumn<QList<QByteArray> >("scenario");
         QTest::addColumn<bool>("uidbased");
         QTest::addColumn<int>("expectedResultsCount");
-        QTest::addColumn<KIMAP::Term>("searchTerm");
+        QTest::addColumn<KIMAP2::Term>("searchTerm");
 
         {
             QList<QByteArray> scenario;
@@ -137,7 +137,7 @@ private Q_SLOTS:
                      << "S: * SEARCH 10 12"
                      << "S: A000001 OK search done";
 
-            QTest::newRow("uidbased header search") << scenario << true << 2 << KIMAP::Term(QLatin1String("Message-Id"), QLatin1String("<12345678@mail.box>"));
+            QTest::newRow("uidbased header search") << scenario << true << 2 << KIMAP2::Term(QLatin1String("Message-Id"), QLatin1String("<12345678@mail.box>"));
         }
         {
             QList<QByteArray> scenario;
@@ -146,7 +146,7 @@ private Q_SLOTS:
                      << "S: * SEARCH"
                      << "S: A000001 OK search done";
 
-            QTest::newRow("OR search with no results") << scenario << false << 0 << KIMAP::Term(KIMAP::Term::Or, QVector<KIMAP::Term>() << KIMAP::Term(KIMAP::Term::New) << KIMAP::Term(QLatin1String("Message-Id"), QLatin1String("<12345678@mail.box>")));
+            QTest::newRow("OR search with no results") << scenario << false << 0 << KIMAP2::Term(KIMAP2::Term::Or, QVector<KIMAP2::Term>() << KIMAP2::Term(KIMAP2::Term::New) << KIMAP2::Term(QLatin1String("Message-Id"), QLatin1String("<12345678@mail.box>")));
         }
         {
             QList<QByteArray> scenario;
@@ -154,7 +154,7 @@ private Q_SLOTS:
                      << "C: A000001 SEARCH TO \"<testuser@kde.testserver>\""
                      << "S: * SEARCH 1"
                      << "S: A000001 OK search done";
-            QTest::newRow("literal data search") << scenario << false << 1 << KIMAP::Term(KIMAP::Term::To, QLatin1String("<testuser@kde.testserver>"));
+            QTest::newRow("literal data search") << scenario << false << 1 << KIMAP2::Term(KIMAP2::Term::To, QLatin1String("<testuser@kde.testserver>"));
         }
         {
             QList<QByteArray> scenario;
@@ -162,7 +162,7 @@ private Q_SLOTS:
                      << "C: A000001 UID SEARCH NOT NEW"
                      << "S: * SEARCH 1 2 3 4 5 6"
                      << "S: A000001 OK search done";
-            QTest::newRow("uidbased NOT NEW search") << scenario << true << 6 << KIMAP::Term(KIMAP::Term::New).setNegated(true);
+            QTest::newRow("uidbased NOT NEW search") << scenario << true << 6 << KIMAP2::Term(KIMAP2::Term::New).setNegated(true);
         }
     }
 
@@ -171,15 +171,15 @@ private Q_SLOTS:
         QFETCH(QList<QByteArray>, scenario);
         QFETCH(bool, uidbased);
         QFETCH(int, expectedResultsCount);
-        QFETCH(KIMAP::Term, searchTerm);
+        QFETCH(KIMAP2::Term, searchTerm);
 
         FakeServer fakeServer;
         fakeServer.setScenario(scenario);
         fakeServer.startAndWait();
 
-        KIMAP::Session session(QLatin1String("127.0.0.1"), 5989);
+        KIMAP2::Session session(QLatin1String("127.0.0.1"), 5989);
 
-        KIMAP::SearchJob *job = new KIMAP::SearchJob(&session);
+        KIMAP2::SearchJob *job = new KIMAP2::SearchJob(&session);
         job->setUidBased(uidbased);
         job->setTerm(searchTerm);
 

@@ -17,14 +17,14 @@
     02110-1301, USA.
 */
 
-#ifndef KIMAP_MESSAGE_P_H
-#define KIMAP_MESSAGE_P_H
+#ifndef KIMAP2_MESSAGE_P_H
+#define KIMAP2_MESSAGE_P_H
 
 #include <QtCore/QByteArray>
 #include <QtCore/QList>
 #include <QtCore/QMetaType>
 
-namespace KIMAP
+namespace KIMAP2
 {
 
 struct Message {
@@ -100,7 +100,7 @@ struct Message {
 
 }
 
-Q_DECLARE_METATYPE(KIMAP::Message)
-static const int _kimap_messageTypeId = qRegisterMetaType<KIMAP::Message>();
+Q_DECLARE_METATYPE(KIMAP2::Message)
+static const int _kimap_messageTypeId = qRegisterMetaType<KIMAP2::Message>();
 
 #endif

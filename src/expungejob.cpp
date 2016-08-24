@@ -25,7 +25,7 @@
 #include "message_p.h"
 #include "session_p.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 class ExpungeJobPrivate : public JobPrivate
 {
@@ -38,7 +38,7 @@ public:
 };
 }
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 ExpungeJob::ExpungeJob(Session *session)
     : Job(*new ExpungeJobPrivate(session, "Expunge"))
@@ -75,7 +75,7 @@ void ExpungeJob::handleResponse(const Message &response)
                 return;
             }
         }
-        qCDebug(KIMAP_LOG) << "Unhandled response: " << response.toString().constData();
+        qCDebug(KIMAP2_LOG) << "Unhandled response: " << response.toString().constData();
 
     }
 }

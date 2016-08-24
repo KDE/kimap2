@@ -17,10 +17,10 @@
     02110-1301, USA.
 */
 
-#ifndef KIMAP_IMAPSET_H
-#define KIMAP_IMAPSET_H
+#ifndef KIMAP2_IMAPSET_H
+#define KIMAP2_IMAPSET_H
 
-#include "kimap_export.h"
+#include "kimap2_export.h"
 
 #include <QtCore/QByteArray>
 #include <QtCore/QDebug>
@@ -28,14 +28,14 @@
 #include <QtCore/QMetaType>
 #include <QtCore/QSharedDataPointer>
 
-namespace KIMAP
+namespace KIMAP2
 {
 
 /**
   Represents a single interval in an ImapSet.
   This class is implicitly shared.
 */
-class KIMAP_EXPORT ImapInterval
+class KIMAP2_EXPORT ImapInterval
 {
 public:
     /**
@@ -138,7 +138,7 @@ private:
   Used to address Akonadi items via the IMAP protocol or in the database.
   This class is implicitly shared.
 */
-class KIMAP_EXPORT ImapSet
+class KIMAP2_EXPORT ImapSet
 {
 public:
     /**
@@ -231,11 +231,11 @@ private:
 
 }
 
-KIMAP_EXPORT QDebug &operator<<(QDebug &d, const KIMAP::ImapInterval &interval);
-KIMAP_EXPORT QDebug &operator<<(QDebug &d, const KIMAP::ImapSet &set);
+KIMAP2_EXPORT QDebug &operator<<(QDebug &d, const KIMAP2::ImapInterval &interval);
+KIMAP2_EXPORT QDebug &operator<<(QDebug &d, const KIMAP2::ImapSet &set);
 
-Q_DECLARE_METATYPE(KIMAP::ImapInterval)
-Q_DECLARE_METATYPE(KIMAP::ImapInterval::List)
-Q_DECLARE_METATYPE(KIMAP::ImapSet)
+Q_DECLARE_METATYPE(KIMAP2::ImapInterval)
+Q_DECLARE_METATYPE(KIMAP2::ImapInterval::List)
+Q_DECLARE_METATYPE(KIMAP2::ImapSet)
 
 #endif

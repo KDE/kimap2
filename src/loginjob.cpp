@@ -44,7 +44,7 @@ static const sasl_callback_t callbacks[] = {
     { SASL_CB_LIST_END, Q_NULLPTR, nullptr }
 };
 
-namespace KIMAP
+namespace KIMAP2
 {
 class LoginJobPrivate : public JobPrivate
 {
@@ -89,11 +89,11 @@ public:
 };
 }
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 bool LoginJobPrivate::sasl_interact()
 {
-    qCDebug(KIMAP_LOG) << "sasl_interact";
+    qCDebug(KIMAP2_LOG) << "sasl_interact";
     sasl_interact_t *interact = client_interact;
 
     //some mechanisms do not require username && pass, so it doesn't need a popup
@@ -108,22 +108,22 @@ bool LoginJobPrivate::sasl_interact()
 
     interact = client_interact;
     while (interact->id != SASL_CB_LIST_END) {
-        qCDebug(KIMAP_LOG) << "SASL_INTERACT id:" << interact->id;
+        qCDebug(KIMAP2_LOG) << "SASL_INTERACT id:" << interact->id;
         switch (interact->id) {
         case SASL_CB_AUTHNAME:
             if (!authorizationName.isEmpty()) {
-                qCDebug(KIMAP_LOG) << "SASL_CB_[AUTHNAME]: '" << authorizationName << "'";
+                qCDebug(KIMAP2_LOG) << "SASL_CB_[AUTHNAME]: '" << authorizationName << "'";
                 interact->result = strdup(authorizationName.toUtf8());
                 interact->len = strlen((const char *) interact->result);
                 break;
             }
         case SASL_CB_USER:
-            qCDebug(KIMAP_LOG) << "SASL_CB_[USER|AUTHNAME]: '" << userName << "'";
+            qCDebug(KIMAP2_LOG) << "SASL_CB_[USER|AUTHNAME]: '" << userName << "'";
             interact->result = strdup(userName.toUtf8());
             interact->len = strlen((const char *) interact->result);
             break;
         case SASL_CB_PASS:
-            qCDebug(KIMAP_LOG) << "SASL_CB_PASS: [hidden]";
+            qCDebug(KIMAP2_LOG) << "SASL_CB_PASS: [hidden]";
             interact->result = strdup(password.toUtf8());
             interact->len = strlen((const char *) interact->result);
             break;
@@ -142,12 +142,12 @@ LoginJob::LoginJob(Session *session)
 {
     Q_D(LoginJob);
     connect(d->sessionInternal(), SIGNAL(encryptionNegotiationResult(bool)), this, SLOT(sslResponse(bool)));
-    qCDebug(KIMAP_LOG) << this;
+    qCDebug(KIMAP2_LOG) << this;
 }
 
 LoginJob::~LoginJob()
 {
-    qCDebug(KIMAP_LOG) << this;
+    qCDebug(KIMAP2_LOG) << this;
 }
 
 QString LoginJob::userName() const
@@ -190,7 +190,7 @@ void LoginJob::doStart()
 {
     Q_D(LoginJob);
 
-    qCDebug(KIMAP_LOG) << this;
+    qCDebug(KIMAP2_LOG) << this;
     // Don't authenticate on a session in the authenticated state
     if (session()->state() == Session::Authenticated || session()->state() == Session::Selected) {
         setError(UserDefinedError);
@@ -245,7 +245,7 @@ void LoginJob::handleResponse(const Message &response)
     QByteArray tag = response.content.first().toString();
     ResponseCode code = OK;
 
-    qCDebug(KIMAP_LOG) << commandName << tag;
+    qCDebug(KIMAP2_LOG) << commandName << tag;
 
     if (tag == "+") {
         code = CONTINUATION;
@@ -293,7 +293,7 @@ void LoginJob::handleResponse(const Message &response)
                 }
                 ++p;
             }
-            qCDebug(KIMAP_LOG) << "Capabilities updated: " << d->capabilities;
+            qCDebug(KIMAP2_LOG) << "Capabilities updated: " << d->capabilities;
         }
         break;
 
@@ -400,7 +400,7 @@ bool LoginJobPrivate::startAuthentication()
 
     int result = sasl_client_new("imap", m_session->hostName().toLatin1(), Q_NULLPTR, nullptr, callbacks, 0, &conn);
     if (result != SASL_OK) {
-        qCDebug(KIMAP_LOG) << "sasl_client_new failed with:" << result;
+        qCDebug(KIMAP2_LOG) << "sasl_client_new failed with:" << result;
         q->setError(LoginJob::UserDefinedError);
         q->setErrorText(QString::fromUtf8(sasl_errdetail(conn)));
         return false;
@@ -419,7 +419,7 @@ bool LoginJobPrivate::startAuthentication()
     } while (result == SASL_INTERACT);
 
     if (result != SASL_CONTINUE && result != SASL_OK) {
-        qCDebug(KIMAP_LOG) << "sasl_client_start failed with:" << result;
+        qCDebug(KIMAP2_LOG) << "sasl_client_start failed with:" << result;
         q->setError(LoginJob::UserDefinedError);
         q->setErrorText(QString::fromUtf8(sasl_errdetail(conn)));
         sasl_dispose(&conn);
@@ -441,7 +441,7 @@ bool LoginJobPrivate::startAuthentication()
 void LoginJobPrivate::sendPlainLogin()
 {
     authState = LoginJobPrivate::Login;
-    qCDebug(KIMAP_LOG) << "sending LOGIN";
+    qCDebug(KIMAP2_LOG) << "sending LOGIN";
     tags << sessionInternal()->sendCommand("LOGIN",
             '"' + quoteIMAP(userName).toUtf8() + '"' +
             ' ' +
@@ -470,7 +470,7 @@ bool LoginJobPrivate::answerChallenge(const QByteArray &data)
     } while (result == SASL_INTERACT);
 
     if (result != SASL_CONTINUE && result != SASL_OK) {
-        qCDebug(KIMAP_LOG) << "sasl_client_step failed with:" << result;
+        qCDebug(KIMAP2_LOG) << "sasl_client_step failed with:" << result;
         q->setError(LoginJob::UserDefinedError);   //TODO: check up the actual error
         q->setErrorText(QString::fromUtf8(sasl_errdetail(conn)));
         sasl_dispose(&conn);
@@ -540,7 +540,7 @@ void LoginJob::connectionLost()
 {
     Q_D(LoginJob);
 
-    qCWarning(KIMAP_LOG) << "Connection to server lost " << d->m_socketError;
+    qCWarning(KIMAP2_LOG) << "Connection to server lost " << d->m_socketError;
     if (d->m_socketError == QSslSocket::SslHandshakeFailedError) {
         setError(ERR_SSL_HANDSHAKE_FAILED);
         setErrorText(QString::fromUtf8("SSL handshake failed."));

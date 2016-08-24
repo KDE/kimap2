@@ -23,7 +23,7 @@
 #include "message_p.h"
 #include "session_p.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 class CloseJobPrivate : public JobPrivate
 {
@@ -33,7 +33,7 @@ public:
 };
 }
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 CloseJob::CloseJob(Session *session)
     : Job(*new CloseJobPrivate(session, "Close"))

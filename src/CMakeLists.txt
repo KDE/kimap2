@@ -49,18 +49,16 @@ set(kimap_SRCS
    unsubscribejob.cpp
 )
 
-ecm_qt_declare_logging_category(kimap_SRCS HEADER kimap_debug.h IDENTIFIER KIMAP_LOG CATEGORY_NAME log_kimap)
+ecm_qt_declare_logging_category(kimap_SRCS HEADER kimap_debug.h IDENTIFIER KIMAP2_LOG CATEGORY_NAME log_kimap2)
 
-add_library(KF5IMAP ${kimap_SRCS})
+add_library(KIMAP2 ${kimap_SRCS})
 
-generate_export_header(KF5IMAP BASE_NAME kimap)
+generate_export_header(KIMAP2 BASE_NAME kimap2)
 
-add_library(KF5::IMAP ALIAS KF5IMAP)
+target_include_directories(KIMAP2 INTERFACE "$<INSTALL_INTERFACE:${KDE_INSTALL_INCLUDEDIR}/KIMAP2;${Sasl2_INCLUDE_DIR}>")
+target_include_directories(KIMAP2 PUBLIC "$<BUILD_INTERFACE:${KIMAP2_SOURCE_DIR}/src;${KIMAP2_BINARY_DIR}/src>")
 
-target_include_directories(KF5IMAP INTERFACE "$<INSTALL_INTERFACE:${KDE_INSTALL_INCLUDEDIR_KF5}/KIMAP;${Sasl2_INCLUDE_DIR}>")
-target_include_directories(KF5IMAP PUBLIC "$<BUILD_INTERFACE:${KIMAP_SOURCE_DIR}/src;${KIMAP_BINARY_DIR}/src>")
-
-target_link_libraries(KF5IMAP
+target_link_libraries(KIMAP2
 PUBLIC
   KF5::Mime
 PRIVATE
@@ -70,13 +68,13 @@ PRIVATE
   ${Sasl2_LIBRARIES}
 )
 
-set_target_properties(KF5IMAP PROPERTIES
-    VERSION ${KIMAP_VERSION_STRING}
-    SOVERSION ${KIMAP_SOVERSION}
-    EXPORT_NAME IMAP
+set_target_properties(KIMAP2 PROPERTIES
+    VERSION ${KIMAP2_VERSION_STRING}
+    SOVERSION ${KIMAP2_SOVERSION}
+    EXPORT_NAME KIMAP2
 )
 
-ecm_generate_headers(KIMAP_CamelCase_HEADERS
+ecm_generate_headers(KIMAP2_CamelCase_HEADERS
   HEADER_NAMES
   Acl
   AclJobBase
@@ -115,28 +113,27 @@ ecm_generate_headers(KIMAP_CamelCase_HEADERS
   StoreJob
   SubscribeJob
   UnsubscribeJob
-  PREFIX KIMAP
-
-  REQUIRED_HEADERS KIMAP_HEADERS
+  PREFIX KIMAP2
+  REQUIRED_HEADERS KIMAP2_HEADERS
 )
 
-install(TARGETS KF5IMAP EXPORT KF5IMAPTargets ${KF5_INSTALL_TARGETS_DEFAULT_ARGS})
+install(TARGETS KIMAP2 EXPORT KIMAP2Targets ${INSTALL_TARGETS_DEFAULT_ARGS})
 
 install(FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/kimap_export.h
-    ${KIMAP_HEADERS}
+    ${CMAKE_CURRENT_BINARY_DIR}/kimap2_export.h
+    ${KIMAP2_HEADERS}
     namespacejob.h rfccodecs.h # FIXME these two headers don't have camelcase headers in KDE4
-    ${KIMAP_CamelCase_HEADERS}
-    DESTINATION ${KDE_INSTALL_INCLUDEDIR_KF5}/KIMAP/kimap
+    ${KIMAP2_CamelCase_HEADERS}
+    DESTINATION ${KDE_INSTALL_INCLUDEDIR}/kimap2
     COMPONENT Devel
 )
 
 install(FILES
-    ${KIMAP_CamelCase_HEADERS}
-    DESTINATION ${KDE_INSTALL_INCLUDEDIR_KF5}/KIMAP/KIMAP
+    ${KIMAP2_CamelCase_HEADERS}
+    DESTINATION ${KDE_INSTALL_INCLUDEDIR}/KIMAP2
     COMPONENT Devel
 )
 
 
-ecm_generate_pri_file(BASE_NAME KIMAP LIB_NAME KF5IMAP DEPS "Mime" FILENAME_VAR PRI_FILENAME INCLUDE_INSTALL_DIR ${KDE_INSTALL_INCLUDEDIR_KF5}/KIMAP)
+ecm_generate_pri_file(BASE_NAME KIMAP2 LIB_NAME KIMAP2 DEPS "Mime" FILENAME_VAR PRI_FILENAME INCLUDE_INSTALL_DIR ${KDE_INSTALL_INCLUDEDIR}/KIMAP2)
 install(FILES ${PRI_FILENAME} DESTINATION ${ECM_MKSPECS_INSTALL_DIR})

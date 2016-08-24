@@ -21,7 +21,7 @@
 
 #include <qtest.h>
 
-#include "kimaptest/fakeserver.h"
+#include "kimap2test/fakeserver.h"
 #include "kimap/session.h"
 #include "kimap/logoutjob.h"
 #include "kimap/loginjob.h"
@@ -44,9 +44,9 @@ private Q_SLOTS:
                               );
         fakeServer.startAndWait();
 
-        KIMAP::Session *session = new KIMAP::Session(QStringLiteral("127.0.0.1"), 5989);
+        KIMAP2::Session *session = new KIMAP2::Session(QStringLiteral("127.0.0.1"), 5989);
 
-        KIMAP::LogoutJob *logout = new KIMAP::LogoutJob(session);
+        KIMAP2::LogoutJob *logout = new KIMAP2::LogoutJob(session);
         QVERIFY(logout->exec());
 
         fakeServer.quit();
@@ -64,9 +64,9 @@ private Q_SLOTS:
                               );
         fakeServer.startAndWait();
 
-        KIMAP::Session *session = new KIMAP::Session(QStringLiteral("127.0.0.1"), 5989);
+        KIMAP2::Session *session = new KIMAP2::Session(QStringLiteral("127.0.0.1"), 5989);
 
-        KIMAP::LogoutJob *logout = new KIMAP::LogoutJob(session);
+        KIMAP2::LogoutJob *logout = new KIMAP2::LogoutJob(session);
         QVERIFY(logout->exec());
 
         fakeServer.quit();

@@ -22,7 +22,7 @@
 #include "message_p.h"
 #include "session_p.h"
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 QMap<QByteArray, QPair<qint64, qint64> > QuotaJobBasePrivate::readQuota(const Message::Part &content)
 {

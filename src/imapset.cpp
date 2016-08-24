@@ -21,7 +21,7 @@
 
 #include <QtCore/QSharedData>
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 class ImapInterval::Private : public QSharedData
 {

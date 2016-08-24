@@ -26,7 +26,7 @@
 #include "session_p.h"
 #include "rfccodecs.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 class SetMetaDataJobPrivate : public MetaDataJobBasePrivate
 {
@@ -42,7 +42,7 @@ public:
 };
 }
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 SetMetaDataJob::SetMetaDataJob(Session *session)
     : MetaDataJobBase(*new SetMetaDataJobPrivate(session, "SetMetaData"))
@@ -57,7 +57,7 @@ void SetMetaDataJob::doStart()
 {
     Q_D(SetMetaDataJob);
     QByteArray parameters;
-    parameters = '\"' + KIMAP::encodeImapFolderName(d->mailBox.toUtf8()) + "\" ";
+    parameters = '\"' + KIMAP2::encodeImapFolderName(d->mailBox.toUtf8()) + "\" ";
     d->entriesIt = d->entries.constBegin();
 
     QByteArray command = "SETMETADATA";
@@ -102,7 +102,7 @@ void SetMetaDataJob::doStart()
     }
 
     d->tags << d->sessionInternal()->sendCommand(command, parameters);
-//   qCDebug(KIMAP_LOG) << "SENT: " << command << " " << parameters;
+//   qCDebug(KIMAP2_LOG) << "SENT: " << command << " " << parameters;
 }
 
 void SetMetaDataJob::handleResponse(const Message &response)
@@ -153,7 +153,7 @@ void SetMetaDataJob::handleResponse(const Message &response)
             int size = d->entriesIt.value().size();
             content += " {" + QByteArray::number( size==0 ? 3 : size ) + '}';
         }
-//      qCDebug(KIMAP_LOG) << "SENT: " << content;
+//      qCDebug(KIMAP2_LOG) << "SENT: " << content;
         d->sessionInternal()->sendData(content);
     }
 }

@@ -24,7 +24,7 @@
 #include "session_p.h"
 #include "rfccodecs.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 class GetQuotaRootJobPrivate : public QuotaJobBasePrivate
 {
@@ -38,7 +38,7 @@ public:
 };
 }
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 GetQuotaRootJob::GetQuotaRootJob(Session *session)
     : QuotaJobBase(*new GetQuotaRootJobPrivate(session, "GetQuotaRoot"))
@@ -52,7 +52,7 @@ GetQuotaRootJob::~GetQuotaRootJob()
 void GetQuotaRootJob::doStart()
 {
     Q_D(GetQuotaRootJob);
-    d->tags << d->sessionInternal()->sendCommand("GETQUOTAROOT", '\"' + KIMAP::encodeImapFolderName(d->mailBox.toUtf8()) + '\"');
+    d->tags << d->sessionInternal()->sendCommand("GETQUOTAROOT", '\"' + KIMAP2::encodeImapFolderName(d->mailBox.toUtf8()) + '\"');
 }
 
 void GetQuotaRootJob::handleResponse(const Message &response)

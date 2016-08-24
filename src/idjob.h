@@ -17,14 +17,14 @@
     02110-1301, USA.
 */
 
-#ifndef KIMAP_IDJOB_H
-#define KIMAP_IDJOB_H
+#ifndef KIMAP2_IDJOB_H
+#define KIMAP2_IDJOB_H
 
-#include "kimap_export.h"
+#include "kimap2_export.h"
 
 #include "job.h"
 
-namespace KIMAP {
+namespace KIMAP2 {
 
 class Session;
 struct Message;
@@ -35,7 +35,7 @@ class IdJobPrivate;
  *
  * This job can be run in any open session.
  */
-class KIMAP_EXPORT IdJob : public Job
+class KIMAP2_EXPORT IdJob : public Job
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(IdJob)

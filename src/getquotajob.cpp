@@ -23,7 +23,7 @@
 #include "message_p.h"
 #include "session_p.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 class GetQuotaJobPrivate : public QuotaJobBasePrivate
 {
@@ -35,7 +35,7 @@ public:
 };
 }
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 GetQuotaJob::GetQuotaJob(Session *session)
     : QuotaJobBase(*new GetQuotaJobPrivate(session, "GetQuota"))

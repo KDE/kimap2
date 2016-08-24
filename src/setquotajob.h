@@ -17,12 +17,12 @@
     02110-1301, USA.
 */
 
-#ifndef KIMAP_SETQUOTAJOB_H
-#define KIMAP_SETQUOTAJOB_H
+#ifndef KIMAP2_SETQUOTAJOB_H
+#define KIMAP2_SETQUOTAJOB_H
 
 #include "quotajobbase.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 
 class Session;
@@ -48,7 +48,7 @@ class SetQuotaJobPrivate;
  * capability, defined in
  * <a href="http://www.apps.ietf.org/rfc/rfc2087.html">RFC 2087</a>.
  */
-class KIMAP_EXPORT SetQuotaJob : public QuotaJobBase
+class KIMAP2_EXPORT SetQuotaJob : public QuotaJobBase
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(SetQuotaJob)

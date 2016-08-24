@@ -18,13 +18,13 @@
     02110-1301, USA.
 */
 
-#ifndef KIMAP_SESSIONLOGGER_P_H
-#define KIMAP_SESSIONLOGGER_P_H
+#ifndef KIMAP2_SESSIONLOGGER_P_H
+#define KIMAP2_SESSIONLOGGER_P_H
 
 #include <QtCore/QObject>
 #include <QtCore/QFile>
 
-namespace KIMAP
+namespace KIMAP2
 {
 
 class SessionLoggerPrivate;

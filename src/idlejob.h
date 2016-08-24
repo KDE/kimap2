@@ -17,10 +17,10 @@
     02110-1301, USA.
 */
 
-#ifndef KIMAP_IDLEJOB_H
-#define KIMAP_IDLEJOB_H
+#ifndef KIMAP2_IDLEJOB_H
+#define KIMAP2_IDLEJOB_H
 
-#include "kimap_export.h"
+#include "kimap2_export.h"
 
 #include "imapset.h"
 #include "job.h"
@@ -28,7 +28,7 @@
 #include <kmime/kmime_content.h>
 #include <kmime/kmime_message.h>
 
-namespace KIMAP
+namespace KIMAP2
 {
 
 class Session;
@@ -59,7 +59,7 @@ class IdleJobPrivate;
  * capability, defined in
  * <a href="http://www.apps.ietf.org/rfc/rfc2177.html">RFC 2177</a>.
  */
-class KIMAP_EXPORT IdleJob : public Job
+class KIMAP2_EXPORT IdleJob : public Job
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(IdleJob)
@@ -116,7 +116,7 @@ Q_SIGNALS:
      * @param messageCount  the new total message count reported by the server
      * @param recentCount   the new "recent message" count reported by the server
      */
-    void mailBoxStats(KIMAP::IdleJob *job, const QString &mailBox, int messageCount, int recentCount);
+    void mailBoxStats(KIMAP2::IdleJob *job, const QString &mailBox, int messageCount, int recentCount);
 
     /**
      * Signals that the server has notified that the some messages flags
@@ -126,7 +126,7 @@ Q_SIGNALS:
      * @param uid UID of message that has changed
      * @since 4.12
      */
-    void mailBoxMessageFlagsChanged(KIMAP::IdleJob *job, qint64 uid);
+    void mailBoxMessageFlagsChanged(KIMAP2::IdleJob *job, qint64 uid);
 
 protected:
     void doStart() Q_DECL_OVERRIDE;

@@ -26,7 +26,7 @@
 #include "rfccodecs.h"
 #include "session_p.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 class ListJobPrivate : public JobPrivate
 {
@@ -58,7 +58,7 @@ public:
 };
 }
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 ListJob::ListJob(Session *session)
     : Job(*new ListJobPrivate(this, session, "List"))
@@ -206,7 +206,7 @@ void ListJob::handleResponse(const Message &response)
     }
 }
 
-void ListJob::convertInboxName(KIMAP::MailBoxDescriptor &descriptor)
+void ListJob::convertInboxName(KIMAP2::MailBoxDescriptor &descriptor)
 {
     //Inbox must be case sensitive, according to the RFC, so make it always uppercase
     QStringList pathParts = descriptor.name.split(descriptor.separator);

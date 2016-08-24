@@ -26,7 +26,7 @@
 #include "session_p.h"
 #include "rfccodecs.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 class SelectJobPrivate : public JobPrivate
 {
@@ -52,7 +52,7 @@ public:
 };
 }
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 SelectJob::SelectJob(Session *session)
     : Job(*new SelectJobPrivate(session, "Select"))
@@ -156,7 +156,7 @@ void SelectJob::doStart()
         command = "EXAMINE";
     }
 
-    QByteArray params = '\"' + KIMAP::encodeImapFolderName(d->mailBox.toUtf8()) + '\"';
+    QByteArray params = '\"' + KIMAP2::encodeImapFolderName(d->mailBox.toUtf8()) + '\"';
 
     if (d->condstoreEnabled) {
         params += " (CONDSTORE)";
@@ -220,7 +220,7 @@ void SelectJob::handleResponse(const Message &response)
                 }
             }
         } else {
-            qCDebug(KIMAP_LOG) << response.toString();
+            qCDebug(KIMAP2_LOG) << response.toString();
         }
     } else {
         Q_ASSERT(error() || d->m_session->selectedMailBox() == d->mailBox);

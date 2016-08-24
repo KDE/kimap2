@@ -21,7 +21,7 @@
 
 #include <qtest.h>
 
-#include "kimaptest/fakeserver.h"
+#include "kimap2test/fakeserver.h"
 #include "kimap/session.h"
 #include "kimap/loginjob.h"
 
@@ -76,9 +76,9 @@ private Q_SLOTS:
         fakeServer.setScenario(scenario);
         fakeServer.startAndWait();
 
-        KIMAP::Session *session = new KIMAP::Session("127.0.0.1", 5989);
+        KIMAP2::Session *session = new KIMAP2::Session("127.0.0.1", 5989);
 
-        KIMAP::LoginJob *login = new KIMAP::LoginJob(session);
+        KIMAP2::LoginJob *login = new KIMAP2::LoginJob(session);
         login->setUserName(user);
         login->setPassword(password);
         bool result = login->exec();
@@ -119,10 +119,10 @@ private Q_SLOTS:
         fakeServer.setScenario(scenario);
         fakeServer.startAndWait();
 
-        KIMAP::Session *session = new KIMAP::Session("127.0.0.1", 5989);
+        KIMAP2::Session *session = new KIMAP2::Session("127.0.0.1", 5989);
 
-        KIMAP::LoginJob *login = new KIMAP::LoginJob(session);
-        login->setAuthenticationMode(KIMAP::LoginJob::Plain);
+        KIMAP2::LoginJob *login = new KIMAP2::LoginJob(session);
+        login->setAuthenticationMode(KIMAP2::LoginJob::Plain);
         login->setUserName(user);
         login->setAuthorizationName(proxy);
         login->setPassword(password);
@@ -177,9 +177,9 @@ private Q_SLOTS:
         fakeServer.setScenario(scenario);
         fakeServer.startAndWait();
 
-        KIMAP::Session *session = new KIMAP::Session("127.0.0.1", 5989);
+        KIMAP2::Session *session = new KIMAP2::Session("127.0.0.1", 5989);
 
-        KIMAP::LoginJob *login = new KIMAP::LoginJob(session);
+        KIMAP2::LoginJob *login = new KIMAP2::LoginJob(session);
         login->setUserName("user");
         login->setPassword("password");
         login->exec();
@@ -221,7 +221,7 @@ private Q_SLOTS:
 
             QTest::newRow("sslv3") << scenario << static_cast<int>(QSsl::TlsV1SslV3) << static_cast<int>(QSsl::SslV3) << false;
             //sslv2 is not supported anymore on my system
-            // QTest::newRow("sslv2") << scenario << static_cast<int>(QSsl::SslV2) << static_cast<int>(KIMAP::LoginJob::SslV2);
+            // QTest::newRow("sslv2") << scenario << static_cast<int>(QSsl::SslV2) << static_cast<int>(KIMAP2::LoginJob::SslV2);
             //AnyProtocol doesn't mean the server can force a specific version (e.g. openssl always starts with a sslv2 hello)
             QTest::newRow("any protocol with anyssl version") << scenario << static_cast<int>(QSsl::AnyProtocol) << static_cast<int>(QSsl::AnyProtocol) << false;
             QTest::newRow("tlsv1.0") << scenario << static_cast<int>(QSsl::TlsV1SslV3) << static_cast<int>(QSsl::TlsV1_0) << false;
@@ -240,14 +240,14 @@ private Q_SLOTS:
         fakeServer.setScenario(scenario);
         fakeServer.startAndWait();
 
-        KIMAP::Session *session = new KIMAP::Session("127.0.0.1", 5989);
+        KIMAP2::Session *session = new KIMAP2::Session("127.0.0.1", 5989);
 
-        QObject::connect(session, &KIMAP::Session::sslErrors, [session](const QList<QSslError> &errors) {
+        QObject::connect(session, &KIMAP2::Session::sslErrors, [session](const QList<QSslError> &errors) {
             qWarning() << "Got ssl error: " << errors;
             session->ignoreErrors(errors);
         });
 
-        KIMAP::LoginJob *login = new KIMAP::LoginJob(session);
+        KIMAP2::LoginJob *login = new KIMAP2::LoginJob(session);
         login->setUserName("user");
         login->setPassword("password");
         login->setEncryptionMode(static_cast<QSsl::SslProtocol>(clientEncryption), startTls);
@@ -269,8 +269,8 @@ private Q_SLOTS:
             scenario << FakeServer::greeting();
 
             //For some reason only connecting to tlsv1 results in an ssl handshake error, with the wrong version only the server detects the error and disconnects
-//     QTest::newRow( "ssl v3 v2" ) << scenario << static_cast<int>(QSsl::SslV3) << static_cast<int>(KIMAP::LoginJob::SslV2) << static_cast<int>(KJob::UserDefinedError);
-            QTest::newRow("ssl tlsv1 v3") << scenario << static_cast<int>(QSsl::SslV3) << static_cast<int>(QSsl::TlsV1_0) << static_cast<int>(KIMAP::LoginJob::ERR_SSL_HANDSHAKE_FAILED);
+//     QTest::newRow( "ssl v3 v2" ) << scenario << static_cast<int>(QSsl::SslV3) << static_cast<int>(KIMAP2::LoginJob::SslV2) << static_cast<int>(KJob::UserDefinedError);
+            QTest::newRow("ssl tlsv1 v3") << scenario << static_cast<int>(QSsl::SslV3) << static_cast<int>(QSsl::TlsV1_0) << static_cast<int>(KIMAP2::LoginJob::ERR_SSL_HANDSHAKE_FAILED);
         }
     }
 
@@ -285,14 +285,14 @@ private Q_SLOTS:
         fakeServer.setScenario(scenario);
         fakeServer.startAndWait();
 
-        KIMAP::Session *session = new KIMAP::Session("127.0.0.1", 5989);
+        KIMAP2::Session *session = new KIMAP2::Session("127.0.0.1", 5989);
 
-        QObject::connect(session, &KIMAP::Session::sslErrors, [session](const QList<QSslError> &errors) {
+        QObject::connect(session, &KIMAP2::Session::sslErrors, [session](const QList<QSslError> &errors) {
             qWarning() << "Got ssl error: " << errors;
             session->ignoreErrors(errors);
         });
 
-        KIMAP::LoginJob *login = new KIMAP::LoginJob(session);
+        KIMAP2::LoginJob *login = new KIMAP2::LoginJob(session);
         login->setUserName("user");
         login->setPassword("password");
         login->setEncryptionMode(static_cast<QSsl::SslProtocol>(clientEncryption), false);

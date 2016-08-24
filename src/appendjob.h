@@ -17,15 +17,15 @@
     02110-1301, USA.
 */
 
-#ifndef KIMAP_APPENDJOB_H
-#define KIMAP_APPENDJOB_H
+#ifndef KIMAP2_APPENDJOB_H
+#define KIMAP2_APPENDJOB_H
 
-#include "kimap_export.h"
+#include "kimap2_export.h"
 
 #include "job.h"
 #include <QDateTime>
 
-namespace KIMAP
+namespace KIMAP2
 {
 
 class Session;
@@ -41,7 +41,7 @@ class AppendJobPrivate;
  * If the server supports ACLs, the user will need the
  * Acl::Insert right on the mailbox.
  */
-class KIMAP_EXPORT AppendJob : public Job
+class KIMAP2_EXPORT AppendJob : public Job
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(AppendJob)

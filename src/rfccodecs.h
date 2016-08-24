@@ -30,16 +30,16 @@
  * @author Sven Carstens
  */
 
-#ifndef KIMAP_RFCCODECS_H
-#define KIMAP_RFCCODECS_H
+#ifndef KIMAP2_RFCCODECS_H
+#define KIMAP2_RFCCODECS_H
 
 #include <QtCore/QString>
 
-#include "kimap_export.h"
+#include "kimap2_export.h"
 
 class QTextCodec;
 
-namespace KIMAP
+namespace KIMAP2
 {
 
 /**
@@ -48,46 +48,46 @@ namespace KIMAP
   @param src is the QByteArray containing the IMAP mailbox.
   @since 4.3
 */
-KIMAP_EXPORT QByteArray encodeImapFolderName(const QByteArray &src);
+KIMAP2_EXPORT QByteArray encodeImapFolderName(const QByteArray &src);
 
 /**
   Converts an UTF-7 encoded IMAP mailbox to a QByteArray
   @param inSrc is the QByteArray containing the Unicode path.
   @since 4.3
 */
-KIMAP_EXPORT QByteArray decodeImapFolderName(const QByteArray &inSrc);
+KIMAP2_EXPORT QByteArray decodeImapFolderName(const QByteArray &inSrc);
 /**
   Converts an Unicode IMAP mailbox to a QString which can be used in
   IMAP communication.
   @param src is the QString containing the IMAP mailbox.
 */
-KIMAP_EXPORT QString encodeImapFolderName(const QString &src);
+KIMAP2_EXPORT QString encodeImapFolderName(const QString &src);
 
 /**
   Converts an UTF-7 encoded IMAP mailbox to a Unicode QString.
   @param inSrc is the QString containing the Unicode path.
 */
-KIMAP_EXPORT QString decodeImapFolderName(const QString &inSrc);
+KIMAP2_EXPORT QString decodeImapFolderName(const QString &inSrc);
 
 /**
   Replaces " with \" and \ with \\ " and \ characters.
   @param src is the QString to quote.
 */
-KIMAP_EXPORT QString quoteIMAP(const QString &src);
+KIMAP2_EXPORT QString quoteIMAP(const QString &src);
 
 /**
   Replaces " with \" and \ with \\ " and \ characters.
   @param src is the QString to quote.
   @since 4.3
 */
-KIMAP_EXPORT QByteArray quoteIMAP(const QByteArray &src);
+KIMAP2_EXPORT QByteArray quoteIMAP(const QByteArray &src);
 
 /**
   Fetches a Codec by @p name.
   @param name is the QString version of the Codec name.
   @return Text Codec object
 */
-KIMAP_EXPORT QTextCodec *codecForName(const QString &name);
+KIMAP2_EXPORT QTextCodec *codecForName(const QString &name);
 
 /**
   Decodes a RFC2047 string @p str.
@@ -95,7 +95,7 @@ KIMAP_EXPORT QTextCodec *codecForName(const QString &name);
   @param charset is the character set to use when decoding.
   @param language is the language found in the charset.
 */
-KIMAP_EXPORT const QString decodeRFC2047String(const QString &str,
+KIMAP2_EXPORT const QString decodeRFC2047String(const QString &str,
         QString &charset,
         QString &language);
 /**
@@ -103,38 +103,38 @@ KIMAP_EXPORT const QString decodeRFC2047String(const QString &str,
   @param str is the QString to decode.
   @param charset is the character set to use when decoding.
 */
-KIMAP_EXPORT const QString decodeRFC2047String(const QString &str,
+KIMAP2_EXPORT const QString decodeRFC2047String(const QString &str,
         QString &charset);
 
 /**
   Decodes a RFC2047 string @p str.
   @param str is the QString to decode.
 */
-KIMAP_EXPORT const QString decodeRFC2047String(const QString &str);
+KIMAP2_EXPORT const QString decodeRFC2047String(const QString &str);
 
 /**
   Encodes a RFC2047 string @p str.
   @param str is the QString to encode.
 */
-KIMAP_EXPORT const QString encodeRFC2047String(const QString &str);
+KIMAP2_EXPORT const QString encodeRFC2047String(const QString &str);
 
 /**
   Encodes a RFC2047 string @p str.
   @param str is the QString to encode.
 */
-KIMAP_EXPORT const QByteArray encodeRFC2047String(const QByteArray &str);
+KIMAP2_EXPORT const QByteArray encodeRFC2047String(const QByteArray &str);
 
 /**
   Encodes a RFC2231 string @p str.
   @param str is the QString to encode.
 */
-KIMAP_EXPORT const QString encodeRFC2231String(const QString &str);
+KIMAP2_EXPORT const QString encodeRFC2231String(const QString &str);
 
 /**
   Decodes a RFC2231 string @p str.
   @param str is the QString to decode.
 */
-KIMAP_EXPORT const QString decodeRFC2231String(const QString &str);
+KIMAP2_EXPORT const QString decodeRFC2231String(const QString &str);
 }
 
 #endif

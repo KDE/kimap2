@@ -26,7 +26,7 @@
 
 //TODO: when custom error codes are introduced, handle the NO [TRYCREATE] response
 
-namespace KIMAP
+namespace KIMAP2
 {
 class CopyJobPrivate : public JobPrivate
 {
@@ -41,7 +41,7 @@ public:
 };
 }
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 CopyJob::CopyJob(Session *session)
     : Job(*new CopyJobPrivate(session, "Copy"))
@@ -101,7 +101,7 @@ void CopyJob::doStart()
     Q_D(CopyJob);
 
     QByteArray parameters = d->set.toImapSequenceSet() + ' ';
-    parameters += '\"' + KIMAP::encodeImapFolderName(d->mailBox.toUtf8()) + '\"';
+    parameters += '\"' + KIMAP2::encodeImapFolderName(d->mailBox.toUtf8()) + '\"';
 
     QByteArray command = "COPY";
     if (d->uidBased) {

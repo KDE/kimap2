@@ -22,7 +22,7 @@
 #include "message_p.h"
 #include "session_p.h"
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 void AclJobBasePrivate::setIdentifier(const QByteArray &identifier)
 {

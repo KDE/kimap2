@@ -18,7 +18,7 @@
 
 #include <qtest.h>
 
-#include "kimaptest/fakeserver.h"
+#include "kimap2test/fakeserver.h"
 #include "kimap/session.h"
 #include "kimap/setmetadatajob.h"
 
@@ -100,10 +100,10 @@ private Q_SLOTS:
         fakeServer.setScenario(scenario);
         fakeServer.startAndWait();
 
-        KIMAP::Session session(QStringLiteral("127.0.0.1"), 5989);
+        KIMAP2::Session session(QStringLiteral("127.0.0.1"), 5989);
 
-        KIMAP::SetMetaDataJob *setMetadataJob = new KIMAP::SetMetaDataJob(&session);
-        setMetadataJob->setServerCapability(KIMAP::MetaDataJobBase::Metadata);
+        KIMAP2::SetMetaDataJob *setMetadataJob = new KIMAP2::SetMetaDataJob(&session);
+        setMetadataJob->setServerCapability(KIMAP2::MetaDataJobBase::Metadata);
         setMetadataJob->setMailBox(mailbox);
         foreach (const QByteArray &entry, annotations.keys()) {
             setMetadataJob->addMetaData(entry, annotations[entry]);
@@ -145,10 +145,10 @@ private Q_SLOTS:
         fakeServer.setScenario(scenario);
         fakeServer.startAndWait();
 
-        KIMAP::Session session(QStringLiteral("127.0.0.1"), 5989);
+        KIMAP2::Session session(QStringLiteral("127.0.0.1"), 5989);
 
-        KIMAP::SetMetaDataJob *setMetadataJob = new KIMAP::SetMetaDataJob(&session);
-        setMetadataJob->setServerCapability(KIMAP::MetaDataJobBase::Annotatemore);
+        KIMAP2::SetMetaDataJob *setMetadataJob = new KIMAP2::SetMetaDataJob(&session);
+        setMetadataJob->setServerCapability(KIMAP2::MetaDataJobBase::Annotatemore);
         setMetadataJob->setMailBox(mailbox);
         foreach (const QByteArray &entry, annotations.keys()) {
             if (legacyMode) {

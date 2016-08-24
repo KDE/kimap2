@@ -17,14 +17,14 @@
     02110-1301, USA.
 */
 
-#ifndef KIMAP_DELETEACLJOB_H
-#define KIMAP_DELETEACLJOB_H
+#ifndef KIMAP2_DELETEACLJOB_H
+#define KIMAP2_DELETEACLJOB_H
 
-#include "kimap_export.h"
+#include "kimap2_export.h"
 
 #include "acljobbase.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 
 class Session;
@@ -45,7 +45,7 @@ class DeleteAclJobPrivate;
  * capability, defined in
  * <a href="http://www.apps.ietf.org/rfc/rfc4314.html">RFC 4314</a>.
  */
-class KIMAP_EXPORT DeleteAclJob : public AclJobBase
+class KIMAP2_EXPORT DeleteAclJob : public AclJobBase
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(DeleteAclJob)

@@ -17,14 +17,14 @@
     02110-1301, USA.
 */
 
-#ifndef KIMAP_CAPABILITIESJOB_H
-#define KIMAP_CAPABILITIESJOB_H
+#ifndef KIMAP2_CAPABILITIESJOB_H
+#define KIMAP2_CAPABILITIESJOB_H
 
-#include "kimap_export.h"
+#include "kimap2_export.h"
 
 #include "job.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 
 class Session;
@@ -43,7 +43,7 @@ class CapabilitiesJobPrivate;
  * it does not implement properly, or it may omit a feature
  * that it does, in reality, support.
  */
-class KIMAP_EXPORT CapabilitiesJob : public Job
+class KIMAP2_EXPORT CapabilitiesJob : public Job
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(CapabilitiesJob)

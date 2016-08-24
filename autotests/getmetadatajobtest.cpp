@@ -18,7 +18,7 @@
 
 #include <qtest.h>
 
-#include "kimaptest/fakeserver.h"
+#include "kimap2test/fakeserver.h"
 #include "kimap/session.h"
 #include "kimap/getmetadatajob.h"
 
@@ -87,12 +87,12 @@ private Q_SLOTS:
         fakeServer.setScenario(scenario);
         fakeServer.startAndWait();
 
-        KIMAP::Session session(QLatin1String("127.0.0.1"), 5989);
+        KIMAP2::Session session(QLatin1String("127.0.0.1"), 5989);
 
-        KIMAP::GetMetaDataJob *getMetadataJob = new KIMAP::GetMetaDataJob(&session);
-        getMetadataJob->setServerCapability(KIMAP::MetaDataJobBase::Metadata);
+        KIMAP2::GetMetaDataJob *getMetadataJob = new KIMAP2::GetMetaDataJob(&session);
+        getMetadataJob->setServerCapability(KIMAP2::MetaDataJobBase::Metadata);
         getMetadataJob->setMailBox(mailbox);
-        getMetadataJob->setDepth(KIMAP::GetMetaDataJob::AllLevels);
+        getMetadataJob->setDepth(KIMAP2::GetMetaDataJob::AllLevels);
         getMetadataJob->addRequestedEntry("/shared");
 
         QVERIFY(getMetadataJob->exec());
@@ -138,89 +138,89 @@ private Q_SLOTS:
         fakeServer.setScenario(scenario);
         fakeServer.startAndWait();
 
-        KIMAP::Session session(QLatin1String("127.0.0.1"), 5989);
+        KIMAP2::Session session(QLatin1String("127.0.0.1"), 5989);
 
         //C: A000001 GETMETADATA "Folder1" (/shared)
-        KIMAP::GetMetaDataJob *getMetadataJob = new KIMAP::GetMetaDataJob(&session);
-        getMetadataJob->setServerCapability(KIMAP::MetaDataJobBase::Metadata);
+        KIMAP2::GetMetaDataJob *getMetadataJob = new KIMAP2::GetMetaDataJob(&session);
+        getMetadataJob->setServerCapability(KIMAP2::MetaDataJobBase::Metadata);
         getMetadataJob->setMailBox(QLatin1String("Folder1"));
         getMetadataJob->addRequestedEntry("/shared");
-        getMetadataJob->setDepth(KIMAP::GetMetaDataJob::NoDepth);
+        getMetadataJob->setDepth(KIMAP2::GetMetaDataJob::NoDepth);
         QVERIFY(getMetadataJob->exec());
 
         QCOMPARE(getMetadataJob->allMetaData(QLatin1String("Folder1")).size(), 0);
 
         //C: A000002 GETMETADATA "Folder1" (DEPTH 1) (/shared)
-        getMetadataJob = new KIMAP::GetMetaDataJob(&session);
-        getMetadataJob->setServerCapability(KIMAP::MetaDataJobBase::Metadata);
+        getMetadataJob = new KIMAP2::GetMetaDataJob(&session);
+        getMetadataJob->setServerCapability(KIMAP2::MetaDataJobBase::Metadata);
         getMetadataJob->setMailBox(QLatin1String("Folder1"));
         getMetadataJob->addRequestedEntry("/shared");
-        getMetadataJob->setDepth(KIMAP::GetMetaDataJob::OneLevel);
+        getMetadataJob->setDepth(KIMAP2::GetMetaDataJob::OneLevel);
         QVERIFY(getMetadataJob->exec());
 
         //C: A000003 GETMETADATA "Folder1" (MAXSIZE 1234) (/shared)
-        getMetadataJob = new KIMAP::GetMetaDataJob(&session);
-        getMetadataJob->setServerCapability(KIMAP::MetaDataJobBase::Metadata);
+        getMetadataJob = new KIMAP2::GetMetaDataJob(&session);
+        getMetadataJob->setServerCapability(KIMAP2::MetaDataJobBase::Metadata);
         getMetadataJob->setMailBox(QLatin1String("Folder1"));
         getMetadataJob->addRequestedEntry("/shared");
-        getMetadataJob->setDepth(KIMAP::GetMetaDataJob::NoDepth);
+        getMetadataJob->setDepth(KIMAP2::GetMetaDataJob::NoDepth);
         getMetadataJob->setMaximumSize(1234);
         QVERIFY(getMetadataJob->exec());
 
         //C: A000004 GETMETADATA "Folder1" (DEPTH 1) (MAXSIZE 1234) (/shared)
-        getMetadataJob = new KIMAP::GetMetaDataJob(&session);
-        getMetadataJob->setServerCapability(KIMAP::MetaDataJobBase::Metadata);
+        getMetadataJob = new KIMAP2::GetMetaDataJob(&session);
+        getMetadataJob->setServerCapability(KIMAP2::MetaDataJobBase::Metadata);
         getMetadataJob->setMailBox(QLatin1String("Folder1"));
         getMetadataJob->addRequestedEntry("/shared");
-        getMetadataJob->setDepth(KIMAP::GetMetaDataJob::OneLevel);
+        getMetadataJob->setDepth(KIMAP2::GetMetaDataJob::OneLevel);
         getMetadataJob->setMaximumSize(1234);
         QVERIFY(getMetadataJob->exec());
 
         //C: A000005 GETMETADATA "Folder1" (DEPTH 1) (MAXSIZE 1234) (/shared /shared2)
-        getMetadataJob = new KIMAP::GetMetaDataJob(&session);
-        getMetadataJob->setServerCapability(KIMAP::MetaDataJobBase::Metadata);
+        getMetadataJob = new KIMAP2::GetMetaDataJob(&session);
+        getMetadataJob->setServerCapability(KIMAP2::MetaDataJobBase::Metadata);
         getMetadataJob->setMailBox(QLatin1String("Folder1"));
         getMetadataJob->addRequestedEntry("/shared");
         getMetadataJob->addRequestedEntry("/shared2");
-        getMetadataJob->setDepth(KIMAP::GetMetaDataJob::OneLevel);
+        getMetadataJob->setDepth(KIMAP2::GetMetaDataJob::OneLevel);
         getMetadataJob->setMaximumSize(1234);
         QVERIFY(getMetadataJob->exec());
 
         //C: A000006 GETMETADATA "Folder1" (DEPTH 1) (MAXSIZE 1234)
-        getMetadataJob = new KIMAP::GetMetaDataJob(&session);
-        getMetadataJob->setServerCapability(KIMAP::MetaDataJobBase::Metadata);
+        getMetadataJob = new KIMAP2::GetMetaDataJob(&session);
+        getMetadataJob->setServerCapability(KIMAP2::MetaDataJobBase::Metadata);
         getMetadataJob->setMailBox(QLatin1String("Folder1"));
-        getMetadataJob->setDepth(KIMAP::GetMetaDataJob::OneLevel);
+        getMetadataJob->setDepth(KIMAP2::GetMetaDataJob::OneLevel);
         getMetadataJob->setMaximumSize(1234);
         QVERIFY(getMetadataJob->exec());
 
         //C: A000007 GETMETADATA "Folder1" (DEPTH 1)
-        getMetadataJob = new KIMAP::GetMetaDataJob(&session);
-        getMetadataJob->setServerCapability(KIMAP::MetaDataJobBase::Metadata);
+        getMetadataJob = new KIMAP2::GetMetaDataJob(&session);
+        getMetadataJob->setServerCapability(KIMAP2::MetaDataJobBase::Metadata);
         getMetadataJob->setMailBox(QLatin1String("Folder1"));
-        getMetadataJob->setDepth(KIMAP::GetMetaDataJob::OneLevel);
+        getMetadataJob->setDepth(KIMAP2::GetMetaDataJob::OneLevel);
         QVERIFY(getMetadataJob->exec());
 
         //C: A000008 GETMETADATA "Folder1" (MAXSIZE 1234)
-        getMetadataJob = new KIMAP::GetMetaDataJob(&session);
-        getMetadataJob->setServerCapability(KIMAP::MetaDataJobBase::Metadata);
+        getMetadataJob = new KIMAP2::GetMetaDataJob(&session);
+        getMetadataJob->setServerCapability(KIMAP2::MetaDataJobBase::Metadata);
         getMetadataJob->setMailBox(QLatin1String("Folder1"));
-        getMetadataJob->setDepth(KIMAP::GetMetaDataJob::NoDepth);
+        getMetadataJob->setDepth(KIMAP2::GetMetaDataJob::NoDepth);
         getMetadataJob->setMaximumSize(1234);
         QVERIFY(getMetadataJob->exec());
 
         //C: A000009 GETMETADATA "Folder1"
-        getMetadataJob = new KIMAP::GetMetaDataJob(&session);
-        getMetadataJob->setServerCapability(KIMAP::MetaDataJobBase::Metadata);
+        getMetadataJob = new KIMAP2::GetMetaDataJob(&session);
+        getMetadataJob->setServerCapability(KIMAP2::MetaDataJobBase::Metadata);
         getMetadataJob->setMailBox(QLatin1String("Folder1"));
-        getMetadataJob->setDepth(KIMAP::GetMetaDataJob::NoDepth);
+        getMetadataJob->setDepth(KIMAP2::GetMetaDataJob::NoDepth);
         QVERIFY(getMetadataJob->exec());
 
         //C: A000010 GETMETADATA ""
-        getMetadataJob = new KIMAP::GetMetaDataJob(&session);
-        getMetadataJob->setServerCapability(KIMAP::MetaDataJobBase::Metadata);
+        getMetadataJob = new KIMAP2::GetMetaDataJob(&session);
+        getMetadataJob->setServerCapability(KIMAP2::MetaDataJobBase::Metadata);
         getMetadataJob->setMailBox(QLatin1String(""));
-        getMetadataJob->setDepth(KIMAP::GetMetaDataJob::NoDepth);
+        getMetadataJob->setDepth(KIMAP2::GetMetaDataJob::NoDepth);
         QVERIFY(getMetadataJob->exec());
 
         QVERIFY(fakeServer.isAllScenarioDone());
@@ -273,10 +273,10 @@ private Q_SLOTS:
         fakeServer.setScenario(scenario);
         fakeServer.startAndWait();
 
-        KIMAP::Session session(QLatin1String("127.0.0.1"), 5989);
+        KIMAP2::Session session(QLatin1String("127.0.0.1"), 5989);
 
-        KIMAP::GetMetaDataJob *getMetadataJob = new KIMAP::GetMetaDataJob(&session);
-        getMetadataJob->setServerCapability(KIMAP::MetaDataJobBase::Annotatemore);
+        KIMAP2::GetMetaDataJob *getMetadataJob = new KIMAP2::GetMetaDataJob(&session);
+        getMetadataJob->setServerCapability(KIMAP2::MetaDataJobBase::Annotatemore);
         getMetadataJob->setMailBox(mailbox);
         getMetadataJob->addRequestedEntry(entry);
 
@@ -307,19 +307,19 @@ private Q_SLOTS:
         fakeServer.setScenario(scenario);
         fakeServer.startAndWait();
 
-        KIMAP::Session session(QLatin1String("127.0.0.1"), 5989);
+        KIMAP2::Session session(QLatin1String("127.0.0.1"), 5989);
 
         //C: A000001 GETANNOTATION "Folder1"
-        KIMAP::GetMetaDataJob *getMetadataJob = new KIMAP::GetMetaDataJob(&session);
-        getMetadataJob->setServerCapability(KIMAP::MetaDataJobBase::Annotatemore);
+        KIMAP2::GetMetaDataJob *getMetadataJob = new KIMAP2::GetMetaDataJob(&session);
+        getMetadataJob->setServerCapability(KIMAP2::MetaDataJobBase::Annotatemore);
         getMetadataJob->setMailBox(QLatin1String("Folder1"));
         QVERIFY(getMetadataJob->exec());
 
         QCOMPARE(getMetadataJob->allMetaData(QLatin1String("Folder1")).size(), 0);
 
         //C: A000002 GETANNOTATION "Folder1" ("/comment" "/motd") ("value.shared" "value.priv")
-        getMetadataJob = new KIMAP::GetMetaDataJob(&session);
-        getMetadataJob->setServerCapability(KIMAP::MetaDataJobBase::Annotatemore);
+        getMetadataJob = new KIMAP2::GetMetaDataJob(&session);
+        getMetadataJob->setServerCapability(KIMAP2::MetaDataJobBase::Annotatemore);
         getMetadataJob->setMailBox(QLatin1String("Folder1"));
         getMetadataJob->addRequestedEntry("/shared/comment");
         getMetadataJob->addRequestedEntry("/private/motd");
@@ -343,19 +343,19 @@ private Q_SLOTS:
         fakeServer.setScenario(scenario);
         fakeServer.startAndWait();
 
-        KIMAP::Session session(QStringLiteral("127.0.0.1"), 5989);
+        KIMAP2::Session session(QStringLiteral("127.0.0.1"), 5989);
 
         //C: A000001 GETANNOTATION "Folder1" ("/comment" "/motd") "value.shared"
-        KIMAP::GetMetaDataJob *getMetadataJob = new KIMAP::GetMetaDataJob( &session);
-        getMetadataJob->setServerCapability(KIMAP::MetaDataJobBase::Annotatemore);
+        KIMAP2::GetMetaDataJob *getMetadataJob = new KIMAP2::GetMetaDataJob( &session);
+        getMetadataJob->setServerCapability(KIMAP2::MetaDataJobBase::Annotatemore);
         getMetadataJob->setMailBox(QStringLiteral("Folder1"));
         getMetadataJob->addRequestedEntry("/shared/comment");
         getMetadataJob->addRequestedEntry("/shared/motd");
         QVERIFY(getMetadataJob->exec());
 
         //C: A000002 GETANNOTATION "Folder1" ("/comment") ("value.shared" "value.priv")
-        getMetadataJob = new KIMAP::GetMetaDataJob(&session);
-        getMetadataJob->setServerCapability(KIMAP::MetaDataJobBase::Annotatemore);
+        getMetadataJob = new KIMAP2::GetMetaDataJob(&session);
+        getMetadataJob->setServerCapability(KIMAP2::MetaDataJobBase::Annotatemore);
         getMetadataJob->setMailBox(QStringLiteral("Folder1"));
         getMetadataJob->addRequestedEntry("/shared/comment");
         getMetadataJob->addRequestedEntry("/private/comment");

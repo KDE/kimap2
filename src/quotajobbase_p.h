@@ -17,8 +17,8 @@
     02110-1301, USA.
 */
 
-#ifndef KIMAP_QUOTAJOBBASE_P_H
-#define KIMAP_QUOTAJOBBASE_P_H
+#ifndef KIMAP2_QUOTAJOBBASE_P_H
+#define KIMAP2_QUOTAJOBBASE_P_H
 
 #include "job_p.h"
 #include "message_p.h"
@@ -26,7 +26,7 @@
 
 #include <QMap>
 
-namespace KIMAP
+namespace KIMAP2
 {
 class QuotaJobBasePrivate : public JobPrivate
 {

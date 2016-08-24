@@ -26,7 +26,7 @@
 #include <ctype.h>
 #include <QIODevice>
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 ImapStreamParser::ImapStreamParser(QIODevice *socket, bool serverModeEnabled)
 {

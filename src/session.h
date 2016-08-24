@@ -17,23 +17,23 @@
     02110-1301, USA.
 */
 
-#ifndef KIMAP_SESSION_H
-#define KIMAP_SESSION_H
+#ifndef KIMAP2_SESSION_H
+#define KIMAP2_SESSION_H
 
-#include "kimap_export.h"
+#include "kimap2_export.h"
 
 #include <QtCore/QObject>
 #include <QtNetwork/QSsl>
 #include <QtNetwork/QSslSocket>
 
-namespace KIMAP
+namespace KIMAP2
 {
 
 class SessionPrivate;
 class JobPrivate;
 struct Message;
 
-class KIMAP_EXPORT Session : public QObject
+class KIMAP2_EXPORT Session : public QObject
 {
     Q_OBJECT
     Q_ENUMS(State)
@@ -101,12 +101,12 @@ Q_SIGNALS:
       Emitted when the session's state changes.
 
       You can use this signal to detect a connection loss (ie: stateChanged is emitted with newState
-      == KIMAP::Session::Disconnected)
+      == KIMAP2::Session::Disconnected)
 
       If you want to receive the stateChanged arguments in your slot, you must register the State
-      enum with @c Q_DECLARE_METATYPE(KIMAP::Session::State) and @c qRegisterMetaType<KIMAP::Session::State>();
+      enum with @c Q_DECLARE_METATYPE(KIMAP2::Session::State) and @c qRegisterMetaType<KIMAP2::Session::State>();
     */
-    void stateChanged(KIMAP::Session::State newState, KIMAP::Session::State oldState);
+    void stateChanged(KIMAP2::Session::State newState, KIMAP2::Session::State oldState);
 
 private:
     friend class SessionPrivate;

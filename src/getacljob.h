@@ -17,14 +17,14 @@
     02110-1301, USA.
 */
 
-#ifndef KIMAP_GETACLJOB_H
-#define KIMAP_GETACLJOB_H
+#ifndef KIMAP2_GETACLJOB_H
+#define KIMAP2_GETACLJOB_H
 
-#include "kimap_export.h"
+#include "kimap2_export.h"
 
 #include "acljobbase.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 
 class Session;
@@ -60,7 +60,7 @@ class GetAclJobPrivate;
  * "fred" and "-fred" are both assigned the 'w' right, the
  * user "fred" will not have the 'w' right.
  */
-class KIMAP_EXPORT GetAclJob : public AclJobBase
+class KIMAP2_EXPORT GetAclJob : public AclJobBase
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(GetAclJob)

@@ -24,7 +24,7 @@
 #include "session_p.h"
 #include "rfccodecs.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 class DeleteJobPrivate : public JobPrivate
 {
@@ -36,7 +36,7 @@ public:
 };
 }
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 DeleteJob::DeleteJob(Session *session)
     : Job(*new DeleteJobPrivate(session, "Delete"))
@@ -50,7 +50,7 @@ DeleteJob::~DeleteJob()
 void DeleteJob::doStart()
 {
     Q_D(DeleteJob);
-    d->tags << d->sessionInternal()->sendCommand("DELETE", '\"' + KIMAP::encodeImapFolderName(d->mailBox.toUtf8()) + '\"');
+    d->tags << d->sessionInternal()->sendCommand("DELETE", '\"' + KIMAP2::encodeImapFolderName(d->mailBox.toUtf8()) + '\"');
 }
 
 void DeleteJob::setMailBox(const QString &mailBox)

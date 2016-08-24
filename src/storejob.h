@@ -17,15 +17,15 @@
     02110-1301, USA.
 */
 
-#ifndef KIMAP_STOREJOB_H
-#define KIMAP_STOREJOB_H
+#ifndef KIMAP2_STOREJOB_H
+#define KIMAP2_STOREJOB_H
 
-#include "kimap_export.h"
+#include "kimap2_export.h"
 
 #include "job.h"
 #include "imapset.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 
 class Session;
@@ -34,7 +34,7 @@ class StoreJobPrivate;
 
 typedef QList<QByteArray> MessageFlags;
 
-class KIMAP_EXPORT StoreJob : public Job
+class KIMAP2_EXPORT StoreJob : public Job
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(StoreJob)

@@ -21,7 +21,7 @@
 
 #include <qtest.h>
 
-#include "kimaptest/fakeserver.h"
+#include "kimap2test/fakeserver.h"
 #include "kimap/session.h"
 #include "kimap/storejob.h"
 
@@ -74,13 +74,13 @@ private Q_SLOTS:
         fakeServer.setScenario(scenario);
         fakeServer.startAndWait();
 
-        KIMAP::Session session(QStringLiteral("127.0.0.1"), 5989);
+        KIMAP2::Session session(QStringLiteral("127.0.0.1"), 5989);
 
-        KIMAP::StoreJob *job = new KIMAP::StoreJob(&session);
+        KIMAP2::StoreJob *job = new KIMAP2::StoreJob(&session);
         job->setUidBased(uidBased);
-        job->setSequenceSet(KIMAP::ImapSet(uidBased ? uid : id));
+        job->setSequenceSet(KIMAP2::ImapSet(uidBased ? uid : id));
         job->setFlags(flags);
-        job->setMode(KIMAP::StoreJob::SetFlags);
+        job->setMode(KIMAP2::StoreJob::SetFlags);
         bool result = job->exec();
         QVERIFY(result);
         if (uidBased) {

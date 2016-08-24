@@ -17,10 +17,10 @@
     02110-1301, USA.
 */
 
-#ifndef KIMAP_FETCHJOB_H
-#define KIMAP_FETCHJOB_H
+#ifndef KIMAP2_FETCHJOB_H
+#define KIMAP2_FETCHJOB_H
 
-#include "kimap_export.h"
+#include "kimap2_export.h"
 
 #include "imapset.h"
 #include "job.h"
@@ -28,7 +28,7 @@
 #include <kmime/kmime_content.h>
 #include <kmime/kmime_message.h>
 
-namespace KIMAP
+namespace KIMAP2
 {
 
 class Session;
@@ -54,7 +54,7 @@ typedef QPair<QByteArray, QVariant> MessageAttribute;
  *
  * This job can only be run when the session is in the selected state.
  */
-class KIMAP_EXPORT FetchJob : public Job
+class KIMAP2_EXPORT FetchJob : public Job
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(FetchJob)
@@ -69,7 +69,7 @@ public:
      * what is fetched that the IMAP FETCH command normally
      * does, but the common cases are catered for.
      */
-    class KIMAP_EXPORT FetchScope
+    class KIMAP2_EXPORT FetchScope
     {
     public:
         FetchScope();
@@ -247,15 +247,15 @@ public:
 
     // XXX: [alexmerry, 2010-07-24]: BIC?  Behaviour change
     /** @deprecated returns an empty map; use the signals instead */
-    KIMAP_DEPRECATED QMap<qint64, MessagePtr> messages() const;
+    KIMAP2_DEPRECATED QMap<qint64, MessagePtr> messages() const;
     /** @deprecated returns an empty map; use the signals instead */
-    KIMAP_DEPRECATED QMap<qint64, MessageParts> parts() const;
+    KIMAP2_DEPRECATED QMap<qint64, MessageParts> parts() const;
     /** @deprecated returns an empty map; use the signals instead */
-    KIMAP_DEPRECATED QMap<qint64, MessageFlags> flags() const;
+    KIMAP2_DEPRECATED QMap<qint64, MessageFlags> flags() const;
     /** @deprecated returns an empty map; use the signals instead */
-    KIMAP_DEPRECATED QMap<qint64, qint64> sizes() const;
+    KIMAP2_DEPRECATED QMap<qint64, qint64> sizes() const;
     /** @deprecated returns an empty map; use the signals instead */
-    KIMAP_DEPRECATED QMap<qint64, qint64> uids() const;
+    KIMAP2_DEPRECATED QMap<qint64, qint64> uids() const;
 
 Q_SIGNALS:
     /**
@@ -291,8 +291,8 @@ Q_SIGNALS:
     void headersReceived(const QString &mailBox,
                          const QMap<qint64, qint64> &uids,
                          const QMap<qint64, qint64> &sizes,
-                         const QMap<qint64, KIMAP::MessageFlags> &flags,
-                         const QMap<qint64, KIMAP::MessagePtr> &messages);
+                         const QMap<qint64, KIMAP2::MessageFlags> &flags,
+                         const QMap<qint64, KIMAP2::MessagePtr> &messages);
 
     /**
      * An overloaded version of headersReceived(), which includes additional attribute
@@ -322,9 +322,9 @@ Q_SIGNALS:
     void headersReceived(const QString &mailBox,
                          const QMap<qint64, qint64> &uids,
                          const QMap<qint64, qint64> &sizes,
-                         const QMap<qint64, KIMAP::MessageAttribute > &attrs,
-                         const QMap<qint64, KIMAP::MessageFlags> &flags,
-                         const QMap<qint64, KIMAP::MessagePtr> &messages);
+                         const QMap<qint64, KIMAP2::MessageAttribute > &attrs,
+                         const QMap<qint64, KIMAP2::MessageFlags> &flags,
+                         const QMap<qint64, KIMAP2::MessagePtr> &messages);
 
     /**
      * Provides header and message results.
@@ -346,7 +346,7 @@ Q_SIGNALS:
      */
     void messagesReceived(const QString &mailBox,
                           const QMap<qint64, qint64> &uids,
-                          const QMap<qint64, KIMAP::MessagePtr> &messages);
+                          const QMap<qint64, KIMAP2::MessagePtr> &messages);
 
     /**
      * An overloaded version of messagesReceived(), which includes additional attribute
@@ -365,8 +365,8 @@ Q_SIGNALS:
      */
     void messagesReceived(const QString &mailBox,
                           const QMap<qint64, qint64> &uids,
-                          const QMap<qint64, KIMAP::MessageAttribute > &attrs,
-                          const QMap<qint64, KIMAP::MessagePtr> &messages);
+                          const QMap<qint64, KIMAP2::MessageAttribute > &attrs,
+                          const QMap<qint64, KIMAP2::MessagePtr> &messages);
     /**
      * Provides header and message results.
      *
@@ -386,7 +386,7 @@ Q_SIGNALS:
      */
     void partsReceived(const QString &mailBox,
                        const QMap<qint64, qint64> &uids,
-                       const QMap<qint64, KIMAP::MessageParts> &parts);
+                       const QMap<qint64, KIMAP2::MessageParts> &parts);
 
     /**
       * An overloaded version of partsReceived(), which includes additional attribute
@@ -404,8 +404,8 @@ Q_SIGNALS:
       */
     void partsReceived(const QString &mailBox,
                        const QMap<qint64, qint64> &uids,
-                       const QMap<qint64, KIMAP::MessageAttribute > &attrs,
-                       const QMap<qint64, KIMAP::MessageParts> &parts);
+                       const QMap<qint64, KIMAP2::MessageAttribute > &attrs,
+                       const QMap<qint64, KIMAP2::MessageParts> &parts);
 
 protected:
     void doStart() Q_DECL_OVERRIDE;

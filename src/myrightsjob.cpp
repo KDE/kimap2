@@ -24,7 +24,7 @@
 #include "session_p.h"
 #include "rfccodecs.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 class MyRightsJobPrivate : public AclJobBasePrivate
 {
@@ -36,7 +36,7 @@ public:
 };
 }
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 MyRightsJob::MyRightsJob(Session *session)
     : AclJobBase(*new MyRightsJobPrivate(session, "MyRights"))
@@ -51,7 +51,7 @@ void MyRightsJob::doStart()
 {
     Q_D(MyRightsJob);
 
-    d->tags << d->sessionInternal()->sendCommand("MYRIGHTS", '\"' + KIMAP::encodeImapFolderName(d->mailBox.toUtf8()) + '\"');
+    d->tags << d->sessionInternal()->sendCommand("MYRIGHTS", '\"' + KIMAP2::encodeImapFolderName(d->mailBox.toUtf8()) + '\"');
 }
 
 void MyRightsJob::handleResponse(const Message &response)

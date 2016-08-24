@@ -17,14 +17,14 @@
     02110-1301, USA.
 */
 
-#ifndef KIMAP_GETMETADATAJOB_H
-#define KIMAP_GETMETADATAJOB_H
+#ifndef KIMAP2_GETMETADATAJOB_H
+#define KIMAP2_GETMETADATAJOB_H
 
-#include "kimap_export.h"
+#include "kimap2_export.h"
 
 #include "metadatajobbase.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 
 class Session;
@@ -59,7 +59,7 @@ class GetMetaDataJobPrivate;
  * version of the extension, only Acl::Lookup rights are
  * required (ie: the user must be able to list the mailbox).
  */
-class KIMAP_EXPORT GetMetaDataJob : public MetaDataJobBase
+class KIMAP2_EXPORT GetMetaDataJob : public MetaDataJobBase
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(GetMetaDataJob)
@@ -96,7 +96,7 @@ public:
      *
      * @deprecated use addRequestedEntry(QByteArray) instead
      */
-    KIMAP_DEPRECATED void addEntry(const QByteArray &entry, const QByteArray &attribute = QByteArray());
+    KIMAP2_DEPRECATED void addEntry(const QByteArray &entry, const QByteArray &attribute = QByteArray());
 
     /**
      * Add an entry to the query list.
@@ -174,7 +174,7 @@ public:
      */
     // XXX: what's with the mailBox argument in a class that has setMailBox()?
     //      KJobs are not intended to be run more than once
-    KIMAP_DEPRECATED QByteArray metaData(const QString &mailBox, const QByteArray &entry,
+    KIMAP2_DEPRECATED QByteArray metaData(const QString &mailBox, const QByteArray &entry,
                                          const QByteArray &attribute = QByteArray()) const;
 
     /**

@@ -24,7 +24,7 @@
 #include "session_p.h"
 #include "rfccodecs.h"
 
-namespace KIMAP
+namespace KIMAP2
 {
 class AppendJobPrivate : public JobPrivate
 {
@@ -40,7 +40,7 @@ public:
 };
 }
 
-using namespace KIMAP;
+using namespace KIMAP2;
 
 AppendJob::AppendJob(Session *session)
     : Job(*new AppendJobPrivate(session, "Append"))
@@ -109,7 +109,7 @@ void AppendJob::doStart()
 {
     Q_D(AppendJob);
 
-    QByteArray parameters = '\"' + KIMAP::encodeImapFolderName(d->mailBox.toUtf8()) + '\"';
+    QByteArray parameters = '\"' + KIMAP2::encodeImapFolderName(d->mailBox.toUtf8()) + '\"';
 
     if (!d->flags.isEmpty()) {
         parameters += " (";

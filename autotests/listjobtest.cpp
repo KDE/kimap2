@@ -21,14 +21,14 @@
 
 #include <qtest.h>
 
-#include "kimaptest/fakeserver.h"
+#include "kimap2test/fakeserver.h"
 #include "kimap/session.h"
 #include "kimap/listjob.h"
 
 #include <QtTest>
 #include <QDebug>
 
-Q_DECLARE_METATYPE(QList<KIMAP::MailBoxDescriptor>)
+Q_DECLARE_METATYPE(QList<KIMAP2::MailBoxDescriptor>)
 Q_DECLARE_METATYPE(QList< QList<QByteArray> >)
 
 class ListJobTest: public QObject
@@ -41,7 +41,7 @@ private Q_SLOTS:
     {
         QTest::addColumn<bool>("unsubscribed");
         QTest::addColumn<QList<QByteArray> >("scenario");
-        QTest::addColumn<QList<KIMAP::MailBoxDescriptor> >("listresult");
+        QTest::addColumn<QList<KIMAP2::MailBoxDescriptor> >("listresult");
 
         QList<QByteArray> scenario;
         scenario << FakeServer::preauth()
@@ -51,8 +51,8 @@ private Q_SLOTS:
                  << "S: * LIST ( \\HasChildren ) / INBOX/lost+found"
                  << "S: * LIST ( \\HasNoChildren ) / \"INBOX/lost+found/Calendar Public-20080128\""
                  << "S: A000001 OK LIST completed";
-        KIMAP::MailBoxDescriptor descriptor;
-        QList<KIMAP::MailBoxDescriptor> listresult;
+        KIMAP2::MailBoxDescriptor descriptor;
+        QList<KIMAP2::MailBoxDescriptor> listresult;
 
         descriptor.separator = QLatin1Char('/');
         descriptor.name = QStringLiteral("INBOX");
@@ -194,19 +194,19 @@ private Q_SLOTS:
     {
         QFETCH(bool, unsubscribed);
         QFETCH(QList<QByteArray>, scenario);
-        QFETCH(QList<KIMAP::MailBoxDescriptor>, listresult);
+        QFETCH(QList<KIMAP2::MailBoxDescriptor>, listresult);
 
         FakeServer fakeServer;
         fakeServer.setScenario(scenario);
         fakeServer.startAndWait();
 
-        KIMAP::Session session(QStringLiteral("127.0.0.1"), 5989);
+        KIMAP2::Session session(QStringLiteral("127.0.0.1"), 5989);
 
-        KIMAP::ListJob *job = new KIMAP::ListJob(&session);
+        KIMAP2::ListJob *job = new KIMAP2::ListJob(&session);
         job->setIncludeUnsubscribed(unsubscribed);
 
         QSignalSpy spy(job,
-                       SIGNAL(mailBoxesReceived(const QList<KIMAP::MailBoxDescriptor> &,
+                       SIGNAL(mailBoxesReceived(const QList<KIMAP2::MailBoxDescriptor> &,
                                                 const QList< QList<QByteArray> > &)));
 
         bool result = job->exec();
@@ -215,10 +215,10 @@ private Q_SLOTS:
         QVERIFY(result);
         if (result) {
             QVERIFY(spy.count() > 0);
-            QList<KIMAP::MailBoxDescriptor> mailBoxes;
+            QList<KIMAP2::MailBoxDescriptor> mailBoxes;
 
             for (int i = 0; i < spy.count(); ++i) {
-                mailBoxes += spy.at(i).at(0).value< QList<KIMAP::MailBoxDescriptor> >();
+                mailBoxes += spy.at(i).at(0).value< QList<KIMAP2::MailBoxDescriptor> >();
             }
 
             //qDebug() << mailBoxes.first().name;
