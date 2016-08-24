@@ -42,7 +42,6 @@
 #include "unsubscribejob.h"
 #include "renamejob.h"
 #include "storejob.h"
-#include "sessionuiproxy.h"
 #include "setacljob.h"
 #include "getacljob.h"
 #include "deleteacljob.h"
@@ -52,16 +51,6 @@
 #include "getmetadatajob.h"
 
 using namespace KIMAP;
-
-class UiProxy: public SessionUiProxy
-{
-public:
-    bool ignoreSslError(const KSslErrorUiData &errorData)
-    {
-        Q_UNUSED(errorData);
-        return true;
-    }
-};
 
 void dumpContentHelper(KMime::Content *part, const QString &partId = QString())
 {
@@ -396,8 +385,11 @@ int main(int argc, char **argv)
 
     QCoreApplication app(argc, argv);
     Session session(server, port);
-    UiProxy::Ptr proxy(new UiProxy());
-    session.setUiProxy(proxy);
+
+    QObject::connect(&session, &KIMAP::Session::sslErrors, [&session](const QList<QSslError> &errors) {
+        qWarning() << "Got ssl error: " << errors;
+        session.ignoreErrors(errors);
+    });
 
     qDebug() << "Logging in...";
     LoginJob *login = new LoginJob(&session);

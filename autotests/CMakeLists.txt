@@ -12,18 +12,20 @@ macro(KIMAP_UNIT_TESTS)
     add_executable(${_testname} ${_testname}.cpp)
     add_test(${_testname} ${_testname})
     ecm_mark_as_test(${_testname})
-    target_link_libraries(${_testname} KF5IMAP Qt5::Test kimaptest Qt5::Network)
+    target_link_libraries(${_testname} KF5IMAP Qt5::Test kimaptest Qt5::Network KF5::CoreAddons)
     set_target_properties(${_testname} PROPERTIES COMPILE_FLAGS -DTEST_DATA="\\"${CMAKE_CURRENT_SOURCE_DIR}\\"")
   endforeach()
 endmacro()
 
 ########### automated tests ###############
 
+remove_definitions(-DQT_NO_CAST_FROM_ASCII)
+
 KIMAP_UNIT_TESTS(
   fakeservertest
   testrfccodecs
   testsession
-  # loginjobtest FIXME: test hangs forever
+  loginjobtest
   logoutjobtest
   capabilitiesjobtest
   selectjobtest

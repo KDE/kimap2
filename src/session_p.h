@@ -21,9 +21,8 @@
 #define KIMAP_SESSION_P_H
 
 #include "session.h"
-#include "sessionuiproxy.h"
 
-#include <ktcpsocket.h>
+#include <QtNetwork/QSslSocket>
 
 #include <QtCore/QObject>
 #include <QtCore/QQueue>
@@ -52,10 +51,8 @@ public:
 
     void addJob(Job *job);
     QByteArray sendCommand(const QByteArray &command, const QByteArray &args = QByteArray());
-    void startSsl(const KTcpSocket::SslVersion &version);
+    void startSsl(const QSsl::SslProtocol &version);
     void sendData(const QByteArray &data);
-
-    KTcpSocket::SslVersion negotiatedEncryption() const;
 
     void setSocketTimeout(int ms);
     int socketTimeout() const;
@@ -64,7 +61,7 @@ Q_SIGNALS:
     void encryptionNegotiationResult(bool);
 
 private Q_SLOTS:
-    void onEncryptionNegotiationResult(bool isEncrypted, KTcpSocket::SslVersion sslVersion);
+    void onEncryptionNegotiationResult(bool isEncrypted);
     void onSocketTimeout();
 
     void doStartNext();
@@ -74,10 +71,9 @@ private Q_SLOTS:
 
     void socketConnected();
     void socketDisconnected();
-    void socketError(KTcpSocket::Error);
+    void socketError(QAbstractSocket::SocketError);
     void socketActivity();
-
-    void handleSslError(const KSslErrorUiData &errorData);
+    void handleSslErrors(const QList<QSslError> &errors);
 
 private:
     void startNext();
@@ -95,7 +91,6 @@ private:
 
     SessionLogger *logger;
     SessionThread *thread;
-    SessionUiProxy::Ptr uiProxy;
 
     bool jobRunning;
     Job *currentJob;
@@ -110,8 +105,6 @@ private:
     QByteArray currentMailBox;
     QByteArray upcomingMailBox;
     quint16 tagCount;
-
-    KTcpSocket::SslVersion sslVersion;
 
     int socketTimerInterval;
     QTimer socketTimer;

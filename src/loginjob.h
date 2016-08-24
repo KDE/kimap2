@@ -24,6 +24,7 @@
 #include "kimap_export.h"
 
 #include "job.h"
+#include <QtNetwork/QSsl>
 
 namespace KIMAP
 {
@@ -40,14 +41,6 @@ class KIMAP_EXPORT LoginJob : public Job
     friend class SessionPrivate;
 
 public:
-    enum EncryptionMode {
-        Unencrypted = 0,
-        TlsV1,
-        SslV2,
-        SslV3,
-        SslV3_1,
-        AnySslVersion
-    };
 
     enum AuthenticationMode {
         ClearText = 0,
@@ -62,7 +55,8 @@ public:
     };
 
     enum ErrorCode {
-        ERR_COULD_NOT_CONNECT = KJob::UserDefinedError + 23 // same as in kio
+        ERR_COULD_NOT_CONNECT = KJob::UserDefinedError + 23, // same as in kio
+        ERR_SSL_HANDSHAKE_FAILED = KJob::UserDefinedError + 24
     };
 
     explicit LoginJob(Session *session);
@@ -110,13 +104,13 @@ public:
      * encrypted or not (e.g handshaking failed).
      * @param mode the encryption mode, see EncryptionModes
      */
-    void setEncryptionMode(EncryptionMode mode);
+    void setEncryptionMode(QSsl::SslProtocol mode, bool startTls = false);
 
     /**
       Get the encryption mode.
       @return the currently active encryption mode
     */
-    EncryptionMode encryptionMode();
+    QSsl::SslProtocol encryptionMode();
 
     void setAuthenticationMode(AuthenticationMode mode);
 

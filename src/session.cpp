@@ -22,11 +22,9 @@
 
 #include "session.h"
 #include "session_p.h"
-#include "sessionuiproxy.h"
 
 #include <QtCore/QDebug>
 #include <QtCore/QTimer>
-#include <QtCore/QPointer>
 
 #include "kimap_debug.h"
 
@@ -37,9 +35,9 @@
 #include "sessionthread_p.h"
 #include "rfccodecs.h"
 
-Q_DECLARE_METATYPE(KTcpSocket::SslVersion)
+Q_DECLARE_METATYPE(QSsl::SslProtocol)
 Q_DECLARE_METATYPE(QSslSocket::SslMode)
-static const int _kimap_sslVersionId = qRegisterMetaType<KTcpSocket::SslVersion>();
+static const int _kimap_sslVersionId = qRegisterMetaType<QSsl::SslProtocol>();
 
 using namespace KIMAP;
 
@@ -56,7 +54,7 @@ Session::Session(const QString &hostName, quint16 port, QObject *parent)
 
     d->thread = new SessionThread(hostName, port);
     connect(d->thread, &SessionThread::encryptionNegotiationResult, d, &SessionPrivate::onEncryptionNegotiationResult);
-    connect(d->thread, &SessionThread::sslError, d, &SessionPrivate::handleSslError);
+    connect(d->thread, &SessionThread::sslErrors, d, &SessionPrivate::handleSslErrors);
     connect(d->thread, &SessionThread::socketDisconnected, d, &SessionPrivate::socketDisconnected);
     connect(d->thread, &SessionThread::responseReceived, d, &SessionPrivate::responseReceived);
     connect(d->thread, &SessionThread::socketConnected, d, &SessionPrivate::socketConnected);
@@ -76,16 +74,6 @@ Session::~Session()
     d->socketDisconnected();
     delete d->thread;
     d->thread = Q_NULLPTR;
-}
-
-void Session::setUiProxy(const SessionUiProxy::Ptr &proxy)
-{
-    d->uiProxy = proxy;
-}
-
-void Session::setUiProxy(SessionUiProxy *proxy)
-{
-    setUiProxy(SessionUiProxy::Ptr(proxy));
 }
 
 QString Session::hostName() const
@@ -123,14 +111,9 @@ void KIMAP::Session::close()
     d->thread->closeSocket();
 }
 
-void SessionPrivate::handleSslError(const KSslErrorUiData &errorData)
+void Session::ignoreErrors(const QList<QSslError> &errors)
 {
-    //ignoreSslError is async, so the thread might already be gone when it returns
-    QPointer<SessionThread> _t = thread;
-    const bool ignoreSslError = uiProxy && uiProxy->ignoreSslError(errorData);
-    if (_t) {
-        _t->sslErrorHandlerResponse(ignoreSslError);
-    }
+    d->thread->ignoreErrors(errors);
 }
 
 SessionPrivate::SessionPrivate(Session *session)
@@ -140,7 +123,6 @@ SessionPrivate::SessionPrivate(Session *session)
       logger(Q_NULLPTR),
       currentJob(Q_NULLPTR),
       tagCount(0),
-      sslVersion(KTcpSocket::UnknownSslVersion),
       socketTimerInterval(30000)   // By default timeouts on 30s
 {
 }
@@ -148,6 +130,11 @@ SessionPrivate::SessionPrivate(Session *session)
 SessionPrivate::~SessionPrivate()
 {
     delete logger;
+}
+
+void SessionPrivate::handleSslErrors(const QList<QSslError> &errors)
+{
+    emit q->sslErrors(errors);
 }
 
 void SessionPrivate::addJob(Job *job)
@@ -348,6 +335,7 @@ void SessionPrivate::sendData(const QByteArray &data)
 
 void SessionPrivate::socketConnected()
 {
+    qWarning() << "Socket connected";
     stopSocketTimer();
     isSocketConnected = true;
 
@@ -355,11 +343,8 @@ void SessionPrivate::socketConnected()
     if (!queue.isEmpty()) {
         KIMAP::LoginJob *login = qobject_cast<KIMAP::LoginJob *>(queue.first());
         if (login) {
-            willUseSsl = (login->encryptionMode() == KIMAP::LoginJob::SslV2) ||
-                         (login->encryptionMode() == KIMAP::LoginJob::SslV3) ||
-                         (login->encryptionMode() == KIMAP::LoginJob::SslV3_1) ||
-                         (login->encryptionMode() == KIMAP::LoginJob::AnySslVersion);
-
+            qWarning() << "got a login job";
+            willUseSsl = login->encryptionMode() != QSsl::UnknownProtocol;
             userName = login->userName();
         }
     }
@@ -373,6 +358,10 @@ void SessionPrivate::socketConnected()
 
 void SessionPrivate::socketDisconnected()
 {
+    qWarning() << "Disconnected";
+    if (!isSocketConnected) {
+        return;
+    }
     if (socketTimer.isActive()) {
         stopSocketTimer();
     }
@@ -398,7 +387,7 @@ void SessionPrivate::socketActivity()
     restartSocketTimer();
 }
 
-void SessionPrivate::socketError(KTcpSocket::Error error)
+void SessionPrivate::socketError(QAbstractSocket::SocketError error)
 {
     if (socketTimer.isActive()) {
         stopSocketTimer();
@@ -415,7 +404,7 @@ void SessionPrivate::socketError(KTcpSocket::Error error)
         thread->closeSocket();
     } else {
         emit q->connectionFailed();
-        emit q->connectionLost();    // KDE5: Remove this. We shouldn't emit connectionLost() if we weren't connected in the first place
+        // emit q->connectionLost();    // KDE5: Remove this. We shouldn't emit connectionLost() if we weren't connected in the first place
         clearJobQueue();
     }
 }
@@ -435,7 +424,7 @@ void SessionPrivate::clearJobQueue()
     emit q->jobQueueSizeChanged(0);
 }
 
-void SessionPrivate::startSsl(const KTcpSocket::SslVersion &version)
+void SessionPrivate::startSsl(const QSsl::SslProtocol &version)
 {
     thread->startSsl(version);
 }
@@ -445,19 +434,9 @@ QString Session::selectedMailBox() const
     return QString::fromUtf8(d->currentMailBox);
 }
 
-void SessionPrivate::onEncryptionNegotiationResult(bool isEncrypted, KTcpSocket::SslVersion version)
+void SessionPrivate::onEncryptionNegotiationResult(bool isEncrypted)
 {
-    if (isEncrypted) {
-        sslVersion = version;
-    } else {
-        sslVersion = KTcpSocket::UnknownSslVersion;
-    }
     emit encryptionNegotiationResult(isEncrypted);
-}
-
-KTcpSocket::SslVersion SessionPrivate::negotiatedEncryption() const
-{
-    return sslVersion;
 }
 
 void SessionPrivate::setSocketTimeout(int ms)
@@ -482,6 +461,7 @@ int SessionPrivate::socketTimeout() const
 
 void SessionPrivate::startSocketTimer()
 {
+    // qWarning() << "Starting socket timer: " << socketTimerInterval;
     if (socketTimerInterval < 0) {
         return;
     }
@@ -509,8 +489,10 @@ void SessionPrivate::restartSocketTimer()
 
 void SessionPrivate::onSocketTimeout()
 {
-    qCDebug(KIMAP_LOG) << "Socket timeout!";
-    thread->closeSocket();
+    qWarning() << "Socket timeout!";
+    // thread->closeSocket();
+    thread->abort();
+    socketDisconnected();
 }
 
 void Session::setTimeout(int timeout)

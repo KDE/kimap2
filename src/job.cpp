@@ -66,7 +66,7 @@ void Job::connectionLost()
     emitResult();
 }
 
-void Job::setSocketError(KTcpSocket::Error error)
+void Job::setSocketError(QAbstractSocket::SocketError error)
 {
     Q_D(Job);
     d->m_socketError = error;

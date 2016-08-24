@@ -23,7 +23,7 @@
 #include "kimap_export.h"
 
 #include <KJob>
-#include <ktcpsocket.h>
+#include <QtNetwork/QAbstractSocket>
 
 namespace KIMAP
 {
@@ -51,7 +51,7 @@ private:
     virtual void doStart() = 0;
     virtual void handleResponse(const Message &response);
     virtual void connectionLost();
-    void setSocketError(KTcpSocket::Error);
+    void setSocketError(QAbstractSocket::SocketError);
 
 protected:
     enum HandlerResponse {

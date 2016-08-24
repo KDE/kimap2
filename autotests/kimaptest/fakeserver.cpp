@@ -43,7 +43,7 @@ QByteArray FakeServer::greeting()
     return "S: * OK localhost Test Library server ready";
 }
 
-FakeServer::FakeServer(QObject *parent) : QThread(parent), m_encrypted(false), m_starttls(false)
+FakeServer::FakeServer(QObject *parent) : QThread(parent), m_encrypted(false), m_starttls(false), m_receivedStarttls(false)
 {
     moveToThread(this);
 }
@@ -74,9 +74,9 @@ void FakeServer::dataAvailable()
 
     readClientPart(scenarioNumber);
     writeServerPart(scenarioNumber);
-    if (m_starttls) {
-        m_starttls = false;
         qDebug() << "start tls";
+    if (m_receivedStarttls) {
+        m_receivedStarttls = false;
         static_cast<QSslSocket *>(socket)->startServerEncryption();
     }
 }
@@ -94,16 +94,17 @@ void FakeServer::newConnection()
     writeServerPart(m_clientSockets.size() - 1);
 }
 
-void FakeServer::setEncrypted(QSsl::SslProtocol protocol)
+void FakeServer::setEncrypted(QSsl::SslProtocol protocol, bool startTls)
 {
     m_encrypted = true;
+    m_starttls = startTls;
     m_sslProtocol = protocol;
 }
 
 void FakeServer::run()
 {
     if (m_encrypted) {
-        m_tcpServer = new SslServer(m_sslProtocol);
+        m_tcpServer = new SslServer(m_sslProtocol, m_starttls);
     } else {
         m_tcpServer = new QTcpServer();
     }
@@ -236,7 +237,7 @@ void FakeServer::readClientPart(int scenarioNumber)
         }
         compareReceived(received, expected);
         if (received.contains("STARTTLS")) {
-            m_starttls = true;
+            m_receivedStarttls = true;
         }
     }
 

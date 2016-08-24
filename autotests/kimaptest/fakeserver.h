@@ -131,7 +131,7 @@ public:
     /**
      * Sets the encryption mode used by the server socket.
      */
-    void setEncrypted(QSsl::SslProtocol protocol);
+    void setEncrypted(QSsl::SslProtocol protocol, bool startTls = false);
 
     /**
      * Starts the server and waits for it to be ready
@@ -229,6 +229,7 @@ private:
     QList<KIMAP::ImapStreamParser *> m_clientParsers;
     bool m_encrypted;
     bool m_starttls;
+    bool m_receivedStarttls;
     QSsl::SslProtocol m_sslProtocol;
 };
 

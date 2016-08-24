@@ -76,7 +76,6 @@ private Q_SLOTS:
         QTest::qWait(500);
         QCOMPARE((int)s.state(), (int)KIMAP::Session::Disconnected);
         QCOMPARE(spyFail.count(), 1);
-        QEXPECT_FAIL("", "FIXME KDE5: Don't emit connectionLost() on a failed connection", Continue);
         QCOMPARE(spyLost.count(), 0);
         QCOMPARE(spyState.count(), 0);
 

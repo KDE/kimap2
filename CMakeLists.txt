@@ -29,10 +29,10 @@ ecm_setup_version(${KIMAP_LIB_VERSION} VARIABLE_PREFIX KIMAP
 )
 
 ########### Find packages ###########
+find_package(Qt5 COMPONENTS REQUIRED Core Network)
 find_package(KF5CoreAddons ${KF5_VERSION} CONFIG REQUIRED)
 find_package(KF5I18n ${KF5_VERSION} CONFIG REQUIRED)
-find_package(KF5KIO ${KF5_VERSION} CONFIG REQUIRED)
-
+find_package(KF5Codecs ${KF5_VERSION} CONFIG REQUIRED)
 find_package(KF5Mime ${KMIME_LIBS_VERSION} CONFIG REQUIRED)
 
 find_package(Sasl2)
@@ -45,7 +45,6 @@ set_package_properties(Sasl2 PROPERTIES
 ########### CMake Config Files ###########
 set(CMAKECONFIG_INSTALL_DIR "${KDE_INSTALL_CMAKEPACKAGEDIR}/KF5IMAP")
 add_definitions(-DTRANSLATION_DOMAIN=\"libkimap5\")
-add_definitions("-DQT_NO_CAST_FROM_ASCII -DQT_NO_CAST_TO_ASCII")
 
 ecm_configure_package_config_file(
   "${CMAKE_CURRENT_SOURCE_DIR}/KF5IMAPConfig.cmake.in"

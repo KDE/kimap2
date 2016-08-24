@@ -29,19 +29,8 @@
 #include "logoutjob.h"
 #include "selectjob.h"
 #include "closejob.h"
-#include "sessionuiproxy.h"
 
 using namespace KIMAP;
-
-class UiProxy: public SessionUiProxy
-{
-public:
-    bool ignoreSslError(const KSslErrorUiData &errorData)
-    {
-        Q_UNUSED(errorData);
-        return true;
-    }
-};
 
 int main(int argc, char **argv)
 {
@@ -65,8 +54,11 @@ int main(int argc, char **argv)
 
     QCoreApplication app(argc, argv);
     Session session(server, port);
-    UiProxy *proxy = new UiProxy();
-    session.setUiProxy(UiProxy::Ptr(proxy));
+
+    QObject::connect(&session, &KIMAP::Session::sslErrors, [&session](const QList<QSslError> &errors) {
+        qWarning() << "Got ssl error: " << errors;
+        session.ignoreErrors(errors);
+    });
 
     qDebug() << "Logging in...";
     LoginJob *login = new LoginJob(&session);

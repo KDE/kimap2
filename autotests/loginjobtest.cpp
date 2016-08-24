@@ -27,14 +27,6 @@
 
 #include <QtTest>
 
-class TestUiProxy: public KIMAP::SessionUiProxy
-{
-    virtual bool ignoreSslError(const KSslErrorUiData &)
-    {
-        return true;
-    }
-};
-
 class LoginJobTest: public QObject
 {
     Q_OBJECT
@@ -203,6 +195,7 @@ private Q_SLOTS:
         QTest::addColumn< QList<QByteArray> >("scenario");
         QTest::addColumn< int >("serverEncryption");
         QTest::addColumn< int >("clientEncryption");
+        QTest::addColumn< bool >("startTls");
 
         {
             QList<QByteArray> scenario;
@@ -214,8 +207,9 @@ private Q_SLOTS:
                      << "C: A000003 LOGIN \"user\" \"password\""
                      << "S: A000003 OK";
 
-            //KIMAP ties tlsv1 to starttls
-            QTest::newRow("tlsv1") << scenario << static_cast<int>(QSsl::TlsV1) << static_cast<int>(KIMAP::LoginJob::TlsV1);
+            QTest::newRow("starttls tlsv1.0") << scenario << static_cast<int>(QSsl::TlsV1_0) << static_cast<int>(QSsl::TlsV1_0) << true;
+            QTest::newRow("starttls tlsv1.1") << scenario << static_cast<int>(QSsl::TlsV1_1) << static_cast<int>(QSsl::TlsV1_1) << true;
+            QTest::newRow("starttls tlsv1.2") << scenario << static_cast<int>(QSsl::TlsV1_2) << static_cast<int>(QSsl::TlsV1_2) << true;
         }
         {
             QList<QByteArray> scenario;
@@ -225,12 +219,12 @@ private Q_SLOTS:
                      << "C: A000002 LOGIN \"user\" \"password\""
                      << "S: A000002 OK";
 
-            QTest::newRow("sslv3") << scenario << static_cast<int>(QSsl::SslV3) << static_cast<int>(KIMAP::LoginJob::SslV3);
-            QTest::newRow("sslv2") << scenario << static_cast<int>(QSsl::SslV2) << static_cast<int>(KIMAP::LoginJob::SslV2);
-            //AnySslVersion doesn't mean the server can force a specific version (e.g. openssl always starts with a sslv2 hello)
-            QTest::newRow("any protocol with anyssl version") << scenario << static_cast<int>(QSsl::AnyProtocol) << static_cast<int>(KIMAP::LoginJob::AnySslVersion);
-            //KIMAP and KTcpSocket use SslV3_1 but really mean tls without starttls
-            QTest::newRow("sslv3_1") << scenario << static_cast<int>(QSsl::TlsV1SslV3) << static_cast<int>(KIMAP::LoginJob::SslV3_1);
+            QTest::newRow("sslv3") << scenario << static_cast<int>(QSsl::TlsV1SslV3) << static_cast<int>(QSsl::SslV3) << false;
+            //sslv2 is not supported anymore on my system
+            // QTest::newRow("sslv2") << scenario << static_cast<int>(QSsl::SslV2) << static_cast<int>(KIMAP::LoginJob::SslV2);
+            //AnyProtocol doesn't mean the server can force a specific version (e.g. openssl always starts with a sslv2 hello)
+            QTest::newRow("any protocol with anyssl version") << scenario << static_cast<int>(QSsl::AnyProtocol) << static_cast<int>(QSsl::AnyProtocol) << false;
+            QTest::newRow("tlsv1.0") << scenario << static_cast<int>(QSsl::TlsV1SslV3) << static_cast<int>(QSsl::TlsV1_0) << false;
         }
     }
 
@@ -239,21 +233,24 @@ private Q_SLOTS:
         QFETCH(QList<QByteArray>, scenario);
         QFETCH(int, serverEncryption);
         QFETCH(int, clientEncryption);
+        QFETCH(bool, startTls);
 
         FakeServer fakeServer;
-        fakeServer.setEncrypted(static_cast<QSsl::SslProtocol>(serverEncryption));
+        fakeServer.setEncrypted(static_cast<QSsl::SslProtocol>(serverEncryption), startTls);
         fakeServer.setScenario(scenario);
         fakeServer.startAndWait();
 
         KIMAP::Session *session = new KIMAP::Session("127.0.0.1", 5989);
 
-        KIMAP::SessionUiProxy::Ptr uiProxy(new TestUiProxy);
-        session->setUiProxy(uiProxy);
+        QObject::connect(session, &KIMAP::Session::sslErrors, [session](const QList<QSslError> &errors) {
+            qWarning() << "Got ssl error: " << errors;
+            session->ignoreErrors(errors);
+        });
 
         KIMAP::LoginJob *login = new KIMAP::LoginJob(session);
         login->setUserName("user");
         login->setPassword("password");
-        login->setEncryptionMode(static_cast<KIMAP::LoginJob::EncryptionMode>(clientEncryption));
+        login->setEncryptionMode(static_cast<QSsl::SslProtocol>(clientEncryption), startTls);
         QVERIFY(login->exec());
 
         fakeServer.quit();
@@ -273,7 +270,7 @@ private Q_SLOTS:
 
             //For some reason only connecting to tlsv1 results in an ssl handshake error, with the wrong version only the server detects the error and disconnects
 //     QTest::newRow( "ssl v3 v2" ) << scenario << static_cast<int>(QSsl::SslV3) << static_cast<int>(KIMAP::LoginJob::SslV2) << static_cast<int>(KJob::UserDefinedError);
-            QTest::newRow("ssl tlsv1 v3") << scenario << static_cast<int>(QSsl::TlsV1) << static_cast<int>(KIMAP::LoginJob::SslV3) << static_cast<int>(KJob::UserDefinedError);
+            QTest::newRow("ssl tlsv1 v3") << scenario << static_cast<int>(QSsl::SslV3) << static_cast<int>(QSsl::TlsV1_0) << static_cast<int>(KIMAP::LoginJob::ERR_SSL_HANDSHAKE_FAILED);
         }
     }
 
@@ -285,19 +282,20 @@ private Q_SLOTS:
         QFETCH(int, expectedErrorCode);
 
         FakeServer fakeServer;
-        fakeServer.setEncrypted(static_cast<QSsl::SslProtocol>(serverEncryption));
         fakeServer.setScenario(scenario);
         fakeServer.startAndWait();
 
         KIMAP::Session *session = new KIMAP::Session("127.0.0.1", 5989);
 
-        KIMAP::SessionUiProxy::Ptr uiProxy(new TestUiProxy);
-        session->setUiProxy(uiProxy);
+        QObject::connect(session, &KIMAP::Session::sslErrors, [session](const QList<QSslError> &errors) {
+            qWarning() << "Got ssl error: " << errors;
+            session->ignoreErrors(errors);
+        });
 
         KIMAP::LoginJob *login = new KIMAP::LoginJob(session);
         login->setUserName("user");
         login->setPassword("password");
-        login->setEncryptionMode(static_cast<KIMAP::LoginJob::EncryptionMode>(clientEncryption));
+        login->setEncryptionMode(static_cast<QSsl::SslProtocol>(clientEncryption), false);
         QVERIFY(!login->exec());
         QCOMPARE(static_cast<int>(login->error()), expectedErrorCode);
 

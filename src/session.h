@@ -23,8 +23,8 @@
 #include "kimap_export.h"
 
 #include <QtCore/QObject>
-
-#include "sessionuiproxy.h"
+#include <QtNetwork/QSsl>
+#include <QtNetwork/QSslSocket>
 
 namespace KIMAP
 {
@@ -60,18 +60,7 @@ public:
 
     QByteArray serverGreeting() const;
 
-    /**
-     * Sets an ui proxy that displays the error messages and waits for user feedback.
-     * @param proxy the ui proxy object
-     */
-    void setUiProxy(const SessionUiProxy::Ptr &proxy);
-
-    /**
-     * Sets an ui proxy that displays the error messages and waits for user feedback.
-     * @param proxy the ui proxy object
-     * @deprecated Use the shared pointer version instead
-     */
-    KIMAP_DEPRECATED void setUiProxy(SessionUiProxy *proxy);
+    void setErrorHandler();
 
     /**
      * Set the session timeout. The default is 30 seconds.
@@ -95,9 +84,11 @@ public:
     int jobQueueSize() const;
 
     void close();
+    void ignoreErrors(const QList<QSslError> &errors);
 
 Q_SIGNALS:
     void jobQueueSizeChanged(int queueSize);
+    void sslErrors(const QList<QSslError> &errors);
 
     /**
       @deprecated

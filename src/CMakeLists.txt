@@ -1,5 +1,6 @@
 # FIXME: Make it build with this flag
 remove_definitions(-DQT_NO_CAST_FROM_BYTEARRAY)
+remove_definitions(-DQT_NO_CAST_FROM_ASCII)
 
 # Turn exceptions on
 kde_enable_exceptions()
@@ -40,7 +41,6 @@ set(kimap_SRCS
    session.cpp
    sessionlogger.cpp
    sessionthread.cpp
-   sessionuiproxy.cpp
    setacljob.cpp
    setmetadatajob.cpp
    setquotajob.cpp
@@ -65,7 +65,7 @@ target_link_libraries(KF5IMAP
 PUBLIC
   KF5::Mime
 PRIVATE
-  KF5::KIOCore
+  Qt5Network
   KF5::Codecs
   KF5::CoreAddons
   KF5::I18n
@@ -110,7 +110,6 @@ ecm_generate_headers(KIMAP_CamelCase_HEADERS
   SearchJob
   SelectJob
   Session
-  SessionUiProxy
   SetAclJob
   SetMetaDataJob
   SetQuotaJob

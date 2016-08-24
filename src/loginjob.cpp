@@ -22,7 +22,6 @@
 
 #include <KLocalizedString>
 #include "kimap_debug.h"
-#include <ktcpsocket.h>
 
 #include "job_p.h"
 #include "message_p.h"
@@ -58,7 +57,7 @@ public:
         Authenticate
     };
 
-    LoginJobPrivate(LoginJob *job, Session *session, const QString &name) : JobPrivate(session, name), q(job), encryptionMode(LoginJob::Unencrypted), authState(Login), plainLoginDisabled(false)
+    LoginJobPrivate(LoginJob *job, Session *session, const QString &name) : JobPrivate(session, name), q(job), encryptionMode(QSsl::UnknownProtocol), authState(Login), plainLoginDisabled(false)
     {
         conn = Q_NULLPTR;
         client_interact = Q_NULLPTR;
@@ -67,6 +66,7 @@ public:
     bool sasl_interact();
 
     bool startAuthentication();
+    void sendPlainLogin();
     bool answerChallenge(const QByteArray &data);
     void sslResponse(bool response);
     void saveServerGreeting(const Message &response);
@@ -78,7 +78,8 @@ public:
     QString password;
     QString serverGreeting;
 
-    LoginJob::EncryptionMode encryptionMode;
+    QSsl::SslProtocol encryptionMode;
+    bool startTls;
     QString authMode;
     AuthState authState;
     QStringList capabilities;
@@ -138,7 +139,7 @@ bool LoginJobPrivate::sasl_interact()
 }
 
 LoginJob::LoginJob(Session *session)
-    : Job(*new LoginJobPrivate(this, session, i18n("Login")))
+    : Job(*new LoginJobPrivate(this, session, QString::fromUtf8("Login")))
 {
     Q_D(LoginJob);
     connect(d->sessionInternal(), SIGNAL(encryptionNegotiationResult(bool)), this, SLOT(sslResponse(bool)));
@@ -194,76 +195,26 @@ void LoginJob::doStart()
     // Don't authenticate on a session in the authenticated state
     if (session()->state() == Session::Authenticated || session()->state() == Session::Selected) {
         setError(UserDefinedError);
-        setErrorText(i18n("IMAP session in the wrong state for authentication"));
+        setErrorText(QString::fromUtf8("IMAP session in the wrong state for authentication"));
         emitResult();
         return;
     }
 
-    // Trigger encryption negotiation only if needed
-    EncryptionMode encryptionMode = d->encryptionMode;
-
-    switch (d->sessionInternal()->negotiatedEncryption()) {
-    case KTcpSocket::UnknownSslVersion:
-        break; // Do nothing the encryption mode still needs to be negotiated
-
-    // For the other cases, pretend we're going unencrypted as that's the
-    // encryption mode already set on the session
-    // (so for instance we won't issue another STARTTLS for nothing if that's
-    // not needed)
-    case KTcpSocket::SslV2:
-        if (encryptionMode == SslV2) {
-            encryptionMode = Unencrypted;
-        }
-        break;
-    case KTcpSocket::SslV3:
-        if (encryptionMode == SslV3) {
-            encryptionMode = Unencrypted;
-        }
-        break;
-    case KTcpSocket::TlsV1:
-        if (encryptionMode == TlsV1) {
-            encryptionMode = Unencrypted;
-        }
-        break;
-    case KTcpSocket::AnySslVersion:
-        if (encryptionMode == AnySslVersion) {
-            encryptionMode = Unencrypted;
-        }
-        break;
-    }
-
-    if (encryptionMode == SslV2 ||
-            encryptionMode == SslV3 ||
-            encryptionMode == SslV3_1 ||
-            encryptionMode == AnySslVersion) {
-        KTcpSocket::SslVersion version = KTcpSocket::SslV2;
-        if (encryptionMode == SslV3) {
-            version = KTcpSocket::SslV3;
-        }
-        if (encryptionMode == SslV3_1) {
-            version = KTcpSocket::SslV3_1;
-        }
-        if (encryptionMode == AnySslVersion) {
-            version = KTcpSocket::AnySslVersion;
-        }
-        d->sessionInternal()->startSsl(version);
-
-    } else if (encryptionMode == TlsV1) {
-        d->authState = LoginJobPrivate::StartTls;
-        d->tags << d->sessionInternal()->sendCommand("STARTTLS");
-
-    } else  if (encryptionMode == Unencrypted) {
+    if (d->encryptionMode == QSsl::UnknownProtocol) {
         if (d->authMode.isEmpty()) {
-            d->authState = LoginJobPrivate::Login;
-            qCDebug(KIMAP_LOG) << "sending LOGIN";
-            d->tags << d->sessionInternal()->sendCommand("LOGIN",
-                    '"' + quoteIMAP(d->userName).toUtf8() + '"' +
-                    ' ' +
-                    '"' + quoteIMAP(d->password).toUtf8() + '"');
+            d->sendPlainLogin();
         } else {
             if (!d->startAuthentication()) {
                 emitResult();
             }
+        }
+    } else {
+        if (d->startTls) {
+            qWarning() << "STARTTLS";
+            d->authState = LoginJobPrivate::StartTls;
+            d->tags << d->sessionInternal()->sendCommand("STARTTLS");
+        } else {
+            d->sessionInternal()->startSsl(d->encryptionMode);
         }
     }
 }
@@ -277,11 +228,11 @@ void LoginJob::handleResponse(const Message &response)
     }
 
     //set the actual command name for standard responses
-    QString commandName = i18n("Login");
+    QString commandName = QStringLiteral("Login");
     if (d->authState == LoginJobPrivate::Capability) {
-        commandName = i18n("Capability");
+        commandName = QStringLiteral("Capability");
     } else if (d->authState == LoginJobPrivate::StartTls) {
-        commandName = i18n("StartTls");
+        commandName = QStringLiteral("StartTls");
     }
 
     enum ResponseCode {
@@ -327,7 +278,7 @@ void LoginJob::handleResponse(const Message &response)
         }
 
         setError(UserDefinedError);
-        setErrorText(i18n("%1 failed, server replied: %2", commandName, QLatin1String(response.toString().constData())));
+        setErrorText(QString("%1 failed, server replied: %2").arg(commandName).arg(QLatin1String(response.toString().constData())));
         emitResult();
         return;
 
@@ -383,22 +334,17 @@ void LoginJob::handleResponse(const Message &response)
 
         switch (d->authState) {
         case LoginJobPrivate::StartTls:
-            d->sessionInternal()->startSsl(KTcpSocket::TlsV1);
+            d->sessionInternal()->startSsl(d->encryptionMode);
             break;
-
         case LoginJobPrivate::Capability:
             //cleartext login, if enabled
             if (d->authMode.isEmpty()) {
                 if (d->plainLoginDisabled) {
                     setError(UserDefinedError);
-                    setErrorText(i18n("Login failed, plain login is disabled by the server."));
+                    setErrorText(QString("Login failed, plain login is disabled by the server."));
                     emitResult();
                 } else {
-                    d->authState = LoginJobPrivate::Login;
-                    d->tags << d->sessionInternal()->sendCommand("LOGIN",
-                            '"' + quoteIMAP(d->userName).toUtf8() + '"' +
-                            ' ' +
-                            '"' + quoteIMAP(d->password).toUtf8() + '"');
+                    d->sendPlainLogin();
                 }
             } else {
                 bool authModeSupported = false;
@@ -413,7 +359,7 @@ void LoginJob::handleResponse(const Message &response)
                 }
                 if (!authModeSupported) {
                     setError(UserDefinedError);
-                    setErrorText(i18n("Login failed, authentication mode %1 is not supported by the server.", d->authMode));
+                    setErrorText(QString("Login failed, authentication mode %1 is not supported by the server.").arg(d->authMode));
                     emitResult();
                 } else if (!d->startAuthentication()) {
                     emitResult(); //problem, we're done
@@ -434,7 +380,7 @@ void LoginJob::handleResponse(const Message &response)
     }
 
     if (code == MALFORMED) {
-        setErrorText(i18n("%1 failed, malformed reply from the server.", commandName));
+        setErrorText(QString("%1 failed, malformed reply from the server.").arg(commandName));
         emitResult();
     }
 }
@@ -444,7 +390,7 @@ bool LoginJobPrivate::startAuthentication()
     //SASL authentication
     if (!initSASL()) {
         q->setError(LoginJob::UserDefinedError);
-        q->setErrorText(i18n("Login failed, client cannot initialize the SASL library."));
+        q->setErrorText(QString("Login failed, client cannot initialize the SASL library."));
         return false;
     }
 
@@ -493,6 +439,16 @@ bool LoginJobPrivate::startAuthentication()
     return true;
 }
 
+void LoginJobPrivate::sendPlainLogin()
+{
+    authState = LoginJobPrivate::Login;
+    qCDebug(KIMAP_LOG) << "sending LOGIN";
+    tags << sessionInternal()->sendCommand("LOGIN",
+            '"' + quoteIMAP(userName).toUtf8() + '"' +
+            ' ' +
+            '"' + quoteIMAP(password).toUtf8() + '"');
+}
+
 bool LoginJobPrivate::answerChallenge(const QByteArray &data)
 {
     QByteArray challenge = data;
@@ -537,19 +493,20 @@ void LoginJobPrivate::sslResponse(bool response)
         tags << sessionInternal()->sendCommand("CAPABILITY");
     } else {
         q->setError(LoginJob::UserDefinedError);
-        q->setErrorText(i18n("Login failed, TLS negotiation failed."));
-        encryptionMode = LoginJob::Unencrypted;
+        q->setErrorText(QString::fromUtf8("Login failed, TLS negotiation failed."));
+        encryptionMode = QSsl::UnknownProtocol;
         q->emitResult();
     }
 }
 
-void LoginJob::setEncryptionMode(EncryptionMode mode)
+void LoginJob::setEncryptionMode(QSsl::SslProtocol mode, bool startTls)
 {
     Q_D(LoginJob);
     d->encryptionMode = mode;
+    d->startTls = startTls;
 }
 
-LoginJob::EncryptionMode LoginJob::encryptionMode()
+QSsl::SslProtocol LoginJob::encryptionMode()
 {
     Q_D(LoginJob);
     return d->encryptionMode;
@@ -584,21 +541,16 @@ void LoginJob::connectionLost()
 {
     Q_D(LoginJob);
 
-    //don't emit the result if the connection was lost before getting the tls result, as it can mean
-    //the TLS handshake failed and the socket was reconnected in normal mode
-    if (d->authState != LoginJobPrivate::StartTls) {
-        qCWarning(KIMAP_LOG) << "Connection to server lost " << d->m_socketError;
-        if (d->m_socketError == KTcpSocket::SslHandshakeFailedError) {
-            setError(KJob::UserDefinedError);
-            setErrorText(i18n("SSL handshake failed."));
-            emitResult();
-        } else {
-            setError(ERR_COULD_NOT_CONNECT);
-            setErrorText(i18n("Connection to server lost."));
-            emitResult();
-        }
+    qCWarning(KIMAP_LOG) << "Connection to server lost " << d->m_socketError;
+    if (d->m_socketError == QSslSocket::SslHandshakeFailedError) {
+        setError(ERR_SSL_HANDSHAKE_FAILED);
+        setErrorText(QString::fromUtf8("SSL handshake failed."));
+        emitResult();
+    } else {
+        setError(ERR_COULD_NOT_CONNECT);
+        setErrorText(QString::fromUtf8("Connection to server lost."));
+        emitResult();
     }
-
 }
 
 void LoginJobPrivate::saveServerGreeting(const Message &response)

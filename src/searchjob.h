@@ -24,6 +24,7 @@
 #include "kimap_export.h"
 
 #include "job.h"
+#include <QSharedPointer>
 
 class QDate;
 

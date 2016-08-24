@@ -21,10 +21,9 @@
 #define KIMAP_SESSIONTHREAD_P_H
 
 #include <QtCore/QQueue>
+#include <QtNetwork/QSslSocket>
 
-#include <ktcpsocket.h>
-
-typedef KTcpSocket SessionSocket;
+typedef QSslSocket SessionSocket;
 
 namespace KIMAP
 {
@@ -51,19 +50,21 @@ public:
 
     void sendData(const QByteArray &payload);
 
+    void abort();
+    void ignoreErrors(const QList<QSslError> &errors);
+
 public Q_SLOTS:
     void closeSocket();
-    void startSsl(KTcpSocket::SslVersion version);
-    void sslErrorHandlerResponse(bool result);
+    void startSsl(QSsl::SslProtocol version);
 
 Q_SIGNALS:
     void socketConnected();
     void socketDisconnected();
     void socketActivity();
-    void socketError(KTcpSocket::Error);
+    void socketError(QAbstractSocket::SocketError);
     void responseReceived(const KIMAP::Message &response);
-    void encryptionNegotiationResult(bool, KTcpSocket::SslVersion);
-    void sslError(const KSslErrorUiData &);
+    void encryptionNegotiationResult(bool);
+    void sslErrors(const QList<QSslError> &errors);
 
 private Q_SLOTS:
     void reconnect();
@@ -71,10 +72,9 @@ private Q_SLOTS:
     void writeDataQueue();
     void sslConnected();
     void doCloseSocket();
-    void slotSocketError(KTcpSocket::Error);
+    void slotSocketError(QAbstractSocket::SocketError);
+    void slotSocketSslError(const QList<QSslError> &errors);
     void slotSocketDisconnected();
-    void doStartSsl(KTcpSocket::SslVersion);
-    void doSslErrorHandlerResponse(bool result);
 
 private:
     QString m_hostName;

@@ -26,7 +26,7 @@ class SslServer: public QTcpServer
 {
     Q_OBJECT
 public:
-    SslServer(QSsl::SslProtocol);
+    SslServer(QSsl::SslProtocol, bool startTls);
     virtual void incomingConnection(qintptr handle) Q_DECL_OVERRIDE;
 
 private Q_SLOTS:
@@ -36,6 +36,7 @@ private Q_SLOTS:
 private:
     QSsl::SslProtocol mProtocol;
     QSslSocket mSocket;
+    const bool mStartTls;
 };
 
 #endif
