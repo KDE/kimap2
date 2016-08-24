@@ -19,8 +19,6 @@
 
 #include "idjob.h"
 
-#include <KLocalizedString>
-
 #include "job_p.h"
 #include "message_p.h"
 #include "session_p.h"
@@ -40,7 +38,7 @@ namespace KIMAP
 using namespace KIMAP;
 
 IdJob::IdJob(Session *session)
-    : Job(*new IdJobPrivate(session, i18n("Id")))
+    : Job(*new IdJobPrivate(session, "Id"))
 {
 }
 

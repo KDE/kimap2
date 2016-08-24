@@ -20,7 +20,6 @@
 
 #include "loginjob.h"
 
-#include <KLocalizedString>
 #include "kimap_debug.h"
 
 #include "job_p.h"

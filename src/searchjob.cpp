@@ -19,7 +19,6 @@
 
 #include "searchjob.h"
 
-#include <KLocalizedString>
 #include "kimap_debug.h"
 
 #include <QtCore/QDate>
@@ -341,7 +340,7 @@ public:
 using namespace KIMAP;
 
 SearchJob::SearchJob(Session *session)
-    : Job(*new SearchJobPrivate(session, i18nc("Name of the search job", "Search")))
+    : Job(*new SearchJobPrivate(session, "Search"))
 {
 }
 

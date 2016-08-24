@@ -68,7 +68,6 @@ PRIVATE
   Qt5Network
   KF5::Codecs
   KF5::CoreAddons
-  KF5::I18n
   ${Sasl2_LIBRARIES}
 )
 

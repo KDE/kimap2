@@ -19,8 +19,6 @@
 
 #include "deletejob.h"
 
-#include <KLocalizedString>
-
 #include "job_p.h"
 #include "message_p.h"
 #include "session_p.h"
@@ -41,7 +39,7 @@ public:
 using namespace KIMAP;
 
 DeleteJob::DeleteJob(Session *session)
-    : Job(*new DeleteJobPrivate(session, i18n("Delete")))
+    : Job(*new DeleteJobPrivate(session, "Delete"))
 {
 }
 

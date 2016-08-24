@@ -19,8 +19,6 @@
 
 #include "unsubscribejob.h"
 
-#include <KLocalizedString>
-
 #include "job_p.h"
 #include "message_p.h"
 #include "session_p.h"
@@ -41,7 +39,7 @@ public:
 using namespace KIMAP;
 
 UnsubscribeJob::UnsubscribeJob(Session *session)
-    : Job(*new UnsubscribeJobPrivate(session, i18n("Unsubscribe")))
+    : Job(*new UnsubscribeJobPrivate(session, "Unsubscribe"))
 {
 }
 

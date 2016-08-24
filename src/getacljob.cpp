@@ -19,7 +19,6 @@
 
 #include "getacljob.h"
 
-#include <KLocalizedString>
 #include "kimap_debug.h"
 
 #include "acljobbase_p.h"
@@ -42,7 +41,7 @@ public:
 using namespace KIMAP;
 
 GetAclJob::GetAclJob(Session *session)
-    : AclJobBase(*new GetAclJobPrivate(session, i18n("GetAcl")))
+    : AclJobBase(*new GetAclJobPrivate(session, "GetAcl"))
 {
 }
 

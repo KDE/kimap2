@@ -22,8 +22,6 @@
 #include "message_p.h"
 #include "session_p.h"
 
-#include <KLocalizedString>
-
 using namespace KIMAP;
 
 QByteArray MetaDataJobBasePrivate::addPrefix(const QByteArray &entry, const QByteArray &attribute) const
@@ -64,7 +62,7 @@ QByteArray MetaDataJobBasePrivate::getAttribute(const QByteArray &entry) const
 }
 
 MetaDataJobBase::MetaDataJobBase(Session *session)
-    : Job(*new MetaDataJobBasePrivate(session, i18n("MetaDataJobBase")))
+    : Job(*new MetaDataJobBasePrivate(session, "MetaDataJobBase"))
 {
 }
 

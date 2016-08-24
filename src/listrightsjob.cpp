@@ -19,8 +19,6 @@
 
 #include "listrightsjob.h"
 
-#include <KLocalizedString>
-
 #include "acljobbase_p.h"
 #include "message_p.h"
 #include "session_p.h"
@@ -43,7 +41,7 @@ public:
 using namespace KIMAP;
 
 ListRightsJob::ListRightsJob(Session *session)
-    : AclJobBase(*new ListRightsJobPrivate(session, i18n("ListRights")))
+    : AclJobBase(*new ListRightsJobPrivate(session, "ListRights"))
 {
 
 }

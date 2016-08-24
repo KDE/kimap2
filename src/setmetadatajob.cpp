@@ -19,7 +19,6 @@
 
 #include "setmetadatajob.h"
 
-#include <KLocalizedString>
 #include "kimap_debug.h"
 
 #include "metadatajobbase_p.h"
@@ -46,7 +45,7 @@ public:
 using namespace KIMAP;
 
 SetMetaDataJob::SetMetaDataJob(Session *session)
-    : MetaDataJobBase(*new SetMetaDataJobPrivate(session, i18n("SetMetaData")))
+    : MetaDataJobBase(*new SetMetaDataJobPrivate(session, "SetMetaData"))
 {
 }
 
@@ -115,7 +114,7 @@ void SetMetaDataJob::handleResponse(const Message &response)
         d->tags.contains(response.content.first().toString())) {
         if (response.content[1].toString() == "NO") {
             setError(UserDefinedError);
-            setErrorText(i18n("%1 failed, server replied: %2", d->m_name, QLatin1String(response.toString().constData())));
+            setErrorText(QString("%1 failed, server replied: %2").arg(d->m_name).arg(QLatin1String(response.toString().constData())));
             if (response.content[2].toString() == "[ANNOTATEMORE TOOMANY]" ||
                     response.content[2].toString() == "[METADATA TOOMANY]") {
                 d->metaDataErrors |= TooMany;
@@ -133,10 +132,10 @@ void SetMetaDataJob::handleResponse(const Message &response)
                 d->metaDataErrors |= NoPrivate;
             }
         } else if (response.content.size() < 2) {
-            setErrorText(i18n("%1 failed, malformed reply from the server.", d->m_name));
+            setErrorText(QString("%1 failed, malformed reply from the server.").arg(d->m_name));
         } else if (response.content[1].toString() != "OK") {
             setError(UserDefinedError);
-            setErrorText(i18n("%1 failed, server replied: %2", d->m_name, QLatin1String(response.toString().constData())));
+            setErrorText(QString("%1 failed, server replied: %2").arg(d->m_name).arg(QLatin1String(response.toString().constData())));
         }
         emitResult();
     } else if (d->serverCapability == Metadata && response.content[0].toString() == "+") {

@@ -20,7 +20,6 @@
 #include "namespacejob.h"
 
 #include "kimap_debug.h"
-#include <KLocalizedString>
 
 #include "job_p.h"
 #include "listjob.h"
@@ -74,7 +73,7 @@ public:
 using namespace KIMAP;
 
 NamespaceJob::NamespaceJob(Session *session)
-    : Job(*new NamespaceJobPrivate(session, i18n("Namespace")))
+    : Job(*new NamespaceJobPrivate(session, "Namespace"))
 {
 }
 

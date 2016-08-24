@@ -19,8 +19,6 @@
 
 #include "setacljob.h"
 
-#include <KLocalizedString>
-
 #include "acljobbase_p.h"
 #include "message_p.h"
 #include "session_p.h"
@@ -39,7 +37,7 @@ public:
 using namespace KIMAP;
 
 SetAclJob::SetAclJob(Session *session)
-    : AclJobBase(*new SetAclJobPrivate(session, i18n("SetAcl")))
+    : AclJobBase(*new SetAclJobPrivate(session, "SetAcl"))
 {
 }
 

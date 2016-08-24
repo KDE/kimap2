@@ -20,7 +20,6 @@
 #include "storejob.h"
 
 #include "kimap_debug.h"
-#include <KLocalizedString>
 
 #include "job_p.h"
 #include "message_p.h"
@@ -74,7 +73,7 @@ public:
 using namespace KIMAP;
 
 StoreJob::StoreJob(Session *session)
-    : Job(*new StoreJobPrivate(session, i18n("Store")))
+    : Job(*new StoreJobPrivate(session, "Store"))
 {
     Q_D(StoreJob);
     d->uidBased = false;

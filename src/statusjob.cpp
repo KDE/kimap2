@@ -24,8 +24,6 @@
 #include "rfccodecs.h"
 #include "kimap_debug.h"
 
-#include <KLocalizedString>
-
 namespace KIMAP
 {
 
@@ -51,7 +49,7 @@ public:
 using namespace KIMAP;
 
 StatusJob::StatusJob(Session *session)
-    : Job(*new StatusJobPrivate(session, i18nc("name of the status job", "Status")))
+    : Job(*new StatusJobPrivate(session, "Status"))
 {
 }
 

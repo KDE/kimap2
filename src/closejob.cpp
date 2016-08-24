@@ -19,8 +19,6 @@
 
 #include "closejob.h"
 
-#include <KLocalizedString>
-
 #include "job_p.h"
 #include "message_p.h"
 #include "session_p.h"
@@ -38,7 +36,7 @@ public:
 using namespace KIMAP;
 
 CloseJob::CloseJob(Session *session)
-    : Job(*new CloseJobPrivate(session, i18n("Close")))
+    : Job(*new CloseJobPrivate(session, "Close"))
 {
 }
 

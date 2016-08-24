@@ -31,7 +31,6 @@ ecm_setup_version(${KIMAP_LIB_VERSION} VARIABLE_PREFIX KIMAP
 ########### Find packages ###########
 find_package(Qt5 COMPONENTS REQUIRED Core Network)
 find_package(KF5CoreAddons ${KF5_VERSION} CONFIG REQUIRED)
-find_package(KF5I18n ${KF5_VERSION} CONFIG REQUIRED)
 find_package(KF5Codecs ${KF5_VERSION} CONFIG REQUIRED)
 find_package(KF5Mime ${KMIME_LIBS_VERSION} CONFIG REQUIRED)
 

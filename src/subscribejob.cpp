@@ -19,8 +19,6 @@
 
 #include "subscribejob.h"
 
-#include <KLocalizedString>
-
 #include "job_p.h"
 #include "message_p.h"
 #include "session_p.h"
@@ -41,7 +39,7 @@ public:
 using namespace KIMAP;
 
 SubscribeJob::SubscribeJob(Session *session)
-    : Job(*new SubscribeJobPrivate(session, i18n("Subscribe")))
+    : Job(*new SubscribeJobPrivate(session, "Subscribe"))
 {
 }
 

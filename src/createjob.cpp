@@ -19,8 +19,6 @@
 
 #include "createjob.h"
 
-#include <KLocalizedString>
-
 #include "job_p.h"
 #include "message_p.h"
 #include "rfccodecs.h"
@@ -41,7 +39,7 @@ public:
 using namespace KIMAP;
 
 CreateJob::CreateJob(Session *session)
-    : Job(*new CreateJobPrivate(session, i18n("Create")))
+    : Job(*new CreateJobPrivate(session, "Create"))
 {
 }
 

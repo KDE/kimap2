@@ -22,8 +22,6 @@
 #include "message_p.h"
 #include "session_p.h"
 
-#include <KLocalizedString>
-
 using namespace KIMAP;
 
 void AclJobBasePrivate::setIdentifier(const QByteArray &identifier)
@@ -61,12 +59,11 @@ void AclJobBasePrivate::setRights(const QByteArray &rights)
 void AclJobBasePrivate::setRights(AclJobBase::AclModifier _modifier, Acl::Rights rights)
 {
     modifier = _modifier;
-    // XXX: [alexmerry, 2010-07-24]: this is REALLY unintuitive behaviour
-    rightList |= rights;
+    rightList = rights;
 }
 
 AclJobBase::AclJobBase(Session *session)
-    : Job(*new AclJobBasePrivate(session, i18n("AclJobBase")))
+    : Job(*new AclJobBasePrivate(session, "AclJobBase"))
 {
 }
 

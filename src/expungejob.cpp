@@ -19,7 +19,6 @@
 
 #include "expungejob.h"
 
-#include <KLocalizedString>
 #include "kimap_debug.h"
 
 #include "job_p.h"
@@ -42,7 +41,7 @@ public:
 using namespace KIMAP;
 
 ExpungeJob::ExpungeJob(Session *session)
-    : Job(*new ExpungeJobPrivate(session, i18n("Expunge")))
+    : Job(*new ExpungeJobPrivate(session, "Expunge"))
 {
 }
 

@@ -19,7 +19,6 @@
 
 #include "getmetadatajob.h"
 
-#include <KLocalizedString>
 #include "kimap_debug.h"
 
 #include "metadatajobbase_p.h"
@@ -47,7 +46,7 @@ public:
 using namespace KIMAP;
 
 GetMetaDataJob::GetMetaDataJob(Session *session)
-    : MetaDataJobBase(*new GetMetaDataJobPrivate(session, i18n("GetMetaData")))
+    : MetaDataJobBase(*new GetMetaDataJobPrivate(session, "GetMetaData"))
 {
 }
 
@@ -70,7 +69,7 @@ void GetMetaDataJob::doStart()
 
     QByteArray command = "GETMETADATA";
     if (d->serverCapability == Annotatemore) {
-        d->m_name = i18n("GetAnnotation");
+        d->m_name = "GetAnnotation";
         command = "GETANNOTATION";
         if (d->entries.size() > 1) {
             parameters += '(';

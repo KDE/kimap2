@@ -19,8 +19,6 @@
 
 #include "appendjob.h"
 
-#include <KLocalizedString>
-
 #include "job_p.h"
 #include "message_p.h"
 #include "session_p.h"
@@ -45,7 +43,7 @@ public:
 using namespace KIMAP;
 
 AppendJob::AppendJob(Session *session)
-    : Job(*new AppendJobPrivate(session, i18n("Append")))
+    : Job(*new AppendJobPrivate(session, "Append"))
 {
 }
 

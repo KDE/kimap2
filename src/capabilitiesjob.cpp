@@ -19,8 +19,6 @@
 
 #include "capabilitiesjob.h"
 
-#include <KLocalizedString>
-
 #include "job_p.h"
 #include "message_p.h"
 #include "session_p.h"
@@ -40,7 +38,7 @@ public:
 using namespace KIMAP;
 
 CapabilitiesJob::CapabilitiesJob(Session *session)
-    : Job(*new CapabilitiesJobPrivate(session, i18n("Capabilities")))
+    : Job(*new CapabilitiesJobPrivate(session, "Capabilities"))
 {
 }
 

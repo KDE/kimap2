@@ -19,8 +19,6 @@
 
 #include "deleteacljob.h"
 
-#include <KLocalizedString>
-
 #include "acljobbase_p.h"
 #include "message_p.h"
 #include "session_p.h"
@@ -42,7 +40,7 @@ DeleteAclJob::DeleteAclJob(Session *session)
     : AclJobBase(session)
 {
     Q_D(DeleteAclJob);
-    d->m_name = i18n("DeleteAclJob");
+    d->m_name = "DeleteAclJob";
 }
 
 DeleteAclJob::~DeleteAclJob()

@@ -22,8 +22,6 @@
 #include "message_p.h"
 #include "session_p.h"
 
-#include <KLocalizedString>
-
 using namespace KIMAP;
 
 QMap<QByteArray, QPair<qint64, qint64> > QuotaJobBasePrivate::readQuota(const Message::Part &content)
@@ -44,7 +42,7 @@ QMap<QByteArray, QPair<qint64, qint64> > QuotaJobBasePrivate::readQuota(const Me
 }
 
 QuotaJobBase::QuotaJobBase(Session *session)
-    : Job(*new QuotaJobBasePrivate(session, i18n("QuotaJobBase")))
+    : Job(*new QuotaJobBasePrivate(session, "QuotaJobBase"))
 {
 }
 

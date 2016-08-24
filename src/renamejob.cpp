@@ -19,8 +19,6 @@
 
 #include "renamejob.h"
 
-#include <KLocalizedString>
-
 #include "job_p.h"
 #include "message_p.h"
 #include "session_p.h"
@@ -42,7 +40,7 @@ public:
 using namespace KIMAP;
 
 RenameJob::RenameJob(Session *session)
-    : Job(*new RenameJobPrivate(session, i18n("Rename")))
+    : Job(*new RenameJobPrivate(session, "Rename"))
 {
 }
 

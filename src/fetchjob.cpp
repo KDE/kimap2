@@ -21,7 +21,6 @@
 
 #include <QtCore/QTimer>
 #include "kimap_debug.h"
-#include <KLocalizedString>
 
 #include "job_p.h"
 #include "message_p.h"
@@ -114,7 +113,7 @@ FetchJob::FetchScope::FetchScope():
 }
 
 FetchJob::FetchJob(Session *session)
-    : Job(*new FetchJobPrivate(this, session, i18n("Fetch")))
+    : Job(*new FetchJobPrivate(this, session, "Fetch"))
 {
     Q_D(FetchJob);
     connect(&d->emitPendingsTimer, SIGNAL(timeout()),

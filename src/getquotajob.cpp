@@ -19,8 +19,6 @@
 
 #include "getquotajob.h"
 
-#include <KLocalizedString>
-
 #include "quotajobbase_p.h"
 #include "message_p.h"
 #include "session_p.h"
@@ -40,7 +38,7 @@ public:
 using namespace KIMAP;
 
 GetQuotaJob::GetQuotaJob(Session *session)
-    : QuotaJobBase(*new GetQuotaJobPrivate(session, i18n("GetQuota")))
+    : QuotaJobBase(*new GetQuotaJobPrivate(session, "GetQuota"))
 {
 }
 

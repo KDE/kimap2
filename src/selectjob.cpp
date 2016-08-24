@@ -19,7 +19,6 @@
 
 #include "selectjob.h"
 
-#include <KLocalizedString>
 #include "kimap_debug.h"
 
 #include "job_p.h"
@@ -56,7 +55,7 @@ public:
 using namespace KIMAP;
 
 SelectJob::SelectJob(Session *session)
-    : Job(*new SelectJobPrivate(session, i18nc("name of the select job", "Select")))
+    : Job(*new SelectJobPrivate(session, "Select"))
 {
 }
 

@@ -19,8 +19,6 @@
 
 #include "copyjob.h"
 
-#include <KLocalizedString>
-
 #include "job_p.h"
 #include "message_p.h"
 #include "session_p.h"
@@ -46,7 +44,7 @@ public:
 using namespace KIMAP;
 
 CopyJob::CopyJob(Session *session)
-    : Job(*new CopyJobPrivate(session, i18n("Copy")))
+    : Job(*new CopyJobPrivate(session, "Copy"))
 {
     Q_D(CopyJob);
     d->uidBased = false;

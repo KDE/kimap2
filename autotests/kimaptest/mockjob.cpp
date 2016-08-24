@@ -26,7 +26,6 @@
 #include "job_p.h"
 #include "session.h"
 #include "session_p.h"
-#include <KLocalizedString>
 #include <QtCore/QTimer>
 
 class MockJobPrivate : public KIMAP::JobPrivate
@@ -44,7 +43,7 @@ public:
 };
 
 MockJob::MockJob(KIMAP::Session *session)
-    : KIMAP::Job(*new MockJobPrivate(session, i18n("Mock")))
+    : KIMAP::Job(*new MockJobPrivate(session, "Mock"))
 {
 }
 

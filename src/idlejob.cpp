@@ -20,7 +20,6 @@
 #include "idlejob.h"
 
 #include <QtCore/QTimer>
-#include <KLocalizedString>
 
 #include "job_p.h"
 #include "message_p.h"
@@ -74,7 +73,7 @@ public:
 using namespace KIMAP;
 
 IdleJob::IdleJob(Session *session)
-    : Job(*new IdleJobPrivate(this, session, i18nc("name of the idle job", "Idle")))
+    : Job(*new IdleJobPrivate(this, session, "Idle"))
 {
     Q_D(IdleJob);
     connect(&d->emitStatsTimer, SIGNAL(timeout()),

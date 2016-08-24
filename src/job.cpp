@@ -22,13 +22,12 @@
 #include "message_p.h"
 #include "session_p.h"
 
-#include <KLocalizedString>
 #include "kimap_debug.h"
 
 using namespace KIMAP;
 
 Job::Job(Session *session)
-    : KJob(session), d_ptr(new JobPrivate(session, i18n("Job")))
+    : KJob(session), d_ptr(new JobPrivate(session, "Job"))
 {
 }
 
@@ -62,7 +61,7 @@ void Job::handleResponse(const Message &response)
 void Job::connectionLost()
 {
     setError(KJob::UserDefinedError);
-    setErrorText(i18n("Connection to server lost."));
+    setErrorText("Connection to server lost.");
     emitResult();
 }
 
@@ -80,10 +79,10 @@ Job::HandlerResponse Job::handleErrorReplies(const Message &response)
     if (!response.content.isEmpty() &&
             d->tags.contains(response.content.first().toString())) {
         if (response.content.size() < 2) {
-            setErrorText(i18n("%1 failed, malformed reply from the server.", d->m_name));
+            setErrorText(QString("%1 failed, malformed reply from the server.").arg(d->m_name));
         } else if (response.content[1].toString() != "OK") {
             setError(UserDefinedError);
-            setErrorText(i18n("%1 failed, server replied: %2", d->m_name, QLatin1String(response.toString().constData())));
+            setErrorText(QString("%1 failed, server replied: %2").arg(d->m_name).arg(QLatin1String(response.toString().constData())));
         }
         d->tags.removeAll(response.content.first().toString());
         if (d->tags.isEmpty()) {   // Only emit result when the last command returned

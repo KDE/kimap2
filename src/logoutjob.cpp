@@ -19,8 +19,6 @@
 
 #include "logoutjob.h"
 
-#include <KLocalizedString>
-
 #include "job_p.h"
 #include "message_p.h"
 #include "session_p.h"
@@ -38,7 +36,7 @@ public:
 using namespace KIMAP;
 
 LogoutJob::LogoutJob(Session *session)
-    : Job(*new LogoutJobPrivate(session, i18n("Logout")))
+    : Job(*new LogoutJobPrivate(session, "Logout"))
 {
 }
 

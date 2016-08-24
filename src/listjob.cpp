@@ -20,7 +20,6 @@
 #include "listjob.h"
 
 #include <QtCore/QTimer>
-#include <KLocalizedString>
 
 #include "job_p.h"
 #include "message_p.h"
@@ -62,7 +61,7 @@ public:
 using namespace KIMAP;
 
 ListJob::ListJob(Session *session)
-    : Job(*new ListJobPrivate(this, session, i18n("List")))
+    : Job(*new ListJobPrivate(this, session, "List"))
 {
     Q_D(ListJob);
     connect(&d->emitPendingsTimer, SIGNAL(timeout()),
