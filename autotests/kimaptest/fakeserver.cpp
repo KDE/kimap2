@@ -70,8 +70,6 @@ void FakeServer::dataAvailable()
 
     int scenarioNumber = m_clientSockets.indexOf(socket);
 
-    QVERIFY(!m_scenarios[scenarioNumber].isEmpty());
-
     readClientPart(scenarioNumber);
     writeServerPart(scenarioNumber);
         qDebug() << "start tls";
