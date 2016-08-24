@@ -21,7 +21,6 @@ set(PIM_VERSION "5.1.20")
 
 set(KF5_VERSION "5.19.0")
 set(KIMAP_LIB_VERSION ${PIM_VERSION})
-set(KMIME_LIBS_VERSION "5.1.40")
 ecm_setup_version(${KIMAP_LIB_VERSION} VARIABLE_PREFIX KIMAP
                         VERSION_HEADER "${CMAKE_CURRENT_BINARY_DIR}/kimap_version.h"
                         PACKAGE_VERSION_FILE "${CMAKE_CURRENT_BINARY_DIR}/KF5IMAPConfigVersion.cmake"
@@ -29,10 +28,10 @@ ecm_setup_version(${KIMAP_LIB_VERSION} VARIABLE_PREFIX KIMAP
 )
 
 ########### Find packages ###########
-find_package(Qt5 COMPONENTS REQUIRED Core Network)
+find_package(Qt5 5.2 COMPONENTS REQUIRED Core Network)
 find_package(KF5CoreAddons ${KF5_VERSION} CONFIG REQUIRED)
 find_package(KF5Codecs ${KF5_VERSION} CONFIG REQUIRED)
-find_package(KF5Mime ${KMIME_LIBS_VERSION} CONFIG REQUIRED)
+find_package(KF5Mime "5.1.40" CONFIG REQUIRED)
 
 find_package(Sasl2)
 set_package_properties(Sasl2 PROPERTIES
