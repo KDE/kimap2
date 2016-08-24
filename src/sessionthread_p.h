@@ -84,8 +84,6 @@ private:
     ImapStreamParser *m_stream;
 
     QQueue<QByteArray> m_dataQueue;
-
-    bool m_encryptedMode;
 };
 
 }

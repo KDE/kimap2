@@ -31,8 +31,7 @@ using namespace KIMAP;
 
 SessionThread::SessionThread(const QString &hostName, quint16 port)
     : QObject(), m_hostName(hostName), m_port(port),
-      m_socket(Q_NULLPTR), m_stream(nullptr),
-      m_encryptedMode(false)
+      m_socket(Q_NULLPTR), m_stream(nullptr)
 {
     m_socket = new SessionSocket;
     m_stream = new ImapStreamParser(m_socket);
@@ -50,7 +49,7 @@ SessionThread::SessionThread(const QString &hostName, quint16 port)
             this, &SessionThread::slotSocketError);
     connect(m_socket, &QIODevice::bytesWritten,
             this, &SessionThread::socketActivity);
-    connect(m_socket, &QSslSocket::encryptedBytesWritten,  // needs kdelibs > 4.8
+    connect(m_socket, &QSslSocket::encryptedBytesWritten,
             this, &SessionThread::socketActivity);
     connect(m_socket, &QIODevice::readyRead,
             this, &SessionThread::socketActivity);
@@ -66,14 +65,12 @@ SessionThread::~SessionThread()
     m_socket = Q_NULLPTR;
 }
 
-// Called in primary thread
 void SessionThread::sendData(const QByteArray &payload)
 {
     m_dataQueue.enqueue(payload);
     QMetaObject::invokeMethod(this, "writeDataQueue");
 }
 
-// Called in secondary thread
 void SessionThread::writeDataQueue()
 {
     if (!m_socket) {
@@ -85,7 +82,6 @@ void SessionThread::writeDataQueue()
     }
 }
 
-// Called in secondary thread
 void SessionThread::readMessage()
 {
     if (!m_stream || m_stream->availableDataSize() == 0) {
@@ -137,7 +133,6 @@ void SessionThread::readMessage()
 
 }
 
-// Called in main thread
 void SessionThread::abort()
 {
     m_socket->abort();
@@ -148,30 +143,26 @@ void SessionThread::closeSocket()
     QMetaObject::invokeMethod(this, "doCloseSocket", Qt::QueuedConnection);
 }
 
-// Called in secondary thread
 void SessionThread::doCloseSocket()
 {
     if (!m_socket) {
         return;
     }
-    m_encryptedMode = false;
     qCDebug(KIMAP_LOG) << "close";
     m_socket->close();
 }
 
-// Called in secondary thread
 void SessionThread::reconnect()
 {
     if (m_socket == Q_NULLPTR) { // threadQuit already called
         return;
     }
     if (m_socket->state() != SessionSocket::ConnectedState &&
-            m_socket->state() != SessionSocket::ConnectingState) {
-            m_socket->connectToHost(m_hostName, m_port);
+        m_socket->state() != SessionSocket::ConnectingState) {
+        m_socket->connectToHost(m_hostName, m_port);
     }
 }
 
-// Called in primary thread
 void SessionThread::startSsl(QSsl::SslProtocol version)
 {
     if (!m_socket) {
@@ -182,13 +173,11 @@ void SessionThread::startSsl(QSsl::SslProtocol version)
     m_socket->startClientEncryption();
 }
 
-// Called in secondary thread
 void SessionThread::slotSocketDisconnected()
 {
     emit socketDisconnected();
 }
 
-// Called in secondary thread
 void SessionThread::slotSocketSslError(const QList<QSslError> &errors)
 {
     if (!m_socket) {
@@ -207,14 +196,12 @@ void SessionThread::slotSocketError(QAbstractSocket::SocketError error)
     emit socketError(error);
 }
 
-// Called in secondary thread
 void SessionThread::sslConnected()
 {
     if (!m_socket) {
         return;
     }
-        m_encryptedMode = true;
-        emit encryptionNegotiationResult(true);
+    emit encryptionNegotiationResult(true);
 }
 
 
