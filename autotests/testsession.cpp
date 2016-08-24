@@ -68,7 +68,6 @@ private Q_SLOTS:
         s.setTimeout(1);   // 1 second timout
 
         QSignalSpy spyFail(&s, SIGNAL(connectionFailed()));
-        QSignalSpy spyLost(&s, SIGNAL(connectionLost()));
         QSignalSpy spyState(&s, SIGNAL(stateChanged(KIMAP::Session::State,KIMAP::Session::State)));
 
         QCOMPARE((int)s.state(), (int)KIMAP::Session::Disconnected);
@@ -76,7 +75,6 @@ private Q_SLOTS:
         QTest::qWait(500);
         QCOMPARE((int)s.state(), (int)KIMAP::Session::Disconnected);
         QCOMPARE(spyFail.count(), 1);
-        QCOMPARE(spyLost.count(), 0);
         QCOMPARE(spyState.count(), 0);
 
         // Wait 800ms more. So now it's 1.3 seconds, check that the socket timeout has correctly been
@@ -98,7 +96,6 @@ private Q_SLOTS:
         KIMAP::Session s(QStringLiteral("127.0.0.1"), 5989);
         s.setTimeout(2);
         QSignalSpy spyFail(&s, SIGNAL(connectionFailed()));
-        QSignalSpy spyLost(&s, SIGNAL(connectionLost()));
         QSignalSpy spyState(&s, SIGNAL(stateChanged(KIMAP::Session::State,KIMAP::Session::State)));
         QCOMPARE((int)s.state(), (int)KIMAP::Session::Disconnected);
 
@@ -107,7 +104,6 @@ private Q_SLOTS:
         QTest::qWait(1800);
         QCOMPARE((int)s.state(), (int)KIMAP::Session::Disconnected);
         QCOMPARE(spyFail.count(), 0);
-        QCOMPARE(spyLost.count(), 0);
         QCOMPARE(spyState.count(), 0);
 
         // Wait 0.5 second more. Now we are at 2.3 seconds, the socket should have timed out, and the
@@ -115,7 +111,6 @@ private Q_SLOTS:
         QTest::qWait(500);
         QCOMPARE((int)s.state(), (int)KIMAP::Session::Disconnected);
         QCOMPARE(spyFail.count(), 1);
-        QCOMPARE(spyLost.count(), 0);
         QCOMPARE(spyState.count(), 0);
     }
 
@@ -250,7 +245,6 @@ private Q_SLOTS:
         KIMAP::Session s(QStringLiteral("127.0.0.1"), 5989);
 
         QSignalSpy spyFail(&s, SIGNAL(connectionFailed()));
-        QSignalSpy spyLost(&s, SIGNAL(connectionLost()));
         QSignalSpy spyState(&s, SIGNAL(stateChanged(KIMAP::Session::State,KIMAP::Session::State)));
 
         MockJob *mock = new MockJob(&s);
@@ -260,7 +254,6 @@ private Q_SLOTS:
         // We expect to get an error here due to some timeout
         QVERIFY(mock->error() != 0);
         QCOMPARE(spyFail.count(), 0);
-        QCOMPARE(spyLost.count(), 1);
         QCOMPARE(spyState.count(), 2);   // Authenticated, Disconnected
     }
 
@@ -323,7 +316,6 @@ private Q_SLOTS:
             KIMAP::Session s(QStringLiteral("127.0.0.1"), 5989);
 
             QSignalSpy spyFail(&s, SIGNAL(connectionFailed()));
-            QSignalSpy spyLost(&s, SIGNAL(connectionLost()));
             QSignalSpy spyState(&s, SIGNAL(stateChanged(KIMAP::Session::State,KIMAP::Session::State)));
 
             MockJob *mock = new MockJob(&s);
@@ -337,7 +329,6 @@ private Q_SLOTS:
             // We expect to get an error here due to the inconsistency
             QVERIFY(mock->error() != 0);
             QCOMPARE(spyFail.count(), 0);
-            QCOMPARE(spyLost.count(), 1);
             QCOMPARE(spyState.count(), 2);   // Authenticated, Disconnected
 
             delete mock;

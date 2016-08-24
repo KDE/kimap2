@@ -54,7 +54,6 @@ public:
      * Returns the name that has been set with LoginJob::setUserName()
      * The user name is useful to uniquely identify an IMAP resource, in combination with the host name
      * @note If the Session was pre-authenticated, userName() will return an empty string
-     * @since 4.7
      */
     QString userName() const;
 
@@ -65,19 +64,16 @@ public:
     /**
      * Set the session timeout. The default is 30 seconds.
      * @param timeout The socket timeout in seconds, negative values disable the timeout.
-     * @since 4.6
      */
     void setTimeout(int timeout);
 
     /**
      * Returns the session timeout.
-     * @since 4.12
      */
     int timeout() const;
 
     /**
      * Returns the currently selected mailbox.
-     * @since 4.5
      */
     QString selectedMailBox() const;
 
@@ -91,20 +87,6 @@ Q_SIGNALS:
     void sslErrors(const QList<QSslError> &errors);
 
     /**
-      @deprecated
-      Emitted when we loose a previously established connection
-
-      Likely reasons: server closed the connection, loss of internet connectivity, etc...
-
-      For historical reasons, this signal is also emitted in the event of a failed connection, but
-      you should not rely on this behavior.
-
-      New implementations should use connectionFailed() to detect a failure to connect to the host,
-      and stateChanged() to detect a loss of connectivity.
-    */
-    KIMAP_DEPRECATED void connectionLost();
-
-    /**
       Emitted when the Session couldn't connect to the host.
 
       Likely reasons: invalid host address, no internet connectivity, firewall blocking rules,
@@ -112,8 +94,6 @@ Q_SIGNALS:
 
       Pending jobs in the queue will be deleted, and the first job in the queue will be failed. (ie:
       it will have its result signal emitted with a non-zero error code.)
-
-      @since 4.7
     */
     void connectionFailed();
 
@@ -125,8 +105,6 @@ Q_SIGNALS:
 
       If you want to receive the stateChanged arguments in your slot, you must register the State
       enum with @c Q_DECLARE_METATYPE(KIMAP::Session::State) and @c qRegisterMetaType<KIMAP::Session::State>();
-
-      @since 4.7
     */
     void stateChanged(KIMAP::Session::State newState, KIMAP::Session::State oldState);
 

@@ -405,7 +405,6 @@ void SessionPrivate::socketDisconnected()
 
     if (state != Session::Disconnected) {
         setState(Session::Disconnected);
-        emit q->connectionLost();
     } else {
         emit q->connectionFailed();
     }
@@ -437,7 +436,6 @@ void SessionPrivate::socketError(QAbstractSocket::SocketError error)
         closeSocket();
     } else {
         emit q->connectionFailed();
-        // emit q->connectionLost();    // KDE5: Remove this. We shouldn't emit connectionLost() if we weren't connected in the first place
         clearJobQueue();
     }
 }
