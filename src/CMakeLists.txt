@@ -40,7 +40,6 @@ set(kimap_SRCS
    selectjob.cpp
    session.cpp
    sessionlogger.cpp
-   sessionthread.cpp
    setacljob.cpp
    setmetadatajob.cpp
    setquotajob.cpp

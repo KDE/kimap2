@@ -32,8 +32,8 @@
 #include "loginjob.h"
 #include "message_p.h"
 #include "sessionlogger_p.h"
-#include "sessionthread_p.h"
 #include "rfccodecs.h"
+#include "imapstreamparser.h"
 
 Q_DECLARE_METATYPE(QSsl::SslProtocol)
 Q_DECLARE_METATYPE(QSslSocket::SslMode)
@@ -51,39 +51,56 @@ Session::Session(const QString &hostName, quint16 port, QObject *parent)
     d->isSocketConnected = false;
     d->state = Disconnected;
     d->jobRunning = false;
+    d->hostName =hostName;
+    d->port = port;
 
-    d->thread = new SessionThread(hostName, port);
-    connect(d->thread, &SessionThread::encryptionNegotiationResult, d, &SessionPrivate::onEncryptionNegotiationResult);
-    connect(d->thread, &SessionThread::sslErrors, d, &SessionPrivate::handleSslErrors);
-    connect(d->thread, &SessionThread::socketDisconnected, d, &SessionPrivate::socketDisconnected);
-    connect(d->thread, &SessionThread::responseReceived, d, &SessionPrivate::responseReceived);
-    connect(d->thread, &SessionThread::socketConnected, d, &SessionPrivate::socketConnected);
-    connect(d->thread, &SessionThread::socketActivity, d, &SessionPrivate::socketActivity);
-    connect(d->thread, &SessionThread::socketError, d, &SessionPrivate::socketError);
+    d->socket = new QSslSocket;
+    d->stream = new ImapStreamParser(d->socket);
+
+    connect(d->socket, &QIODevice::readyRead,
+            d, &SessionPrivate::readMessage, Qt::QueuedConnection);
+
+    // Delay the call to socketDisconnected so that it finishes disconnecting before we call reconnect()
+    connect(d->socket, &QSslSocket::disconnected,
+            d, &SessionPrivate::socketDisconnected, Qt::QueuedConnection);
+    connect(d->socket, &QSslSocket::connected,
+            d, &SessionPrivate::socketConnected);
+    connect(d->socket, static_cast<void (QSslSocket::*)(const QList<QSslError>&)>(&QSslSocket::sslErrors),
+            d, &SessionPrivate::handleSslErrors);
+    connect(d->socket, static_cast<void (QSslSocket::*)(QAbstractSocket::SocketError)>(&QSslSocket::error),
+            d, &SessionPrivate::socketError);
+
+    connect(d->socket, &QIODevice::bytesWritten,
+            d, &SessionPrivate::socketActivity);
+    connect(d->socket, &QSslSocket::encryptedBytesWritten,
+            d, &SessionPrivate::socketActivity);
+    connect(d->socket, &QIODevice::readyRead,
+            d, &SessionPrivate::socketActivity);
 
     d->socketTimer.setSingleShot(true);
     connect(&d->socketTimer, &QTimer::timeout,
             d, &SessionPrivate::onSocketTimeout);
 
     d->startSocketTimer();
+
+    QMetaObject::invokeMethod(d, "reconnect", Qt::QueuedConnection);
 }
 
 Session::~Session()
 {
     //Make sure all jobs know we're done
     d->socketDisconnected();
-    delete d->thread;
-    d->thread = Q_NULLPTR;
+    delete d;
 }
 
 QString Session::hostName() const
 {
-    return d->thread->hostName();
+    return d->hostName;
 }
 
 quint16 Session::port() const
 {
-    return d->thread->port();
+    return d->port;
 }
 
 Session::State Session::state() const
@@ -106,15 +123,31 @@ int Session::jobQueueSize() const
     return d->queue.size() + (d->jobRunning ? 1 : 0);
 }
 
-void KIMAP::Session::close()
+void Session::close()
 {
-    d->thread->closeSocket();
+    d->closeSocket();
 }
 
 void Session::ignoreErrors(const QList<QSslError> &errors)
 {
-    d->thread->ignoreErrors(errors);
+    d->socket->ignoreSslErrors(errors);
 }
+
+void Session::setTimeout(int timeout)
+{
+    d->setSocketTimeout(timeout * 1000);
+}
+
+int Session::timeout() const
+{
+    return d->socketTimeout() / 1000;
+}
+
+QString Session::selectedMailBox() const
+{
+    return QString::fromUtf8(d->currentMailBox);
+}
+
 
 SessionPrivate::SessionPrivate(Session *session)
     : QObject(session),
@@ -242,7 +275,7 @@ void SessionPrivate::responseReceived(const Message &response)
 
             startNext();
         } else {
-            thread->closeSocket();
+            closeSocket();
         }
         return;
     case Session::NotAuthenticated:
@@ -330,7 +363,8 @@ void SessionPrivate::sendData(const QByteArray &data)
         logger->dataSent(data);
     }
 
-    thread->sendData(data + "\r\n");
+    dataQueue.enqueue(data + "\r\n");
+    QMetaObject::invokeMethod(this, "writeDataQueue");
 }
 
 void SessionPrivate::socketConnected()
@@ -401,7 +435,7 @@ void SessionPrivate::socketError(QAbstractSocket::SocketError error)
     }
 
     if (isSocketConnected) {
-        thread->closeSocket();
+        closeSocket();
     } else {
         emit q->connectionFailed();
         // emit q->connectionLost();    // KDE5: Remove this. We shouldn't emit connectionLost() if we weren't connected in the first place
@@ -426,17 +460,18 @@ void SessionPrivate::clearJobQueue()
 
 void SessionPrivate::startSsl(const QSsl::SslProtocol &version)
 {
-    thread->startSsl(version);
+    Q_ASSERT(socket);
+    if (!socket) {
+        return;
+    }
+
+    connect(socket, &QSslSocket::encrypted, this, &SessionPrivate::sslConnected);
+    socket->startClientEncryption();
 }
 
-QString Session::selectedMailBox() const
+void SessionPrivate::sslConnected()
 {
-    return QString::fromUtf8(d->currentMailBox);
-}
-
-void SessionPrivate::onEncryptionNegotiationResult(bool isEncrypted)
-{
-    emit encryptionNegotiationResult(isEncrypted);
+    emit encryptionNegotiationResult(true);
 }
 
 void SessionPrivate::setSocketTimeout(int ms)
@@ -490,19 +525,95 @@ void SessionPrivate::restartSocketTimer()
 void SessionPrivate::onSocketTimeout()
 {
     qWarning() << "Socket timeout!";
-    // thread->closeSocket();
-    thread->abort();
+    socket->abort();
     socketDisconnected();
 }
 
-void Session::setTimeout(int timeout)
+void SessionPrivate::writeDataQueue()
 {
-    d->setSocketTimeout(timeout * 1000);
+    if (!socket) {
+        return;
+    }
+
+    while (!dataQueue.isEmpty()) {
+        socket->write(dataQueue.dequeue());
+    }
 }
 
-int Session::timeout() const
+void SessionPrivate::readMessage()
 {
-    return d->socketTimeout() / 1000;
+    if (!stream || stream->availableDataSize() == 0) {
+        return;
+    }
+
+    Message message;
+    QList<Message::Part> *payload = &message.content;
+
+    try {
+        while (!stream->atCommandEnd()) {
+            if (stream->hasString()) {
+                QByteArray string = stream->readString();
+                if (string == "NIL") {
+                    *payload << Message::Part(QList<QByteArray>());
+                } else {
+                    *payload << Message::Part(string);
+                }
+            } else if (stream->hasList()) {
+                *payload << Message::Part(stream->readParenthesizedList());
+            } else if (stream->hasResponseCode()) {
+                payload = &message.responseCode;
+            } else if (stream->atResponseCodeEnd()) {
+                payload = &message.content;
+            } else if (stream->hasLiteral()) {
+                QByteArray literal;
+                while (!stream->atLiteralEnd()) {
+                    literal += stream->readLiteralPart();
+                }
+                *payload << Message::Part(literal);
+            } else {
+                // Oops! Something really bad happened, we won't be able to recover
+                // so close the socket immediately
+                qWarning("Inconsistent state, probably due to some packet loss");
+                doCloseSocket();
+                return;
+            }
+        }
+
+        responseReceived(message);
+
+    } catch (KIMAP::ImapParserException e) {
+        qCWarning(KIMAP_LOG) << "The stream parser raised an exception:" << e.what();
+    }
+
+    if (stream->availableDataSize() > 1) {
+        QMetaObject::invokeMethod(this, "readMessage", Qt::QueuedConnection);
+    }
+
+}
+
+void SessionPrivate::closeSocket()
+{
+    QMetaObject::invokeMethod(this, "doCloseSocket", Qt::QueuedConnection);
+}
+
+void SessionPrivate::doCloseSocket()
+{
+    if (!socket) {
+        return;
+    }
+    qCDebug(KIMAP_LOG) << "close";
+    socket->close();
+}
+
+void SessionPrivate::reconnect()
+{
+    if (socket == Q_NULLPTR) { // threadQuit already called
+        return;
+    }
+    if (socket->state() != QSslSocket::ConnectedState &&
+        socket->state() != QSslSocket::ConnectingState) {
+        socket->connectToHost(hostName, port);
+    }
 }
 
 #include "moc_session.cpp"

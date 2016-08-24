@@ -37,7 +37,7 @@ namespace KIMAP
 class Job;
 struct Message;
 class SessionLogger;
-class SessionThread;
+class ImapStreamParser;
 
 class KIMAP_EXPORT SessionPrivate : public QObject
 {
@@ -61,13 +61,11 @@ Q_SIGNALS:
     void encryptionNegotiationResult(bool);
 
 private Q_SLOTS:
-    void onEncryptionNegotiationResult(bool isEncrypted);
     void onSocketTimeout();
 
     void doStartNext();
     void jobDone(KJob *);
     void jobDestroyed(QObject *);
-    void responseReceived(const KIMAP::Message &);
 
     void socketConnected();
     void socketDisconnected();
@@ -75,7 +73,15 @@ private Q_SLOTS:
     void socketActivity();
     void handleSslErrors(const QList<QSslError> &errors);
 
+    void closeSocket();
+    void doCloseSocket();
+    void reconnect();
+    void readMessage();
+    void writeDataQueue();
+    void sslConnected();
+
 private:
+    void responseReceived(const KIMAP::Message &);
     void startNext();
     void clearJobQueue();
     void setState(Session::State state);
@@ -90,7 +96,6 @@ private:
     Session::State state;
 
     SessionLogger *logger;
-    SessionThread *thread;
 
     bool jobRunning;
     Job *currentJob;
@@ -108,6 +113,14 @@ private:
 
     int socketTimerInterval;
     QTimer socketTimer;
+
+    QString hostName;
+    quint16 port;
+
+    QSslSocket *socket;
+    ImapStreamParser *stream;
+
+    QQueue<QByteArray> dataQueue;
 };
 
 }
