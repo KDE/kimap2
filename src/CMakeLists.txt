@@ -61,10 +61,10 @@ target_include_directories(KIMAP2 PUBLIC "$<BUILD_INTERFACE:${KIMAP2_SOURCE_DIR}
 target_link_libraries(KIMAP2
 PUBLIC
   KF5::Mime
+  KF5::CoreAddons
 PRIVATE
   Qt5Network
   KF5::Codecs
-  KF5::CoreAddons
   ${Sasl2_LIBRARIES}
 )
 
