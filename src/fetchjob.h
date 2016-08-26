@@ -125,8 +125,6 @@ public:
              *    everything but attachments).
              * -# Start another FetchJob with FetchScope::HeaderAndContent to fetch those parts.
              * -# At the request of the user, you can repeat the step above to fetch the attachments.
-             *
-             * @since 4.7
              */
             HeaderAndContent,
 
@@ -135,8 +133,6 @@ public:
              * and all RFC822 headers.
              *
              * The @p parts field is ignored when using this scope
-             *
-             * @since 4.12
              */
             FullHeaders
         };
@@ -158,6 +154,7 @@ public:
          * is fetched (all MIME parts together).
          */
         QList<QByteArray> parts;
+
         /**
          * Specify what message data should be fetched.
          */
@@ -170,9 +167,20 @@ public:
          *
          * Default value is 0 (ignored).
          *
-         * @since 4.12
          */
         quint64 changedSince;
+
+        /**
+        * Enables retrieving of Gmail-specific extensions
+        *
+        * The FETCH response will contain X-GM-MSGID, X-GM-THRID and X-GM-LABELS
+        *
+        * Do NOT enable this, unless talking to Gmail servers, otherwise the
+        * request may fail.
+        *
+        * @param enabled Whether the Gmail support should be enabled
+        */
+        bool gmailExtensionsEnabled;
     };
 
     explicit FetchJob(Session *session);
@@ -222,40 +230,6 @@ public:
      * Specifies what data will be fetched.
      */
     FetchScope scope() const;
-
-    // TODO: KF5: Move this to FetchScope
-    /**
-     * Enables retrieving of Gmail-specific extensions
-     *
-     * The FETCH response will contain X-GM-MSGID, X-GM-THRID and X-GM-LABELS
-     *
-     * Do NOT enable this, unless talking to Gmail servers, otherwise the
-     * request may fail.
-     *
-     * @param enabled Whether the Gmail support should be enabled
-     * @since 4.14
-     */
-    void setGmailExtensionsEnabled(bool enabled);
-
-    /**
-     * Returns whether Gmail support is enabled
-     *
-     * @since 4.14
-     * @see setGmailExtensionsEnabled()
-     */
-    bool setGmailExtensionsEnabled() const;
-
-    // XXX: [alexmerry, 2010-07-24]: BIC?  Behaviour change
-    /** @deprecated returns an empty map; use the signals instead */
-    KIMAP2_DEPRECATED QMap<qint64, MessagePtr> messages() const;
-    /** @deprecated returns an empty map; use the signals instead */
-    KIMAP2_DEPRECATED QMap<qint64, MessageParts> parts() const;
-    /** @deprecated returns an empty map; use the signals instead */
-    KIMAP2_DEPRECATED QMap<qint64, MessageFlags> flags() const;
-    /** @deprecated returns an empty map; use the signals instead */
-    KIMAP2_DEPRECATED QMap<qint64, qint64> sizes() const;
-    /** @deprecated returns an empty map; use the signals instead */
-    KIMAP2_DEPRECATED QMap<qint64, qint64> uids() const;
 
 Q_SIGNALS:
     /**

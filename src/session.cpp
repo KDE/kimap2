@@ -368,7 +368,6 @@ void SessionPrivate::sendData(const QByteArray &data)
 
 void SessionPrivate::socketConnected()
 {
-    qWarning() << "Socket connected";
     stopSocketTimer();
     isSocketConnected = true;
 
@@ -376,7 +375,6 @@ void SessionPrivate::socketConnected()
     if (!queue.isEmpty()) {
         KIMAP2::LoginJob *login = qobject_cast<KIMAP2::LoginJob *>(queue.first());
         if (login) {
-            qWarning() << "got a login job";
             willUseSsl = login->encryptionMode() != QSsl::UnknownProtocol;
             userName = login->userName();
         }
@@ -391,7 +389,6 @@ void SessionPrivate::socketConnected()
 
 void SessionPrivate::socketDisconnected()
 {
-    qWarning() << "Disconnected";
     if (!isSocketConnected) {
         return;
     }
@@ -493,7 +490,6 @@ int SessionPrivate::socketTimeout() const
 
 void SessionPrivate::startSocketTimer()
 {
-    // qWarning() << "Starting socket timer: " << socketTimerInterval;
     if (socketTimerInterval < 0) {
         return;
     }
@@ -521,7 +517,6 @@ void SessionPrivate::restartSocketTimer()
 
 void SessionPrivate::onSocketTimeout()
 {
-    qWarning() << "Socket timeout!";
     socket->abort();
     socketDisconnected();
 }
@@ -570,7 +565,7 @@ void SessionPrivate::readMessage()
             } else {
                 // Oops! Something really bad happened, we won't be able to recover
                 // so close the socket immediately
-                qWarning("Inconsistent state, probably due to some packet loss");
+                qCWarning(KIMAP2_LOG) << "Inconsistent state, probably due to some packet loss";
                 doCloseSocket();
                 return;
             }

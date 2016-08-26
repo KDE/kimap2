@@ -35,7 +35,6 @@ public:
         : JobPrivate(session, name)
         , q(job)
         , uidBased(false)
-        , gmailEnabled(false)
     { }
 
     ~FetchJobPrivate()
@@ -91,7 +90,6 @@ public:
     bool uidBased;
     FetchJob::FetchScope scope;
     QString selectedMailBox;
-    bool gmailEnabled;
 
     QTimer emitPendingsTimer;
     QMap<qint64, MessagePtr> pendingMessages;
@@ -107,7 +105,8 @@ using namespace KIMAP2;
 
 FetchJob::FetchScope::FetchScope():
     mode(FetchScope::Content),
-    changedSince(0)
+    changedSince(0),
+    gmailExtensionsEnabled(false)
 {
 
 }
@@ -159,43 +158,6 @@ FetchJob::FetchScope FetchJob::scope() const
 {
     Q_D(const FetchJob);
     return d->scope;
-}
-
-bool FetchJob::setGmailExtensionsEnabled() const
-{
-    Q_D(const FetchJob);
-    return d->gmailEnabled;
-}
-
-void FetchJob::setGmailExtensionsEnabled(bool enabled)
-{
-    Q_D(FetchJob);
-    d->gmailEnabled = enabled;
-}
-
-QMap<qint64, MessagePtr> FetchJob::messages() const
-{
-    return QMap<qint64, MessagePtr>();
-}
-
-QMap<qint64, MessageParts> FetchJob::parts() const
-{
-    return QMap<qint64, MessageParts>();
-}
-
-QMap<qint64, MessageFlags> FetchJob::flags() const
-{
-    return QMap<qint64, MessageFlags>();
-}
-
-QMap<qint64, qint64> FetchJob::sizes() const
-{
-    return QMap<qint64, qint64>();
-}
-
-QMap<qint64, qint64> FetchJob::uids() const
-{
-    return QMap<qint64, qint64>();
 }
 
 void FetchJob::doStart()
@@ -253,7 +215,7 @@ void FetchJob::doStart()
         break;
     }
 
-    if (d->gmailEnabled) {
+    if (d->scope.gmailExtensionsEnabled) {
         parameters += " X-GM-LABELS X-GM-MSGID X-GM-THRID";
     }
     parameters += ")";
