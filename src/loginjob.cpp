@@ -190,7 +190,7 @@ void LoginJob::doStart()
 {
     Q_D(LoginJob);
 
-    qCDebug(KIMAP2_LOG) << this;
+    qCDebug(KIMAP2_LOG) << "doStart" << this;
     // Don't authenticate on a session in the authenticated state
     if (session()->state() == Session::Authenticated || session()->state() == Session::Selected) {
         setError(UserDefinedError);
@@ -200,6 +200,7 @@ void LoginJob::doStart()
     }
 
     if (d->encryptionMode == QSsl::UnknownProtocol) {
+        qCDebug(KIMAP2_LOG) << "Starting with plain";
         if (d->authMode.isEmpty()) {
             d->sendPlainLogin();
         } else {
@@ -209,10 +210,11 @@ void LoginJob::doStart()
         }
     } else {
         if (d->startTls) {
-            qWarning() << "STARTTLS";
+            qCDebug(KIMAP2_LOG) << "Starting with tls";
             d->authState = LoginJobPrivate::StartTls;
             d->tags << d->sessionInternal()->sendCommand("STARTTLS");
         } else {
+            qCDebug(KIMAP2_LOG) << "Starting with Ssl";
             d->sessionInternal()->startSsl(d->encryptionMode);
         }
     }

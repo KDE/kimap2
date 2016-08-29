@@ -73,6 +73,9 @@ Session::Session(const QString &hostName, quint16 port, QObject *parent)
             d, &SessionPrivate::socketActivity);
     connect(d->socket.data(), &QIODevice::readyRead,
             d, &SessionPrivate::socketActivity);
+    connect(d->socket.data(), &QAbstractSocket::stateChanged, [](QAbstractSocket::SocketState state) {
+        qCDebug(KIMAP2_LOG) << "Socket state changed: " << state;
+    });
 
     d->socketTimer.setSingleShot(true);
     connect(&d->socketTimer, &QTimer::timeout,
@@ -367,6 +370,7 @@ void SessionPrivate::sendData(const QByteArray &data)
 
 void SessionPrivate::socketConnected()
 {
+    qCDebug(KIMAP2_LOG) << "Socket connected.";
     stopSocketTimer();
     isSocketConnected = true;
 
@@ -459,11 +463,18 @@ void SessionPrivate::startSsl(const QSsl::SslProtocol &version)
     }
 
     connect(socket.data(), &QSslSocket::encrypted, this, &SessionPrivate::sslConnected);
-    socket->startClientEncryption();
+    if (socket->state() == QAbstractSocket::ConnectedState) {
+        qCDebug(KIMAP2_LOG) << "Starting client encryption";
+        Q_ASSERT(socket->mode() == QSslSocket::UnencryptedMode);
+        socket->startClientEncryption();
+    } else {
+        qWarning() << "The socket is not yet connected";
+    }
 }
 
 void SessionPrivate::sslConnected()
 {
+    qCDebug(KIMAP2_LOG) << "ssl is connected";
     emit encryptionNegotiationResult(true);
 }
 
@@ -522,6 +533,7 @@ void SessionPrivate::onSocketTimeout()
 
 void SessionPrivate::writeDataQueue()
 {
+    Q_ASSERT(socket);
     if (!socket) {
         return;
     }
@@ -534,6 +546,7 @@ void SessionPrivate::writeDataQueue()
 void SessionPrivate::readMessage()
 {
     if (!stream || stream->availableDataSize() == 0) {
+        qCWarning(KIMAP2_LOG) << "no stream";
         return;
     }
 
@@ -603,6 +616,7 @@ void SessionPrivate::reconnect()
     }
     if (socket->state() != QSslSocket::ConnectedState &&
         socket->state() != QSslSocket::ConnectingState) {
+        qCDebug(KIMAP2_LOG) << "Connecting to: " << hostName << port;
         socket->connectToHost(hostName, port);
     }
 }
