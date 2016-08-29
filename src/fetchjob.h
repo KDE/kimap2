@@ -177,8 +177,6 @@ public:
         *
         * Do NOT enable this, unless talking to Gmail servers, otherwise the
         * request may fail.
-        *
-        * @param enabled Whether the Gmail support should be enabled
         */
         bool gmailExtensionsEnabled;
     };
@@ -291,7 +289,6 @@ Q_SIGNALS:
      *                 FetchScope::Headers or FetchScope::Structure
      *
      * @overload
-     * @since 4.14
      */
     void headersReceived(const QString &mailBox,
                          const QMap<qint64, qint64> &uids,
@@ -335,7 +332,6 @@ Q_SIGNALS:
      * @param messages a map from message sequence numbers to message contents
      *
      * @overload
-     * @since 4.14
      */
     void messagesReceived(const QString &mailBox,
                           const QMap<qint64, qint64> &uids,
@@ -374,7 +370,6 @@ Q_SIGNALS:
       * @param parts    a map from message sequence numbers to message part collections
       *
       * @overload
-      * @since 4.14
       */
     void partsReceived(const QString &mailBox,
                        const QMap<qint64, qint64> &uids,
