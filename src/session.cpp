@@ -45,7 +45,7 @@ Session::Session(const QString &hostName, quint16 port, QObject *parent)
     : QObject(parent), d(new SessionPrivate(this))
 {
     if (!qEnvironmentVariableIsEmpty("KIMAP2_LOGFILE")) {
-        d->logger = QSharedPointer<SessionLogger>::create();
+        d->logger.reset(new SessionLogger);
     }
 
     d->isSocketConnected = false;
@@ -53,9 +53,6 @@ Session::Session(const QString &hostName, quint16 port, QObject *parent)
     d->jobRunning = false;
     d->hostName =hostName;
     d->port = port;
-
-    d->socket = QSharedPointer<QSslSocket>::create();
-    d->stream = QSharedPointer<ImapStreamParser>::create(d->socket.data());
 
     connect(d->socket.data(), &QIODevice::readyRead,
             d, &SessionPrivate::readMessage, Qt::QueuedConnection);
@@ -156,7 +153,9 @@ SessionPrivate::SessionPrivate(Session *session)
       logger(Q_NULLPTR),
       currentJob(Q_NULLPTR),
       tagCount(0),
-      socketTimerInterval(30000)   // By default timeouts on 30s
+      socketTimerInterval(30000),   // By default timeouts on 30s
+      socket(new QSslSocket),
+      stream(new ImapStreamParser(socket.data()))
 {
 }
 
