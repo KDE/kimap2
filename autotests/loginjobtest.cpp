@@ -41,22 +41,28 @@ private Q_SLOTS:
 
         QList<QByteArray> scenario;
         scenario << FakeServer::greeting()
-                 << "C: A000001 LOGIN \"user\" \"password\""
-                 << "S: A000001 OK User logged in";
+                 << "C: A000001 CAPABILITY"
+                 << "S: A000001 OK"
+                 << "C: A000002 LOGIN \"user\" \"password\""
+                 << "S: A000002 OK User logged in";
 
         QTest::newRow("success") << "user" << "password" << scenario;
 
         scenario.clear();
         scenario << FakeServer::greeting()
-                 << "C: A000001 LOGIN \"user_bad\" \"password\""
-                 << "S: A000001 NO Login failed: authentication failure";
+                 << "C: A000001 CAPABILITY"
+                 << "S: A000001 OK"
+                 << "C: A000002 LOGIN \"user_bad\" \"password\""
+                 << "S: A000002 NO Login failed: authentication failure";
 
         QTest::newRow("wrong login") << "user_bad" << "password" << scenario;
 
         scenario.clear();
         scenario << FakeServer::greeting()
-                 << "C: A000001 LOGIN \"user\" \"aa\\\"bb\\\\cc[dd ee\""
-                 << "S: A000001 OK User logged in";
+                 << "C: A000001 CAPABILITY"
+                 << "S: A000001 OK"
+                 << "C: A000002 LOGIN \"user\" \"aa\\\"bb\\\\cc[dd ee\""
+                 << "S: A000002 OK User logged in";
 
         QTest::newRow("special chars") << "user" << "aa\"bb\\cc[dd ee" << scenario;
 
@@ -100,6 +106,8 @@ private Q_SLOTS:
 
         QList<QByteArray> scenario;
         scenario << FakeServer::greeting()
+                 << "C: A000001 CAPABILITY"
+                 << "S: A000001 OK"
                  << "C: A000001 AUTHENTICATE PLAIN"
                  << "S: A000001 OK (success)"
                  << "C: A000001 LOGIN \"proxy\" \"user\" \"password\""
@@ -202,8 +210,6 @@ private Q_SLOTS:
             scenario << FakeServer::greeting()
                      << "C: A000001 STARTTLS"
                      << "S: A000001 OK"
-                     << "C: A000002 CAPABILITY"
-                     << "S: A000002 OK"
                      << "C: A000003 LOGIN \"user\" \"password\""
                      << "S: A000003 OK";
 

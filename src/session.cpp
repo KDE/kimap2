@@ -51,7 +51,7 @@ Session::Session(const QString &hostName, quint16 port, QObject *parent)
     d->isSocketConnected = false;
     d->state = Disconnected;
     d->jobRunning = false;
-    d->hostName =hostName;
+    d->hostName = hostName;
     d->port = port;
 
     connect(d->socket.data(), &QIODevice::readyRead,
@@ -178,10 +178,7 @@ void SessionPrivate::addJob(Job *job)
 
     QObject::connect(job, &KJob::result, this, &SessionPrivate::jobDone);
     QObject::connect(job, &QObject::destroyed, this, &SessionPrivate::jobDestroyed);
-
-    if (state != Session::Disconnected) {
-        startNext();
-    }
+    startNext();
 }
 
 void SessionPrivate::startNext()
@@ -258,23 +255,17 @@ void SessionPrivate::responseReceived(const Message &response)
             stopSocketTimer();
         }
         if (code == "OK") {
+            Message simplified = response;
+            simplified.content.removeFirst(); // Strip the tag
+            simplified.content.removeFirst(); // Strip the code
+            greeting = simplified.toString().trimmed(); // Save the server greeting
             setState(Session::NotAuthenticated);
-
-            Message simplified = response;
-            simplified.content.removeFirst(); // Strip the tag
-            simplified.content.removeFirst(); // Strip the code
-            greeting = simplified.toString().trimmed(); // Save the server greeting
-
-            startNext();
         } else if (code == "PREAUTH") {
-            setState(Session::Authenticated);
-
             Message simplified = response;
             simplified.content.removeFirst(); // Strip the tag
             simplified.content.removeFirst(); // Strip the code
             greeting = simplified.toString().trimmed(); // Save the server greeting
-
-            startNext();
+            setState(Session::Authenticated);
         } else {
             closeSocket();
         }
@@ -373,21 +364,7 @@ void SessionPrivate::socketConnected()
     qCDebug(KIMAP2_LOG) << "Socket connected.";
     stopSocketTimer();
     isSocketConnected = true;
-
-    bool willUseSsl = false;
-    if (!queue.isEmpty()) {
-        KIMAP2::LoginJob *login = qobject_cast<KIMAP2::LoginJob *>(queue.first());
-        if (login) {
-            willUseSsl = login->encryptionMode() != QSsl::UnknownProtocol;
-            userName = login->userName();
-        }
-    }
-
-    if (state == Session::Disconnected && willUseSsl) {
-        startNext();
-    } else {
-        startSocketTimer();
-    }
+    startNext();
 }
 
 void SessionPrivate::socketDisconnected()

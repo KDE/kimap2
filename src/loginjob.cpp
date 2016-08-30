@@ -56,7 +56,7 @@ public:
         Authenticate
     };
 
-    LoginJobPrivate(LoginJob *job, Session *session, const QString &name) : JobPrivate(session, name), q(job), encryptionMode(QSsl::UnknownProtocol), authState(Login), plainLoginDisabled(false)
+    LoginJobPrivate(LoginJob *job, Session *session, const QString &name) : JobPrivate(session, name), q(job), encryptionMode(QSsl::UnknownProtocol), startTls(false), authState(Login), plainLoginDisabled(false)
     {
         conn = Q_NULLPTR;
         client_interact = Q_NULLPTR;
@@ -69,6 +69,8 @@ public:
     bool answerChallenge(const QByteArray &data);
     void sslResponse(bool response);
     void saveServerGreeting(const Message &response);
+    void login();
+    void retrieveCapabilities();
 
     LoginJob *q;
 
@@ -186,6 +188,32 @@ void LoginJob::setPassword(const QString &password)
     d->password = password;
 }
 
+/*
+ * The IMAP authentication procedure is unfortunately ridiculously complicated due to the many different options:
+ *
+ * An IMAP Session always has the following structure:
+ * * Connection is established.
+ * * Server sends greeting.
+ * * Client authenticates somehow.
+ * * .....
+ *
+ * If the we have a plain connection it's simple:
+ * * Wait for the greeting
+ * * Login using the chosen authentication mechanism
+ *
+ * If we're using TLS (without STARTTLS, so directly):
+ * * Immediately initiate TLS handshake.
+ * * Wait for the greeting
+ * * Get CAPABILITIES to figure out which AUTH mechs are supported
+ * * Login using the chosen authentication mechanism
+ *
+ * If we're using TLS with STARTTLS:
+ * * Wait for the greeting (on the unencrypted connection)
+ * * Send STARTTLS and wait for OK
+ * * Initiate TLS handshake
+ * * Get CAPABILITIES to figure out which AUTH mechs are supported
+ * * Login using the chosen authentication mechanism
+ */
 void LoginJob::doStart()
 {
     Q_D(LoginJob);
@@ -199,25 +227,61 @@ void LoginJob::doStart()
         return;
     }
 
-    if (d->encryptionMode == QSsl::UnknownProtocol) {
-        qCDebug(KIMAP2_LOG) << "Starting with plain";
-        if (d->authMode.isEmpty()) {
-            d->sendPlainLogin();
-        } else {
-            if (!d->startAuthentication()) {
-                emitResult();
-            }
-        }
-    } else {
-        if (d->startTls) {
-            qCDebug(KIMAP2_LOG) << "Starting with tls";
-            d->authState = LoginJobPrivate::StartTls;
-            d->tags << d->sessionInternal()->sendCommand("STARTTLS");
-        } else {
-            qCDebug(KIMAP2_LOG) << "Starting with Ssl";
+    if (session()->state() == Session::Disconnected) {
+        auto guard = new QObject(this);
+        QObject::connect(session(), &Session::stateChanged, guard, [d, guard](KIMAP2::Session::State newState, KIMAP2::Session::State) {
+            qCDebug(KIMAP2_LOG) << "Session state changed" << newState;
+            d->login();
+            delete guard;
+        });
+        if (!d->startTls && d->encryptionMode != QSsl::UnknownProtocol) {
+            //We have to encrypt for the greeting
             d->sessionInternal()->startSsl(d->encryptionMode);
         }
+        //We wait for the server greeting
+        return;
+    } else {
+        qCDebug(KIMAP2_LOG) << "Session is ready, carring on";
+        //The session is ready, we can carry on.
+        d->login();
     }
+
+}
+
+void LoginJobPrivate::login()
+{
+    if (startTls) {
+        //With STARTTLS we have to try to upgrade our connection before the login
+        qCDebug(KIMAP2_LOG) << "Starting with tls";
+        authState = LoginJobPrivate::StartTls;
+        tags << sessionInternal()->sendCommand("STARTTLS");
+        return;
+    } else {
+        //If this is unecrypted we can retrieve capabilties. Otherwise we wait for the sslResponse.
+        if (encryptionMode == QSsl::UnknownProtocol) {
+            retrieveCapabilities();
+        }
+    }
+
+}
+
+void LoginJobPrivate::sslResponse(bool response)
+{
+    qCWarning(KIMAP2_LOG) << "Got an ssl response " << response;
+    if (response) {
+        retrieveCapabilities();
+    } else {
+        q->setError(LoginJob::UserDefinedError);
+        q->setErrorText(QString::fromUtf8("Login failed, TLS negotiation failed."));
+        encryptionMode = QSsl::UnknownProtocol;
+        q->emitResult();
+    }
+}
+
+void LoginJobPrivate::retrieveCapabilities()
+{
+    authState = LoginJobPrivate::Capability;
+    tags << sessionInternal()->sendCommand("CAPABILITY");
 }
 
 void LoginJob::handleResponse(const Message &response)
@@ -332,9 +396,9 @@ void LoginJob::handleResponse(const Message &response)
         break;
 
     case OK:
-
         switch (d->authState) {
         case LoginJobPrivate::StartTls:
+            //Start encryption and wait for sslResponse
             d->sessionInternal()->startSsl(d->encryptionMode);
             break;
         case LoginJobPrivate::Capability:
@@ -485,19 +549,6 @@ bool LoginJobPrivate::answerChallenge(const QByteArray &data)
     sessionInternal()->sendData(challenge);
 
     return true;
-}
-
-void LoginJobPrivate::sslResponse(bool response)
-{
-    if (response) {
-        authState = LoginJobPrivate::Capability;
-        tags << sessionInternal()->sendCommand("CAPABILITY");
-    } else {
-        q->setError(LoginJob::UserDefinedError);
-        q->setErrorText(QString::fromUtf8("Login failed, TLS negotiation failed."));
-        encryptionMode = QSsl::UnknownProtocol;
-        q->emitResult();
-    }
 }
 
 void LoginJob::setEncryptionMode(QSsl::SslProtocol mode, bool startTls)
