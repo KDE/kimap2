@@ -51,7 +51,7 @@ public:
 
     void addJob(Job *job);
     QByteArray sendCommand(const QByteArray &command, const QByteArray &args = QByteArray());
-    void startSsl(const QSsl::SslProtocol &version);
+    void startSsl(QSsl::SslProtocol version);
     void sendData(const QByteArray &data);
 
     void setSocketTimeout(int ms);

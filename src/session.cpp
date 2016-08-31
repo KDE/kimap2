@@ -432,12 +432,13 @@ void SessionPrivate::clearJobQueue()
     emit q->jobQueueSizeChanged(0);
 }
 
-void SessionPrivate::startSsl(const QSsl::SslProtocol &version)
+void SessionPrivate::startSsl(QSsl::SslProtocol protocol)
 {
     Q_ASSERT(socket);
     if (!socket) {
         return;
     }
+    socket->setProtocol(protocol);
 
     connect(socket.data(), &QSslSocket::encrypted, this, &SessionPrivate::sslConnected);
     if (socket->state() == QAbstractSocket::ConnectedState) {
