@@ -267,6 +267,7 @@ void SessionPrivate::responseReceived(const Message &response)
             greeting = simplified.toString().trimmed(); // Save the server greeting
             setState(Session::Authenticated);
         } else {
+            //We have been rejected
             closeSocket();
         }
         return;
@@ -369,9 +370,7 @@ void SessionPrivate::socketConnected()
 
 void SessionPrivate::socketDisconnected()
 {
-    if (!isSocketConnected) {
-        return;
-    }
+    qCDebug(KIMAP2_LOG) << "Socket disconnected." << isSocketConnected;
     if (socketTimer.isActive()) {
         stopSocketTimer();
     }
@@ -398,6 +397,7 @@ void SessionPrivate::socketActivity()
 
 void SessionPrivate::socketError(QAbstractSocket::SocketError error)
 {
+    qCDebug(KIMAP2_LOG) << "Socket error." << error;
     if (socketTimer.isActive()) {
         stopSocketTimer();
     }
@@ -523,7 +523,6 @@ void SessionPrivate::writeDataQueue()
 void SessionPrivate::readMessage()
 {
     if (!stream || stream->availableDataSize() == 0) {
-        qCWarning(KIMAP2_LOG) << "no stream";
         return;
     }
 
