@@ -91,7 +91,6 @@ public:
     FetchJob::FetchScope scope;
     QString selectedMailBox;
 
-    QTimer emitPendingsTimer;
     QMap<qint64, MessagePtr> pendingMessages;
     QMap<qint64, MessageParts> pendingParts;
     QMap<qint64, MessageFlags> pendingFlags;
@@ -115,8 +114,6 @@ FetchJob::FetchJob(Session *session)
     : Job(*new FetchJobPrivate(this, session, "Fetch"))
 {
     Q_D(FetchJob);
-    connect(&d->emitPendingsTimer, SIGNAL(timeout()),
-            this, SLOT(emitPendings()));
 }
 
 FetchJob::~FetchJob()
@@ -229,7 +226,6 @@ void FetchJob::doStart()
         command = "UID " + command;
     }
 
-    d->emitPendingsTimer.start(100);
     d->selectedMailBox = d->m_session->selectedMailBox();
     d->tags << d->sessionInternal()->sendCommand(command, parameters);
 }
@@ -243,7 +239,6 @@ void FetchJob::handleResponse(const Message &response)
     if (!response.content.isEmpty() &&
             d->tags.size() == 1 &&
             d->tags.contains(response.content.first().toString())) {
-        d->emitPendingsTimer.stop();
         d->emitPendings();
     }
 
@@ -350,6 +345,7 @@ void FetchJob::handleResponse(const Message &response)
                 d->pendingMessages[id] = message;
             }
         }
+        d->emitPendings();
     }
 }
 
