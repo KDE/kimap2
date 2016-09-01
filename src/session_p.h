@@ -74,7 +74,6 @@ private Q_SLOTS:
     void handleSslErrors(const QList<QSslError> &errors);
 
     void closeSocket();
-    void doCloseSocket();
     void reconnect();
     void readMessage();
     void writeDataQueue();

@@ -57,8 +57,6 @@ Session::Session(const QString &hostName, quint16 port, QObject *parent)
     connect(d->socket.data(), &QIODevice::readyRead,
             d, &SessionPrivate::readMessage, Qt::QueuedConnection);
 
-    connect(d->socket.data(), &QSslSocket::disconnected,
-            d, &SessionPrivate::socketDisconnected, Qt::QueuedConnection);
     connect(d->socket.data(), &QSslSocket::connected,
             d, &SessionPrivate::socketConnected);
     connect(d->socket.data(), static_cast<void (QSslSocket::*)(const QList<QSslError>&)>(&QSslSocket::sslErrors),
@@ -72,8 +70,12 @@ Session::Session(const QString &hostName, quint16 port, QObject *parent)
             d, &SessionPrivate::socketActivity);
     connect(d->socket.data(), &QIODevice::readyRead,
             d, &SessionPrivate::socketActivity);
-    connect(d->socket.data(), &QAbstractSocket::stateChanged, [](QAbstractSocket::SocketState state) {
+    connect(d->socket.data(), &QAbstractSocket::stateChanged, [this](QAbstractSocket::SocketState state) {
         qCDebug(KIMAP2_LOG) << "Socket state changed: " << state;
+        //The disconnected signal will not fire if we fail to lookup the host, but this will.
+        if (state == QAbstractSocket::UnconnectedState) {
+            d->socketDisconnected();
+        }
     });
 
     d->socketTimer.setSingleShot(true);
@@ -88,7 +90,7 @@ Session::Session(const QString &hostName, quint16 port, QObject *parent)
 Session::~Session()
 {
     //Make sure all jobs know we're done
-    d->socketDisconnected();
+    d->clearJobQueue();
     delete d;
 }
 
@@ -360,7 +362,6 @@ void SessionPrivate::sendData(const QByteArray &data)
 void SessionPrivate::socketConnected()
 {
     qCDebug(KIMAP2_LOG) << "Socket connected.";
-    stopSocketTimer();
     isSocketConnected = true;
     startNext();
 }
@@ -404,9 +405,6 @@ void SessionPrivate::socketError(QAbstractSocket::SocketError error)
 
     if (isSocketConnected) {
         closeSocket();
-    } else {
-        emit q->connectionFailed();
-        clearJobQueue();
     }
 }
 
@@ -535,7 +533,7 @@ void SessionPrivate::readMessage()
                 // Oops! Something really bad happened, we won't be able to recover
                 // so close the socket immediately
                 qCWarning(KIMAP2_LOG) << "Inconsistent state, probably due to some packet loss";
-                doCloseSocket();
+                closeSocket();
                 return;
             }
         }
@@ -554,12 +552,6 @@ void SessionPrivate::readMessage()
 
 void SessionPrivate::closeSocket()
 {
-    QMetaObject::invokeMethod(this, "doCloseSocket", Qt::QueuedConnection);
-}
-
-void SessionPrivate::doCloseSocket()
-{
-    qCDebug(KIMAP2_LOG) << "close";
     socket->close();
 }
 
