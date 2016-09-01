@@ -219,13 +219,6 @@ void LoginJob::doStart()
     Q_D(LoginJob);
 
     qCDebug(KIMAP2_LOG) << "doStart" << this;
-    // Don't authenticate on a session in the authenticated state
-    if (session()->state() == Session::Authenticated || session()->state() == Session::Selected) {
-        setError(UserDefinedError);
-        setErrorText(QString::fromUtf8("IMAP session in the wrong state for authentication"));
-        emitResult();
-        return;
-    }
 
     if (session()->state() == Session::Disconnected) {
         auto guard = new QObject(this);
@@ -250,6 +243,14 @@ void LoginJob::doStart()
 
 void LoginJobPrivate::login()
 {
+    // Don't authenticate on a session in the authenticated state
+    if (q->session()->state() == Session::Authenticated || q->session()->state() == Session::Selected) {
+        q->setError(LoginJob::UserDefinedError);
+        q->setErrorText(QString::fromUtf8("IMAP session in the wrong state for authentication"));
+        q->emitResult();
+        return;
+    }
+
     if (startTls) {
         //With STARTTLS we have to try to upgrade our connection before the login
         qCDebug(KIMAP2_LOG) << "Starting with tls";
@@ -413,6 +414,10 @@ void LoginJob::handleResponse(const Message &response)
                 }
             } else {
                 bool authModeSupported = false;
+                //PLAIN is always supported as defined in the standard. We should also get an AUTH= capability, but in case a server doesn't properly announce it we'll just accept it anyways.
+                if (d->authMode == "PLAIN") {
+                    authModeSupported = true;
+                }
                 //find the selected SASL authentication method
                 Q_FOREACH (const QString &capability, d->capabilities) {
                     if (capability.startsWith(QLatin1String("AUTH="))) {
