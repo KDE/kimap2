@@ -492,7 +492,6 @@ void SessionPrivate::restartSocketTimer()
 void SessionPrivate::onSocketTimeout()
 {
     socket->abort();
-    socketDisconnected();
 }
 
 void SessionPrivate::writeDataQueue()
