@@ -182,6 +182,18 @@ public:
 
     void setData(const QByteArray &data);
 
+    bool parse();
+
+    void saveState();
+    void restoreState();
+
+    bool insufficientData();
+
+    /**
+     * Remove already read data from the internal buffer if necessary.
+     */
+    void trimBuffer();
+
 private:
     void stripLeadingSpaces();
     QByteArray parseQuotedString();
@@ -199,16 +211,16 @@ private:
      */
     void sendContinuationResponse(qint64 size);
 
-    /**
-     * Remove already read data from the internal buffer if necessary.
-     */
-    void trimBuffer();
+    bool dataAvailable() const;
+    bool dataAvailable(int pos) const;
 
     QIODevice *m_socket;
     bool m_isServerModeEnabled;
     QByteArray m_data;
     int m_position;
+    int m_savedState;
     qint64 m_literalSize;
+    bool m_insufficientData;
 };
 
 }

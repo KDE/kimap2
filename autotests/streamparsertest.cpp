@@ -73,6 +73,7 @@ private Q_SLOTS:
         QBuffer readSocket(&buffer);
         readSocket.open(QBuffer::ReadOnly);
         ImapStreamParser parser(&readSocket);
+        parser.parse();
 
         QVERIFY(parser.availableDataSize() != 0);
 
@@ -95,7 +96,7 @@ private Q_SLOTS:
     void testLeadingNewline()
     {
         /**
-        * Test a the special case when the CRLF after the string octet count, is separated and not initially loaded into the buffer.
+        * Test the special case when the CRLF after the string octet count is separated and not initially loaded into the buffer.
         */
         QByteArray buffer;
         QBuffer socket(&buffer);
@@ -106,6 +107,7 @@ private Q_SLOTS:
         QBuffer readSocket(&buffer);
         readSocket.open(QBuffer::ReadOnly);
         ImapStreamParser parser(&readSocket);
+        parser.parse();
 
         QVERIFY(parser.availableDataSize() != 0);
 
@@ -123,6 +125,7 @@ private Q_SLOTS:
 
         QVERIFY(socket.write(part3) != -1);
         QVERIFY(socket.write(part4) != -1);
+        parser.parse();
 
         QVERIFY(parser.hasList());
         *payload << Message::Part(parser.readParenthesizedList());
@@ -146,6 +149,7 @@ private Q_SLOTS:
         QBuffer readSocket(&buffer);
         readSocket.open(QBuffer::ReadOnly);
         ImapStreamParser parser(&readSocket);
+        parser.parse();
 
         QVERIFY(parser.availableDataSize() != 0);
 

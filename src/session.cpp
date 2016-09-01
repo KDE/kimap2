@@ -54,8 +54,7 @@ Session::Session(const QString &hostName, quint16 port, QObject *parent)
     d->hostName = hostName;
     d->port = port;
 
-    connect(d->socket.data(), &QIODevice::readyRead,
-            d, &SessionPrivate::readMessage, Qt::QueuedConnection);
+    connect(d->socket.data(), &QIODevice::readyRead, d, &SessionPrivate::readMessage);
 
     connect(d->socket.data(), &QSslSocket::connected,
             d, &SessionPrivate::socketConnected);
@@ -509,16 +508,27 @@ void SessionPrivate::readMessage()
     QList<Message::Part> *payload = &message.content;
 
     try {
+        if (!stream->parse()) {
+            //No CRLF found
+            return;
+        }
+        stream->saveState();
+
         while (!stream->atCommandEnd()) {
             if (stream->hasString()) {
-                QByteArray string = stream->readString();
-                if (string == "NIL") {
-                    *payload << Message::Part(QList<QByteArray>());
-                } else {
-                    *payload << Message::Part(string);
+                const auto string = stream->readString();
+                if (!stream->insufficientData()) {
+                    if (string == "NIL") {
+                        *payload << Message::Part(QList<QByteArray>());
+                    } else {
+                        *payload << Message::Part(string);
+                    }
                 }
             } else if (stream->hasList()) {
-                *payload << Message::Part(stream->readParenthesizedList());
+                const auto list = stream->readParenthesizedList();
+                if (!stream->insufficientData()) {
+                    *payload << Message::Part(list);
+                }
             } else if (stream->hasResponseCode()) {
                 payload = &message.responseCode;
             } else if (stream->atResponseCodeEnd()) {
@@ -528,15 +538,20 @@ void SessionPrivate::readMessage()
                 while (!stream->atLiteralEnd()) {
                     literal += stream->readLiteralPart();
                 }
-                *payload << Message::Part(literal);
+                if (!stream->insufficientData()) {
+                    *payload << Message::Part(literal);
+                }
             } else {
-                // Oops! Something really bad happened, we won't be able to recover
-                // so close the socket immediately
-                qCWarning(KIMAP2_LOG) << "Inconsistent state, probably due to some packet loss";
-                closeSocket();
                 return;
             }
+            if (stream->insufficientData()) {
+                stream->restoreState();
+                return;
+            } else {
+                stream->trimBuffer();
+            }
         }
+        stream->trimBuffer();
 
         responseReceived(message);
 
