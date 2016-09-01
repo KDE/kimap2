@@ -57,7 +57,6 @@ Session::Session(const QString &hostName, quint16 port, QObject *parent)
     connect(d->socket.data(), &QIODevice::readyRead,
             d, &SessionPrivate::readMessage, Qt::QueuedConnection);
 
-    // Delay the call to socketDisconnected so that it finishes disconnecting before we call reconnect()
     connect(d->socket.data(), &QSslSocket::disconnected,
             d, &SessionPrivate::socketDisconnected, Qt::QueuedConnection);
     connect(d->socket.data(), &QSslSocket::connected,
@@ -251,9 +250,7 @@ void SessionPrivate::responseReceived(const Message &response)
 
     switch (state) {
     case Session::Disconnected:
-        if (socketTimer.isActive()) {
-            stopSocketTimer();
-        }
+        stopSocketTimer();
         if (code == "OK") {
             Message simplified = response;
             simplified.content.removeFirst(); // Strip the tag
@@ -371,9 +368,7 @@ void SessionPrivate::socketConnected()
 void SessionPrivate::socketDisconnected()
 {
     qCDebug(KIMAP2_LOG) << "Socket disconnected." << isSocketConnected;
-    if (socketTimer.isActive()) {
-        stopSocketTimer();
-    }
+    stopSocketTimer();
 
     if (logger && (state == Session::Authenticated || state == Session::Selected)) {
         logger->disconnectionOccured();
@@ -398,9 +393,7 @@ void SessionPrivate::socketActivity()
 void SessionPrivate::socketError(QAbstractSocket::SocketError error)
 {
     qCDebug(KIMAP2_LOG) << "Socket error." << error;
-    if (socketTimer.isActive()) {
-        stopSocketTimer();
-    }
+    stopSocketTimer();
 
     if (currentJob) {
         currentJob->setSocketError(error);
@@ -434,12 +427,7 @@ void SessionPrivate::clearJobQueue()
 
 void SessionPrivate::startSsl(QSsl::SslProtocol protocol)
 {
-    Q_ASSERT(socket);
-    if (!socket) {
-        return;
-    }
     socket->setProtocol(protocol);
-
     connect(socket.data(), &QSslSocket::encrypted, this, &SessionPrivate::sslConnected);
     if (socket->state() == QAbstractSocket::ConnectedState) {
         qCDebug(KIMAP2_LOG) << "Starting client encryption";
@@ -497,9 +485,7 @@ void SessionPrivate::stopSocketTimer()
 
 void SessionPrivate::restartSocketTimer()
 {
-    if (socketTimer.isActive()) {
-        stopSocketTimer();
-    }
+    stopSocketTimer();
     startSocketTimer();
 }
 
@@ -511,11 +497,6 @@ void SessionPrivate::onSocketTimeout()
 
 void SessionPrivate::writeDataQueue()
 {
-    Q_ASSERT(socket);
-    if (!socket) {
-        return;
-    }
-
     while (!dataQueue.isEmpty()) {
         socket->write(dataQueue.dequeue());
     }
@@ -579,23 +560,18 @@ void SessionPrivate::closeSocket()
 
 void SessionPrivate::doCloseSocket()
 {
-    if (!socket) {
-        return;
-    }
     qCDebug(KIMAP2_LOG) << "close";
     socket->close();
 }
 
 void SessionPrivate::reconnect()
 {
-    if (socket == Q_NULLPTR) { // threadQuit already called
-        return;
-    }
-    if (socket->state() != QSslSocket::ConnectedState &&
-        socket->state() != QSslSocket::ConnectingState) {
+    if (socket->state() == QSslSocket::ConnectedState &&
+        socket->state() == QSslSocket::ConnectingState) {
         qCDebug(KIMAP2_LOG) << "Connecting to: " << hostName << port;
-        socket->connectToHost(hostName, port);
     }
+    qCDebug(KIMAP2_LOG) << "Connecting to: " << hostName << port;
+    socket->connectToHost(hostName, port);
 }
 
 #include "moc_session.cpp"
