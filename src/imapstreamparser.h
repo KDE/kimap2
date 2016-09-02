@@ -23,8 +23,6 @@
 
 #include "kimap2_export.h"
 
-#include <exception>
-
 #include <QtCore/QByteArray>
 #include <QtCore/QList>
 #include <QtCore/QString>
@@ -33,26 +31,6 @@ class QIODevice;
 
 namespace KIMAP2
 {
-
-class ImapParserException : public std::exception
-{
-public:
-    explicit ImapParserException(const char *what) throw() : mWhat(what) {}
-    explicit ImapParserException(const QByteArray &what) throw() : mWhat(what) {}
-    explicit ImapParserException(const QString &what) throw() : mWhat(what.toUtf8()) {}
-    ImapParserException(const ImapParserException &other) throw() : std::exception(other), mWhat(other.what()) {}
-    virtual ~ImapParserException() throw() {}
-    const char *what() const throw() Q_DECL_OVERRIDE
-    {
-        return mWhat.constData();
-    }
-    virtual const char *type() const throw()
-    {
-        return "ImapParserException";
-    }
-private:
-    QByteArray mWhat;
-};
 
 /**
   Parser for IMAP messages that operates on a local socket stream.
@@ -211,8 +189,8 @@ private:
      */
     void sendContinuationResponse(qint64 size);
 
-    bool dataAvailable() const;
-    bool dataAvailable(int pos) const;
+    bool dataAvailable();
+    bool dataAvailable(int pos);
 
     QIODevice *m_socket;
     bool m_isServerModeEnabled;

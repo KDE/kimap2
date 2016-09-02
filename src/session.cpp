@@ -507,62 +507,58 @@ void SessionPrivate::readMessage()
     Message message;
     QList<Message::Part> *payload = &message.content;
 
-    try {
-        if (!stream->parse()) {
-            //No CRLF found
-            return;
-        }
-        stream->saveState();
-
-        while (!stream->atCommandEnd()) {
-            if (stream->hasString()) {
-                const auto string = stream->readString();
-                if (!stream->insufficientData()) {
-                    if (string == "NIL") {
-                        *payload << Message::Part(QList<QByteArray>());
-                    } else {
-                        *payload << Message::Part(string);
-                    }
-                }
-            } else if (stream->hasList()) {
-                const auto list = stream->readParenthesizedList();
-                if (!stream->insufficientData()) {
-                    *payload << Message::Part(list);
-                }
-            } else if (stream->hasResponseCode()) {
-                payload = &message.responseCode;
-            } else if (stream->atResponseCodeEnd()) {
-                payload = &message.content;
-            } else if (stream->hasLiteral()) {
-                QByteArray literal;
-                while (!stream->atLiteralEnd()) {
-                    literal += stream->readLiteralPart();
-                }
-                if (!stream->insufficientData()) {
-                    *payload << Message::Part(literal);
-                }
-            } else {
-                return;
-            }
-            if (stream->insufficientData()) {
-                stream->restoreState();
-                return;
-            } else {
-                stream->trimBuffer();
-            }
-        }
-        stream->trimBuffer();
-
-        responseReceived(message);
-
-    } catch (KIMAP2::ImapParserException e) {
-        qCWarning(KIMAP2_LOG) << "The stream parser raised an exception:" << e.what();
+    if (!stream->parse()) {
+        qCDebug(KIMAP2_LOG) << "incomplete ";
+        //No CRLF found
+        return;
     }
+    stream->saveState();
+    qCDebug(KIMAP2_LOG) << "got data to process ";
 
-    if (stream->availableDataSize() > 1) {
+    while (!stream->atCommandEnd()) {
+        if (stream->hasString()) {
+            const auto string = stream->readString();
+            if (!stream->insufficientData()) {
+                if (string == "NIL") {
+                    *payload << Message::Part(QList<QByteArray>());
+                } else {
+                    *payload << Message::Part(string);
+                }
+            }
+        } else if (stream->hasList()) {
+            const auto list = stream->readParenthesizedList();
+            if (!stream->insufficientData()) {
+                *payload << Message::Part(list);
+            }
+        } else if (stream->hasResponseCode()) {
+            payload = &message.responseCode;
+        } else if (stream->atResponseCodeEnd()) {
+            payload = &message.content;
+        } else if (stream->hasLiteral()) {
+
+            QByteArray literal;
+            while (!stream->atLiteralEnd()) {
+                literal += stream->readLiteralPart();
+            }
+            if (!stream->insufficientData()) {
+                *payload << Message::Part(literal);
+            }
+
+        if (stream->insufficientData()) {
+            stream->restoreState();
+            return;
+        } else {
+            // qCDebug(KIMAP2_LOG) << "processing successful ";
+            stream->trimBuffer();
+        }
+    }
+    stream->trimBuffer();
+
+    responseReceived(message);
+
+    if (stream->availableDataSize() >= 1) {
         QMetaObject::invokeMethod(this, "readMessage", Qt::QueuedConnection);
     }
-
 }
 
 void SessionPrivate::closeSocket()

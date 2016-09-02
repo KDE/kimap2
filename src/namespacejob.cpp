@@ -44,18 +44,17 @@ public:
             ImapStreamParser parser(Q_NULLPTR);
             parser.setData(namespaceItem);
 
-            try {
-                QList<QByteArray> parts = parser.readParenthesizedList();
-                if (parts.size() < 2) {
-                    continue;
-                }
-                MailBoxDescriptor descriptor;
-                descriptor.name = QString::fromUtf8(decodeImapFolderName(parts[0]));
-                descriptor.separator = QLatin1Char(parts[1][0]);
+            QList<QByteArray> parts = parser.readParenthesizedList();
+            if (parts.size() < 2) {
+                continue;
+            }
+            MailBoxDescriptor descriptor;
+            descriptor.name = QString::fromUtf8(decodeImapFolderName(parts[0]));
+            descriptor.separator = QLatin1Char(parts[1][0]);
 
-                result << descriptor;
-            } catch (KIMAP2::ImapParserException e) {
-                qCWarning(KIMAP2_LOG) << "The stream parser raised an exception during namespace list parsing:" << e.what();
+            result << descriptor;
+            if (parser.insufficientData()) {
+                qCWarning(KIMAP2_LOG) << "The stream parser raised an exception during namespace list parsing.";
                 qCWarning(KIMAP2_LOG) << "namespacelist:" << namespaceList;
             }
 
