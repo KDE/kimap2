@@ -55,7 +55,6 @@ QByteArray ImapStreamParser::readString()
     }
 
     // literal string
-    // TODO: error handling
     if (hasLiteral()) {
         while (!atLiteralEnd()) {
             result += readLiteralPart();
@@ -128,7 +127,6 @@ bool ImapStreamParser::hasLiteral()
             ++m_position;
         }
 
-        //FIXME: Makes sense only on the server side?
         if (m_isServerModeEnabled && m_literalSize > 0) {
             sendContinuationResponse(m_literalSize);
         }
