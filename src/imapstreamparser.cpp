@@ -169,7 +169,7 @@ QByteArray ImapStreamParser::readLiteralPart()
 bool ImapStreamParser::hasList()
 {
     if (!dataAvailable()) {
-        throw ImapParserException("Unable to read more data");
+        return false;
     }
     int savedPos = m_position;
     stripLeadingSpaces();
