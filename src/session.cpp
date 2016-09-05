@@ -544,17 +544,17 @@ void SessionPrivate::readMessage()
                 *payload << Message::Part(literal);
             }
 
+        }
         if (stream->insufficientData()) {
-            stream->restoreState();
-            return;
-        } else {
-            // qCDebug(KIMAP2_LOG) << "processing successful ";
-            stream->trimBuffer();
+            break;
         }
     }
-    stream->trimBuffer();
-
-    responseReceived(message);
+    if (stream->insufficientData()) {
+        stream->restoreState();
+    } else {
+        stream->trimBuffer();
+        responseReceived(message);
+    }
 
     if (stream->availableDataSize() >= 1) {
         QMetaObject::invokeMethod(this, "readMessage", Qt::QueuedConnection);
