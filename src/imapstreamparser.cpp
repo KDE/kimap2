@@ -482,6 +482,11 @@ void ImapStreamParser::setData(const QByteArray &data)
     m_data = data;
 }
 
+QByteArray ImapStreamParser::data() const
+{
+    return m_data;
+}
+
 bool ImapStreamParser::parse()
 {
     m_data.append(m_socket->readAll());

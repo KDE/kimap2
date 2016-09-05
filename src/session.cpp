@@ -508,12 +508,10 @@ void SessionPrivate::readMessage()
     QList<Message::Part> *payload = &message.content;
 
     if (!stream->parse()) {
-        qCDebug(KIMAP2_LOG) << "incomplete ";
         //No CRLF found
         return;
     }
     stream->saveState();
-    qCDebug(KIMAP2_LOG) << "got data to process ";
 
     while (!stream->atCommandEnd()) {
         if (stream->hasString()) {
@@ -535,7 +533,6 @@ void SessionPrivate::readMessage()
         } else if (stream->atResponseCodeEnd()) {
             payload = &message.content;
         } else if (stream->hasLiteral()) {
-
             QByteArray literal;
             while (!stream->atLiteralEnd()) {
                 literal += stream->readLiteralPart();
@@ -543,9 +540,14 @@ void SessionPrivate::readMessage()
             if (!stream->insufficientData()) {
                 *payload << Message::Part(literal);
             }
-
-        }
-        if (stream->insufficientData()) {
+        } else {
+            //If we get here but didn't run into an insufficient-data condition,
+            //then something is wrong.
+            if (!stream->insufficientData()) {
+                qWarning() << "Inconsistent data: " << stream->data();
+                socket->abort();
+                return;
+            }
             break;
         }
     }
