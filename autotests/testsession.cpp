@@ -290,8 +290,8 @@ private Q_SLOTS:
 
         // Check that only the first job has emitted it's result
         QCOMPARE(spyResult1.count(), 1);
-        QCOMPARE(spyResult2.count(), 0);
-        QCOMPARE(spyResult3.count(), 0);
+        QCOMPARE(spyResult2.count(), 1);
+        QCOMPARE(spyResult3.count(), 1);
 
         // Check that all jobs have been deleted
         QCOMPARE(spyDestroyed1.count(), 1);
