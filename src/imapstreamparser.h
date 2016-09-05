@@ -189,6 +189,12 @@ private:
      */
     void sendContinuationResponse(qint64 size);
 
+    /**
+     * Skip whitespace until @param char, and then increment by one.
+     * Returns false if the next char isn't @param c.
+     */
+    bool advanceOver(const char c);
+
     bool dataAvailable();
     bool dataAvailable(int pos);
 

@@ -183,18 +183,7 @@ bool ImapStreamParser::hasList()
 
 bool ImapStreamParser::atListEnd()
 {
-    if (!dataAvailable()) {
-        return false;
-    }
-    int savedPos = m_position;
-    stripLeadingSpaces();
-    int pos = m_position;
-    m_position = savedPos;
-    if (m_data.at(pos) == ')') {
-        m_position = pos + 1;
-        return true;
-    }
-    return false;
+    return advanceOver(')');
 }
 
 void ImapStreamParser::saveState()
@@ -323,7 +312,7 @@ QList<QByteArray> ImapStreamParser::readParenthesizedList()
     Q_ASSERT(false);
 }
 
-bool ImapStreamParser::hasResponseCode()
+bool ImapStreamParser::advanceOver(const char c)
 {
     if (!dataAvailable()) {
         return false;
@@ -332,27 +321,21 @@ bool ImapStreamParser::hasResponseCode()
     stripLeadingSpaces();
     int pos = m_position;
     m_position = savedPos;
-    if (m_data.at(pos) == '[') {
+    if (m_data.at(pos) == c) {
         m_position = pos + 1;
         return true;
     }
     return false;
 }
 
+bool ImapStreamParser::hasResponseCode()
+{
+    return advanceOver('[');
+}
+
 bool ImapStreamParser::atResponseCodeEnd()
 {
-    if (!dataAvailable()) {
-        return false;
-    }
-    int savedPos = m_position;
-    stripLeadingSpaces();
-    int pos = m_position;
-    m_position = savedPos;
-    if (m_data.at(pos) == ']') {
-        m_position = pos + 1;
-        return true;
-    }
-    return false;
+    return advanceOver(']');
 }
 
 QByteArray ImapStreamParser::parseQuotedString()
