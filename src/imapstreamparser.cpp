@@ -357,13 +357,9 @@ bool ImapStreamParser::atResponseCodeEnd()
 
 QByteArray ImapStreamParser::parseQuotedString()
 {
-    QByteArray result;
-    if (!dataAvailable()) {
-        return QByteArray();
-    }
     stripLeadingSpaces();
     int end = m_position;
-    result.clear();
+    QByteArray result;
     if (!dataAvailable()) {
         return QByteArray();
     }
@@ -374,34 +370,26 @@ QByteArray ImapStreamParser::parseQuotedString()
         ++m_position;
         int i = m_position;
         Q_FOREVER {
-            if (!dataAvailable(i))
-            {
+            if (!dataAvailable(i)) {
                 m_position = i;
                 return QByteArray();
             }
-            if (m_data.at(i) == '\\')
-            {
+            if (m_data.at(i) == '\\') {
                 i += 2;
                 foundSlash = true;
                 continue;
             }
-            if (m_data.at(i) == '"')
-            {
+            if (m_data.at(i) == '"') {
                 result = m_data.mid(m_position, i - m_position);
                 end = i + 1; // skip the '"'
                 break;
             }
             ++i;
         }
-    }
-
-    // unquoted string
-    else {
-        bool reachedInputEnd = true;
+    } else { //unquoted string
         int i = m_position;
         Q_FOREVER {
-            if (!dataAvailable(i))
-            {
+            if (!dataAvailable(i)) {
                 m_position = i;
                 return QByteArray();
             }
@@ -412,20 +400,14 @@ QByteArray ImapStreamParser::parseQuotedString()
             m_data.at(i) == ']' ||
             m_data.at(i) == '\n' ||
             m_data.at(i) == '\r' ||
-            m_data.at(i) == '"')
-            {
+            m_data.at(i) == '"') {
                 end = i;
-                reachedInputEnd = false;
                 break;
             }
-            if (m_data.at(i) == '\\')
-            {
+            if (m_data.at(i) == '\\') {
                 foundSlash = true;
             }
             i++;
-        }
-        if (reachedInputEnd) {   //FIXME: how can it get here?
-            end = m_data.length();
         }
 
         result = m_data.mid(m_position, end - m_position);
