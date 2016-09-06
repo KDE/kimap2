@@ -78,23 +78,23 @@ bool ImapStreamParser::hasString()
     if (!dataAvailable(pos)) {
         return false;
     }
-    if (m_data.at(pos) == '{') {
+    const auto c = m_data.at(pos);
+    if (c == '{') {
         return true; //literal string
     }
-    if (m_data.at(pos) == '"') {
+    if (c == '"') {
         return true; //quoted string
     }
-    if (m_data.at(pos) != ' ' &&
-            m_data.at(pos) != '(' &&
-            m_data.at(pos) != ')' &&
-            m_data.at(pos) != '[' &&
-            m_data.at(pos) != ']' &&
-            m_data.at(pos) != '\n' &&
-            m_data.at(pos) != '\r') {
-        return true;  //unquoted string
-    }
-
-    return false; //something else, not a string
+    // is this an unquoted string, or something else?
+    const bool isUnquotedString =
+           !(c == ' ' ||
+             c == '(' ||
+             c == ')' ||
+             c == '[' ||
+             c == ']' ||
+             c == '\n' ||
+             c == '\r');
+    return isUnquotedString;
 }
 
 bool ImapStreamParser::hasLiteral()
@@ -374,14 +374,15 @@ QByteArray ImapStreamParser::parseQuotedString()
                 m_position = i;
                 return QByteArray();
             }
-            if (m_data.at(i) == ' ' ||
-            m_data.at(i) == '(' ||
-            m_data.at(i) == ')' ||
-            m_data.at(i) == '[' ||
-            m_data.at(i) == ']' ||
-            m_data.at(i) == '\n' ||
-            m_data.at(i) == '\r' ||
-            m_data.at(i) == '"') {
+            const auto c = m_data.at(i);
+            if (c == ' ' ||
+            c == '(' ||
+            c == ')' ||
+            c == '[' ||
+            c == ']' ||
+            c == '\n' ||
+            c == '\r' ||
+            c == '"') {
                 end = i;
                 break;
             }
