@@ -160,6 +160,12 @@ SessionPrivate::SessionPrivate(Session *session)
       socket(new QSslSocket),
       stream(new ImapStreamParser(socket.data()))
 {
+    stream->onResponseReceived([this](const Message &message) {
+        responseReceived(message);
+        if (stream->availableDataSize() >= 1) {
+            QMetaObject::invokeMethod(this, "readMessage", Qt::QueuedConnection);
+        }
+    });
 }
 
 SessionPrivate::~SessionPrivate()
@@ -503,63 +509,8 @@ void SessionPrivate::readMessage()
     if (!stream || stream->availableDataSize() == 0) {
         return;
     }
-
-    Message message;
-    QList<Message::Part> *payload = &message.content;
-
-    if (!stream->parse()) {
-        //No CRLF found
-        return;
-    }
-    stream->saveState();
-
-    while (!stream->atCommandEnd()) {
-        if (stream->hasString()) {
-            const auto string = stream->readString();
-            if (!stream->insufficientData()) {
-                if (string == "NIL") {
-                    *payload << Message::Part(QList<QByteArray>());
-                } else {
-                    *payload << Message::Part(string);
-                }
-            }
-        } else if (stream->hasList()) {
-            const auto list = stream->readParenthesizedList();
-            if (!stream->insufficientData()) {
-                *payload << Message::Part(list);
-            }
-        } else if (stream->hasResponseCode()) {
-            payload = &message.responseCode;
-        } else if (stream->atResponseCodeEnd()) {
-            payload = &message.content;
-        } else if (stream->hasLiteral()) {
-            QByteArray literal;
-            while (!stream->atLiteralEnd()) {
-                literal += stream->readLiteralPart();
-            }
-            if (!stream->insufficientData()) {
-                *payload << Message::Part(literal);
-            }
-        } else {
-            //If we get here but didn't run into an insufficient-data condition,
-            //then something is wrong.
-            if (!stream->insufficientData()) {
-                qWarning() << "Inconsistent data: " << stream->data();
-                socket->abort();
-                return;
-            }
-            break;
-        }
-    }
-    if (stream->insufficientData()) {
-        stream->restoreState();
-    } else {
-        stream->trimBuffer();
-        responseReceived(message);
-        if (stream->availableDataSize() >= 1) {
-            QMetaObject::invokeMethod(this, "readMessage", Qt::QueuedConnection);
-        }
-    }
+    stream->parse();
+    stream->parseStream();
 }
 
 void SessionPrivate::closeSocket()

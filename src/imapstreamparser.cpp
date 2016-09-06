@@ -526,11 +526,71 @@ QByteArray ImapStreamParser::data() const
     return buffer();
 }
 
-bool ImapStreamParser::parse()
+
+void ImapStreamParser::parse()
 {
     append(m_socket->readAll());
     m_insufficientData = false;
-    return buffer().contains("\r\n");
+}
+
+void ImapStreamParser::parseStream()
+{
+    Message message;
+    QList<Message::Part> *payload = &message.content;
+
+    if (!buffer().contains("\r\n")) {
+        //No CRLF found
+        return;
+    }
+    saveState();
+
+    while (!atCommandEnd()) {
+        if (hasString()) {
+            const auto string = readString();
+            if (!insufficientData()) {
+                if (string == "NIL") {
+                    *payload << Message::Part(QList<QByteArray>());
+                } else {
+                    *payload << Message::Part(string);
+                }
+            }
+        } else if (hasList()) {
+            const auto list = readParenthesizedList();
+            if (!insufficientData()) {
+                *payload << Message::Part(list);
+            }
+        } else if (hasResponseCode()) {
+            payload = &message.responseCode;
+        } else if (atResponseCodeEnd()) {
+            payload = &message.content;
+        } else if (hasLiteral()) {
+            QByteArray literal;
+            while (!atLiteralEnd()) {
+                literal += readLiteralPart();
+            }
+            if (!insufficientData()) {
+                *payload << Message::Part(literal);
+            }
+        } else {
+            //If we get here but didn't run into an insufficient-data condition,
+            //then something is wrong.
+            if (!insufficientData()) {
+                qWarning() << "Inconsistent data: " << data();
+                m_socket->close();
+                return;
+            }
+            break;
+        }
+    }
+
+    if (insufficientData()) {
+        restoreState();
+    } else {
+        trimBuffer();
+        if (responseReceived) {
+            responseReceived(message);
+        }
+    }
 }
 
 QByteArray ImapStreamParser::readRemainingData()
@@ -625,9 +685,14 @@ void ImapStreamParser::sendContinuationResponse(qint64 size)
 
 void ImapStreamParser::trimBuffer()
 {
-    if (m_position > m_bufferSize) {   // right() is expensive, so don't do it for every line
+    if (m_position < m_bufferSize) {   // right() is expensive, so don't do it for every line
         return;
     }
     buffer() = buffer().right(buffer().size() - m_position);
     m_position = 0;
+}
+
+void ImapStreamParser::onResponseReceived(std::function<void(const Message &)> f)
+{
+    responseReceived = f;
 }

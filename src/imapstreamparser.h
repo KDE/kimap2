@@ -26,6 +26,8 @@
 #include <QtCore/QByteArray>
 #include <QtCore/QList>
 #include <QtCore/QString>
+#include <functional>
+#include <message_p.h>
 
 class QIODevice;
 
@@ -161,7 +163,8 @@ public:
     void setData(const QByteArray &data);
     QByteArray data() const;
 
-    bool parse();
+    void parse();
+    void parseStream();
 
     void saveState();
     void restoreState();
@@ -172,6 +175,8 @@ public:
      * Remove already read data from the internal buffer if necessary.
      */
     void trimBuffer();
+
+    void onResponseReceived(std::function<void(const Message &)>);
 
 private:
     void stripLeadingSpaces();
@@ -218,6 +223,8 @@ private:
     QByteArray m_data2;
     QByteArray *m_current;
     int m_bufferSize;
+
+    std::function<void(const Message &)> responseReceived;
 };
 
 }
