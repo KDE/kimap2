@@ -30,12 +30,49 @@
 using namespace KIMAP2;
 
 ImapStreamParser::ImapStreamParser(QIODevice *socket, bool serverModeEnabled)
+    : m_socket(socket),
+    m_isServerModeEnabled(serverModeEnabled),
+    m_position(0),
+    m_literalSize(0),
+    m_insufficientData(false),
+    m_bufferSize(4096)
 {
-    m_socket = socket;
-    m_isServerModeEnabled = serverModeEnabled;
-    m_position = 0;
-    m_literalSize = 0;
-    m_insufficientData = false;
+    m_current = &m_data1;
+}
+
+QByteArray &ImapStreamParser::buffer()
+{
+    return *m_current;
+}
+
+const QByteArray &ImapStreamParser::buffer() const
+{
+    return *m_current;
+}
+
+char ImapStreamParser::at(int pos) const
+{
+    return buffer().at(pos);
+}
+
+void ImapStreamParser::append(const QByteArray &b)
+{
+    buffer().append(b);
+}
+
+QByteArray ImapStreamParser::mid(int start, int end)  const
+{
+    return buffer().mid(start, end);
+}
+
+int ImapStreamParser::length() const
+{
+    return buffer().length();
+}
+
+int ImapStreamParser::indexOf(const char c, int offset) const
+{
+    return buffer().indexOf(c, offset);
 }
 
 QString ImapStreamParser::readUtf8String()
@@ -78,7 +115,7 @@ bool ImapStreamParser::hasString()
     if (!dataAvailable(pos)) {
         return false;
     }
-    const auto c = m_data.at(pos);
+    const auto c = at(pos);
     if (c == '{') {
         return true; //literal string
     }
@@ -104,15 +141,15 @@ bool ImapStreamParser::hasLiteral()
     }
     int savedPos = m_position;
     stripLeadingSpaces();
-    if (m_data.at(m_position) == '{') {
-        int end = m_data.indexOf('}', m_position);
+    if (at(m_position) == '{') {
+        int end = indexOf('}', m_position);
         if (end == -1) {
             //Couldn't find end
             m_position = savedPos;
             return false;
         }
         Q_ASSERT(end > m_position);
-        m_literalSize = m_data.mid(m_position + 1, end - m_position - 1).toInt();
+        m_literalSize = mid(m_position + 1, end - m_position - 1).toInt();
         // strip CRLF
         m_position = end + 1;
         // ensure that the CRLF is available
@@ -120,10 +157,10 @@ bool ImapStreamParser::hasLiteral()
             m_position = savedPos;
             return false;
         }
-        if (m_position < m_data.length() && m_data.at(m_position) == '\r') {
+        if (m_position < length() && at(m_position) == '\r') {
             ++m_position;
         }
-        if (m_position < m_data.length() && m_data.at(m_position) == '\n') {
+        if (m_position < length() && at(m_position) == '\n') {
             ++m_position;
         }
 
@@ -151,12 +188,12 @@ QByteArray ImapStreamParser::readLiteralPart()
         return QByteArray();
     }
 
-    if (m_data.length() < m_position + size) {   // Still not enough data
+    if (length() < m_position + size) {   // Still not enough data
         // Take what's already there
-        size = m_data.length() - m_position;
+        size = length() - m_position;
     }
 
-    QByteArray result = m_data.mid(m_position, size);
+    QByteArray result = mid(m_position, size);
     m_position += size;
     m_literalSize -= size;
     Q_ASSERT(m_literalSize >= 0);
@@ -173,7 +210,7 @@ bool ImapStreamParser::hasList()
     stripLeadingSpaces();
     int pos = m_position;
     m_position = savedPos;
-    if (m_data.at(pos) == '(') {
+    if (at(pos) == '(') {
         return true;
     }
     return false;
@@ -207,7 +244,7 @@ QList<QByteArray> ImapStreamParser::readParenthesizedList()
     }
 
     stripLeadingSpaces();
-    if (m_data.at(m_position) != '(') {
+    if (at(m_position) != '(') {
         return result; //no list found
     }
 
@@ -220,7 +257,7 @@ QList<QByteArray> ImapStreamParser::readParenthesizedList()
             m_position = i;
             return QList<QByteArray>();
         }
-        if (m_data.at(i) == '(') {
+        if (at(i) == '(') {
             ++count;
             if (count == 1) {
                 sublistbegin = i;
@@ -228,25 +265,25 @@ QList<QByteArray> ImapStreamParser::readParenthesizedList()
             ++i;
             continue;
         }
-        if (m_data.at(i) == ')')
+        if (at(i) == ')')
         {
             if (count <= 0) {
                 m_position = i + 1;
                 return result;
             }
             if (count == 1) {
-                result.append(m_data.mid(sublistbegin, i - sublistbegin + 1));
+                result.append(mid(sublistbegin, i - sublistbegin + 1));
             }
             --count;
             ++i;
             continue;
         }
-        if (m_data.at(i) == ' ')
+        if (at(i) == ' ')
         {
             ++i;
             continue;
         }
-        if (m_data.at(i) == '"')
+        if (at(i) == '"')
         {
             if (count > 0) {
                 m_position = i;
@@ -255,7 +292,7 @@ QList<QByteArray> ImapStreamParser::readParenthesizedList()
                 continue;
             }
         }
-        if (m_data.at(i) == '[')
+        if (at(i) == '[')
         {
             concatToLast = true;
             if (result.isEmpty()) {
@@ -265,7 +302,7 @@ QList<QByteArray> ImapStreamParser::readParenthesizedList()
             ++i;
             continue;
         }
-        if (m_data.at(i) == ']')
+        if (at(i) == ']')
         {
             concatToLast = false;
             result.last() += ']';
@@ -292,8 +329,8 @@ QList<QByteArray> ImapStreamParser::readParenthesizedList()
 
             // We might sometime get some unwanted CRLF, but we're still not at the end
             // of the list, would make further string reads fail so eat the CRLFs.
-            while ((m_position < m_data.size()) &&
-                    (m_data.at(m_position) == '\r' || m_data.at(m_position) == '\n')) {
+            while ((m_position < length()) &&
+                    (at(m_position) == '\r' || at(m_position) == '\n')) {
                 m_position++;
             }
 
@@ -320,7 +357,7 @@ bool ImapStreamParser::advanceOver(const char c)
     stripLeadingSpaces();
     int pos = m_position;
     m_position = savedPos;
-    if (m_data.at(pos) == c) {
+    if (at(pos) == c) {
         m_position = pos + 1;
         return true;
     }
@@ -348,7 +385,7 @@ QByteArray ImapStreamParser::parseQuotedString()
 
     bool foundSlash = false;
     // quoted string
-    if (m_data.at(m_position) == '"') {
+    if (at(m_position) == '"') {
         ++m_position;
         int i = m_position;
         Q_FOREVER {
@@ -356,13 +393,13 @@ QByteArray ImapStreamParser::parseQuotedString()
                 m_position = i;
                 return QByteArray();
             }
-            if (m_data.at(i) == '\\') {
+            if (at(i) == '\\') {
                 i += 2;
                 foundSlash = true;
                 continue;
             }
-            if (m_data.at(i) == '"') {
-                result = m_data.mid(m_position, i - m_position);
+            if (at(i) == '"') {
+                result = mid(m_position, i - m_position);
                 end = i + 1; // skip the '"'
                 break;
             }
@@ -375,7 +412,7 @@ QByteArray ImapStreamParser::parseQuotedString()
                 m_position = i;
                 return QByteArray();
             }
-            const auto c = m_data.at(i);
+            const auto c = at(i);
             if (c == ' ' ||
             c == '(' ||
             c == ')' ||
@@ -387,13 +424,13 @@ QByteArray ImapStreamParser::parseQuotedString()
                 end = i;
                 break;
             }
-            if (m_data.at(i) == '\\') {
+            if (at(i) == '\\') {
                 foundSlash = true;
             }
             i++;
         }
 
-        result = m_data.mid(m_position, end - m_position);
+        result = mid(m_position, end - m_position);
     }
 
     // strip quotes
@@ -425,13 +462,13 @@ qint64 ImapStreamParser::readNumber(bool *ok)
             m_position = i;
             return 0;
         }
-        if (!isdigit(m_data.at(i)))
+        if (!isdigit(at(i)))
         {
             break;
         }
         ++i;
     }
-    const QByteArray tmp = m_data.mid(m_position, i - m_position);
+    const QByteArray tmp = mid(m_position, i - m_position);
     result = tmp.toLongLong(ok);
     m_position = i;
     return result;
@@ -444,8 +481,10 @@ bool ImapStreamParser::dataAvailable()
 
 bool ImapStreamParser::dataAvailable(int i)
 {
-    m_insufficientData = !(i < m_data.length());
-    return !m_insufficientData;
+    auto dataAvailable = i < length();
+    dataAvailable = i < length();
+    m_insufficientData = !dataAvailable;
+    return dataAvailable;
 }
 
 void ImapStreamParser::stripLeadingSpaces()
@@ -453,13 +492,13 @@ void ImapStreamParser::stripLeadingSpaces()
     if (!dataAvailable()) {
         return;
     }
-    for (int i = m_position; i < m_data.length(); ++i) {
-        if (m_data.at(i) != ' ') {
+    for (int i = m_position; i < length(); ++i) {
+        if (at(i) != ' ') {
             m_position = i;
             return;
         }
     }
-    m_position = m_data.length();
+    m_position = length();
 }
 
 bool ImapStreamParser::waitForMoreData(bool wait)
@@ -468,7 +507,7 @@ bool ImapStreamParser::waitForMoreData(bool wait)
         if (m_socket->bytesAvailable() > 0 ||
                 m_socket->waitForReadyRead(30000)) {
             const auto data = m_socket->readAll();
-            m_data.append(data);
+            append(data);
             m_insufficientData = false;
         } else {
             return false;
@@ -479,29 +518,29 @@ bool ImapStreamParser::waitForMoreData(bool wait)
 
 void ImapStreamParser::setData(const QByteArray &data)
 {
-    m_data = data;
+    buffer() = data;
 }
 
 QByteArray ImapStreamParser::data() const
 {
-    return m_data;
+    return buffer();
 }
 
 bool ImapStreamParser::parse()
 {
-    m_data.append(m_socket->readAll());
+    append(m_socket->readAll());
     m_insufficientData = false;
-    return m_data.contains("\r\n");
+    return buffer().contains("\r\n");
 }
 
 QByteArray ImapStreamParser::readRemainingData()
 {
-    return m_data.mid(m_position);
+    return mid(m_position);
 }
 
 int ImapStreamParser::availableDataSize() const
 {
-    return m_socket->bytesAvailable() + m_data.size() - m_position;
+    return m_socket->bytesAvailable() + buffer().size() - m_position;
 }
 
 bool ImapStreamParser::atCommandEnd()
@@ -515,11 +554,11 @@ bool ImapStreamParser::atCommandEnd()
         return false;
     }
 
-    if (m_data.at(m_position) == '\n' || m_data.at(m_position) == '\r') {
-        if (m_data.at(m_position) == '\r') {
+    if (at(m_position) == '\n' || at(m_position) == '\r') {
+        if (at(m_position) == '\r') {
             ++m_position;
         }
-        if (m_position < m_data.length() && m_data.at(m_position) == '\n') {
+        if (m_position < length() && at(m_position) == '\n') {
             ++m_position;
         }
 
@@ -540,11 +579,11 @@ QByteArray ImapStreamParser::readUntilCommandEnd()
         if (!dataAvailable(i)) {
             waitForMoreData(true);
         }
-        if (m_data.at(i) == '{')
+        if (at(i) == '{')
         {
             m_position = i - 1;
             hasLiteral(); //init literal size
-            result.append( m_data.mid( i, m_position + 1 ) );
+            result.append( mid( i, m_position + 1 ) );
             while (!atLiteralEnd()) {
                 const auto data = readLiteralPart();
                 if (m_insufficientData) {
@@ -555,20 +594,20 @@ QByteArray ImapStreamParser::readUntilCommandEnd()
             }
             i = m_position;
         }
-        if (m_data.at(i) == '(')
+        if (at(i) == '(')
         {
             paranthesisBalance++;
         }
-        if (m_data.at(i) == ')')
+        if (at(i) == ')')
         {
             paranthesisBalance--;
         }
-        if ((i == m_data.length() && paranthesisBalance == 0) ||
-                m_data.at(i) == '\n'  || m_data.at(i) == '\r')
+        if ((i == length() && paranthesisBalance == 0) ||
+                at(i) == '\n'  || at(i) == '\r')
         {
             break; //command end
         }
-        result.append(m_data.at(i));
+        result.append(at(i));
         ++i;
     }
     m_position = i;
@@ -586,9 +625,9 @@ void ImapStreamParser::sendContinuationResponse(qint64 size)
 
 void ImapStreamParser::trimBuffer()
 {
-    if (m_position < 4096) {   // right() is expensive, so don't do it for every line
+    if (m_position > m_bufferSize) {   // right() is expensive, so don't do it for every line
         return;
     }
-    m_data = m_data.right(m_data.size() - m_position);
+    buffer() = buffer().right(buffer().size() - m_position);
     m_position = 0;
 }

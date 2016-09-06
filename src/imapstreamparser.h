@@ -199,13 +199,25 @@ private:
     bool dataAvailable();
     bool dataAvailable(int pos);
 
+    char at(int pos) const;
+    void append(const QByteArray &);
+    QByteArray mid(int start, int end = -1)  const;
+    int length() const;
+    int indexOf(const char, int offset) const;
+
+    QByteArray &buffer();
+    const QByteArray &buffer() const;
+
     QIODevice *m_socket;
     bool m_isServerModeEnabled;
-    QByteArray m_data;
     int m_position;
     int m_savedState;
     qint64 m_literalSize;
     bool m_insufficientData;
+    QByteArray m_data1;
+    QByteArray m_data2;
+    QByteArray *m_current;
+    int m_bufferSize;
 };
 
 }
