@@ -308,6 +308,7 @@ QList<QByteArray> ImapStreamParser::readParenthesizedList()
     }
     qWarning() << "Failed to read the ParenthesizedList";
     Q_ASSERT(false);
+    return QList<QByteArray>();
 }
 
 bool ImapStreamParser::advanceOver(const char c)
