@@ -556,10 +556,9 @@ void SessionPrivate::readMessage()
     } else {
         stream->trimBuffer();
         responseReceived(message);
-    }
-
-    if (stream->availableDataSize() >= 1) {
-        QMetaObject::invokeMethod(this, "readMessage", Qt::QueuedConnection);
+        if (stream->availableDataSize() >= 1) {
+            QMetaObject::invokeMethod(this, "readMessage", Qt::QueuedConnection);
+        }
     }
 }
 
