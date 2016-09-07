@@ -33,10 +33,13 @@ ImapStreamParser::ImapStreamParser(QIODevice *socket, bool serverModeEnabled)
     : m_socket(socket),
     m_isServerModeEnabled(serverModeEnabled),
     m_position(0),
+    m_readPosition(0),
     m_literalSize(0),
     m_insufficientData(false),
-    m_bufferSize(4096)
+    m_bufferSize(16000)
 {
+    m_data1.resize(m_bufferSize);
+    m_data2.resize(m_bufferSize);
     m_current = &m_data1;
 }
 
@@ -67,7 +70,7 @@ QByteArray ImapStreamParser::mid(int start, int end)  const
 
 int ImapStreamParser::length() const
 {
-    return buffer().length();
+    return m_readPosition;
 }
 
 int ImapStreamParser::indexOf(const char c, int offset) const
@@ -134,6 +137,23 @@ bool ImapStreamParser::hasString()
     return isUnquotedString;
 }
 
+int ImapStreamParser::readUntil(const char c)
+{
+    int end = -1;
+    int extraBytes = 0;
+    while (end == -1) {
+        end = indexOf(c, m_position);
+        extraBytes++;
+        if (end == -1) {
+            if (!dataAvailable(m_position + extraBytes)) {
+                //Couldn't find end, which means we have insufficient data
+                return false;
+            }
+        }
+    }
+    return end;
+}
+
 bool ImapStreamParser::hasLiteral()
 {
     if (!dataAvailable()) {
@@ -142,7 +162,8 @@ bool ImapStreamParser::hasLiteral()
     int savedPos = m_position;
     stripLeadingSpaces();
     if (at(m_position) == '{') {
-        int end = indexOf('}', m_position);
+        //Look for } and read more until we find it or run out of data.
+        int end = readUntil('}');
         if (end == -1) {
             //Couldn't find end
             m_position = savedPos;
@@ -158,10 +179,10 @@ bool ImapStreamParser::hasLiteral()
             return false;
         }
         if (m_position < length() && at(m_position) == '\r') {
-            ++m_position;
+            advance();
         }
         if (m_position < length() && at(m_position) == '\n') {
-            ++m_position;
+            advance();
         }
 
         if (m_isServerModeEnabled && m_literalSize > 0) {
@@ -257,6 +278,7 @@ QList<QByteArray> ImapStreamParser::readParenthesizedList()
             m_position = i;
             return QList<QByteArray>();
         }
+        //Count parenthesis
         if (at(i) == '(') {
             ++count;
             if (count == 1) {
@@ -265,6 +287,7 @@ QList<QByteArray> ImapStreamParser::readParenthesizedList()
             ++i;
             continue;
         }
+        //Count parenthesis
         if (at(i) == ')')
         {
             if (count <= 0) {
@@ -278,11 +301,13 @@ QList<QByteArray> ImapStreamParser::readParenthesizedList()
             ++i;
             continue;
         }
+        //Skip over whitespace
         if (at(i) == ' ')
         {
             ++i;
             continue;
         }
+        //Parse quoted strings
         if (at(i) == '"')
         {
             if (count > 0) {
@@ -320,18 +345,17 @@ QList<QByteArray> ImapStreamParser::readParenthesizedList()
                         return QList<QByteArray>();
                     }
                 }
-            } else {
+            } else if (hasString()) {
                 ba = readString();
-                if (m_insufficientData) {
-                    return QList<QByteArray>();
-                }
             }
-
+            if (m_insufficientData) {
+                return QList<QByteArray>();
+            }
             // We might sometime get some unwanted CRLF, but we're still not at the end
             // of the list, would make further string reads fail so eat the CRLFs.
             while ((m_position < length()) &&
                     (at(m_position) == '\r' || at(m_position) == '\n')) {
-                m_position++;
+                advance();
             }
 
             i = m_position - 1;
@@ -369,6 +393,11 @@ bool ImapStreamParser::hasResponseCode()
     return advanceOver('[');
 }
 
+void ImapStreamParser::advance(int i)
+{
+    m_position += i;
+}
+
 bool ImapStreamParser::atResponseCodeEnd()
 {
     return advanceOver(']');
@@ -386,7 +415,7 @@ QByteArray ImapStreamParser::parseQuotedString()
     bool foundSlash = false;
     // quoted string
     if (at(m_position) == '"') {
-        ++m_position;
+        advance();
         int i = m_position;
         Q_FOREVER {
             if (!dataAvailable(i)) {
@@ -474,19 +503,6 @@ qint64 ImapStreamParser::readNumber(bool *ok)
     return result;
 }
 
-bool ImapStreamParser::dataAvailable()
-{
-    return dataAvailable(m_position);
-}
-
-bool ImapStreamParser::dataAvailable(int i)
-{
-    auto dataAvailable = i < length();
-    dataAvailable = i < length();
-    m_insufficientData = !dataAvailable;
-    return dataAvailable;
-}
-
 void ImapStreamParser::stripLeadingSpaces()
 {
     if (!dataAvailable()) {
@@ -529,8 +545,49 @@ QByteArray ImapStreamParser::data() const
 
 void ImapStreamParser::parse()
 {
-    append(m_socket->readAll());
-    m_insufficientData = false;
+    readFromSocket();
+}
+
+bool ImapStreamParser::dataAvailable()
+{
+    return dataAvailable(m_position);
+}
+
+bool ImapStreamParser::dataAvailable(int i)
+{
+    auto gotEnough = i < length();
+    if (!gotEnough) {
+        if (readFromSocket()) {
+            return dataAvailable(i);
+        }
+    } else {
+    }
+    m_insufficientData = !gotEnough;
+    return gotEnough;
+}
+
+int ImapStreamParser::readFromSocket()
+{
+    const auto amountToRead = qMin(m_socket->bytesAvailable(), qint64(100));
+    if (amountToRead) {
+        auto spaceLeft = m_bufferSize - m_readPosition;
+        if (amountToRead > spaceLeft) {
+            qWarning() << "No space left";
+            //We should never get here.
+            Q_ASSERT(false);
+        } else {
+            const auto readBytes = m_socket->read(buffer().data() + m_readPosition, amountToRead);
+            if (readBytes < 0) {
+                qWarning() << "Failed to read data";
+                return 0;
+            }
+            m_readPosition += readBytes;
+            m_insufficientData = false;
+            return readBytes;
+        }
+    } else {
+    }
+    return 0;
 }
 
 void ImapStreamParser::parseStream()
@@ -538,8 +595,7 @@ void ImapStreamParser::parseStream()
     Message message;
     QList<Message::Part> *payload = &message.content;
 
-    if (!buffer().contains("\r\n")) {
-        //No CRLF found
+    if (!dataAvailable()) {
         return;
     }
     saveState();
@@ -587,10 +643,24 @@ void ImapStreamParser::parseStream()
         restoreState();
     } else {
         trimBuffer();
-        if (responseReceived) {
-            responseReceived(message);
-        }
+        Q_ASSERT(responseReceived);
+        responseReceived(message);
     }
+}
+
+void ImapStreamParser::trimBuffer()
+{
+    auto remainderSize = m_readPosition - m_position;
+    QByteArray *otherBuffer;
+    if (m_current == &m_data1) {
+        otherBuffer = &m_data2;
+    } else {
+        otherBuffer = &m_data1;
+    }
+    otherBuffer->replace(0, remainderSize, buffer().constData() + m_position, remainderSize);
+    m_current = otherBuffer;
+    m_readPosition = remainderSize;
+    m_position = 0;
 }
 
 QByteArray ImapStreamParser::readRemainingData()
@@ -616,10 +686,10 @@ bool ImapStreamParser::atCommandEnd()
 
     if (at(m_position) == '\n' || at(m_position) == '\r') {
         if (at(m_position) == '\r') {
-            ++m_position;
+            advance();
         }
         if (m_position < length() && at(m_position) == '\n') {
-            ++m_position;
+            advance();
         }
 
 
@@ -681,15 +751,6 @@ void ImapStreamParser::sendContinuationResponse(qint64 size)
                        QByteArray::number(size) + " bytes)\r\n";
     m_socket->write(block);
     m_socket->waitForBytesWritten(30000);
-}
-
-void ImapStreamParser::trimBuffer()
-{
-    if (m_position < m_bufferSize) {   // right() is expensive, so don't do it for every line
-        return;
-    }
-    buffer() = buffer().right(buffer().size() - m_position);
-    m_position = 0;
 }
 
 void ImapStreamParser::onResponseReceived(std::function<void(const Message &)> f)

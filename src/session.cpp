@@ -506,10 +506,6 @@ void SessionPrivate::writeDataQueue()
 
 void SessionPrivate::readMessage()
 {
-    if (!stream || stream->availableDataSize() == 0) {
-        return;
-    }
-    stream->parse();
     stream->parseStream();
 }
 

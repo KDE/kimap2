@@ -200,6 +200,10 @@ private:
      * Returns false if the next char isn't @param c.
      */
     bool advanceOver(const char c);
+    void advance(int = 1);
+    int readUntil(const char c);
+
+    int readFromSocket();
 
     bool dataAvailable();
     bool dataAvailable(int pos);
@@ -216,6 +220,7 @@ private:
     QIODevice *m_socket;
     bool m_isServerModeEnabled;
     int m_position;
+    int m_readPosition;
     int m_savedState;
     qint64 m_literalSize;
     bool m_insufficientData;

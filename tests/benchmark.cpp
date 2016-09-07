@@ -69,14 +69,18 @@ private Q_SLOTS:
 
     void testFetchParts()
     {
-        int count = 40000;
+        int count = 5000;
+        int parsedBytes = 0;
         QList<QByteArray> scenario;
-        scenario << FakeServer::preauth()
-                 << "C: A000001 FETCH 1:* (BODY.PEEK[HEADER.FIELDS (TO FROM MESSAGE-ID REFERENCES IN-REPLY-TO SUBJECT DATE)] BODY.PEEK[1.1.1.MIME] BODY.PEEK[1.1.1] FLAGS UID)";
+        scenario << FakeServer::preauth();
+        parsedBytes += scenario.last().size();
+        scenario << "C: A000001 FETCH 1:* (BODY.PEEK[HEADER.FIELDS (TO FROM MESSAGE-ID REFERENCES IN-REPLY-TO SUBJECT DATE)] BODY.PEEK[1.1.1.MIME] BODY.PEEK[1.1.1] FLAGS UID)";
         for (int i = 1; i <= count; i++) {
             scenario << QString("S: * %1 FETCH (UID %2 FLAGS (\\Seen) BODY[HEADER.FIELDS (TO FROM MESSAGE-ID REFERENCES IN-REPLY-TO SUBJECT DATE)] {154}\r\nFrom: Joe Smith <smith@example.com>\r\nDate: Wed, 2 Mar 2011 11:33:24 +0700\r\nMessage-ID: <1234@example.com>\r\nSubject: hello\r\nTo: Jane <jane@example.com>\r\n\r\n BODY[1.1.1] {28}\r\nHi Jane, nice to meet you!\r\n BODY[1.1.1.MIME] {48}\r\nContent-Type: text/plain; charset=ISO-8859-1\r\n\r\n)\r\n").arg(i).arg(i).toLatin1();
+            parsedBytes += scenario.last().size();
         };
         scenario << "S: A000001 OK fetch done";
+        parsedBytes += scenario.last().size();
 
         KIMAP2::FetchJob::FetchScope scope;
         scope.mode = KIMAP2::FetchJob::FetchScope::HeaderAndContent;
@@ -113,6 +117,7 @@ private Q_SLOTS:
         bool result = job->exec();
 
         qWarning() << "Reading " << count << " messages took: " << time.elapsed() << " ms.";
+        qWarning() << parsedBytes << " bytes expected to be parsed";
 
         QVERIFY(result);
         QVERIFY(m_signals.count() > 0);
