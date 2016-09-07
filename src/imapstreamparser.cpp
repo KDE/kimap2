@@ -271,74 +271,68 @@ QList<QByteArray> ImapStreamParser::readParenthesizedList()
 
     bool concatToLast = false;
     int count = 0;
-    int sublistbegin = m_position;
-    int i = m_position + 1;
+    int sublistbegin = -1;
     Q_FOREVER {
-        if (!dataAvailable(i)) {
-            m_position = i;
+        advance();
+        if (!dataAvailable()) {
             return QList<QByteArray>();
         }
+        const auto c = at(m_position);
         //Count parenthesis
-        if (at(i) == '(') {
+        if (c == '(') {
             ++count;
             if (count == 1) {
-                sublistbegin = i;
+                sublistbegin = m_position;
             }
-            ++i;
             continue;
         }
         //Count parenthesis
-        if (at(i) == ')')
+        if (c == ')')
         {
+            //End of the list
             if (count <= 0) {
-                m_position = i + 1;
+                advance();
                 return result;
             }
+            //End of a sublist
             if (count == 1) {
-                result.append(mid(sublistbegin, i - sublistbegin + 1));
+                result.append(mid(sublistbegin, m_position - sublistbegin + 1));
             }
             --count;
-            ++i;
             continue;
         }
         //Skip over whitespace
-        if (at(i) == ' ')
+        if (c == ' ')
         {
-            ++i;
             continue;
         }
         //Parse quoted strings
-        if (at(i) == '"')
+        if (c == '"')
         {
             if (count > 0) {
-                m_position = i;
                 parseQuotedString();
-                i = m_position;
                 continue;
             }
         }
-        if (at(i) == '[')
+        if (c == '[')
         {
             concatToLast = true;
             if (result.isEmpty()) {
                 result.append(QByteArray());
             }
             result.last() += '[';
-            ++i;
             continue;
         }
-        if (at(i) == ']')
+        if (c == ']')
         {
             concatToLast = false;
             result.last() += ']';
-            ++i;
             continue;
         }
         if (count == 0)
         {
-            m_position = i;
             QByteArray ba;
-            if (hasLiteral()) {
+            if (c == '{' && hasLiteral()) {
                 while (!atLiteralEnd()) {
                     ba += readLiteralPart();
                     if (m_insufficientData) {
@@ -357,15 +351,13 @@ QList<QByteArray> ImapStreamParser::readParenthesizedList()
                     (at(m_position) == '\r' || at(m_position) == '\n')) {
                 advance();
             }
-
-            i = m_position - 1;
+            m_position--;
             if (concatToLast) {
                 result.last() += ba;
             } else {
                 result.append(ba);
             }
         }
-        ++i;
     }
     qWarning() << "Failed to read the ParenthesizedList";
     Q_ASSERT(false);
@@ -560,7 +552,6 @@ bool ImapStreamParser::dataAvailable(int i)
         if (readFromSocket()) {
             return dataAvailable(i);
         }
-    } else {
     }
     m_insufficientData = !gotEnough;
     return gotEnough;
