@@ -203,6 +203,7 @@ private:
 
     char at(int pos) const;
     QByteArray mid(int start, int end = -1)  const;
+    QByteArray midRef(int start, int end)  const;
     int length() const;
     int indexOf(const char);
 
@@ -223,6 +224,7 @@ private:
     QByteArray m_data2;
     QByteArray *m_current;
     int m_bufferSize;
+    int m_readBlockSize;
 
     std::function<void(const Message &)> responseReceived;
 };

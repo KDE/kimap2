@@ -36,7 +36,8 @@ ImapStreamParser::ImapStreamParser(QIODevice *socket, bool serverModeEnabled)
     m_readPosition(0),
     m_literalSize(0),
     m_insufficientData(false),
-    m_bufferSize(16000)
+    m_bufferSize(16000),
+    m_readBlockSize(100)
 {
     m_data1.resize(m_bufferSize);
     m_data2.resize(m_bufferSize);
@@ -58,9 +59,14 @@ char ImapStreamParser::at(int pos) const
     return m_current->constData()[pos];
 }
 
-QByteArray ImapStreamParser::mid(int start, int end)  const
+QByteArray ImapStreamParser::mid(int start, int len)  const
 {
-    return buffer().mid(start, end);
+    return buffer().mid(start, len);
+}
+
+QByteArray ImapStreamParser::midRef(int start, int len)  const
+{
+    return QByteArray::fromRawData(buffer().constData() + start, len);
 }
 
 int ImapStreamParser::length() const
@@ -155,7 +161,7 @@ bool ImapStreamParser::hasLiteral()
             return false;
         }
         Q_ASSERT(end > m_position);
-        m_literalSize = mid(m_position + 1, end - m_position - 1).toInt();
+        m_literalSize = midRef(m_position + 1, end - m_position - 1).toInt();
         // strip CRLF
         m_position = end + 1;
         // ensure that the CRLF is available
@@ -501,7 +507,7 @@ bool ImapStreamParser::dataAvailable(int i)
 
 int ImapStreamParser::readFromSocket()
 {
-    const auto amountToRead = qMin(m_socket->bytesAvailable(), qint64(100));
+    const auto amountToRead = qMin(m_socket->bytesAvailable(), qint64(m_readBlockSize));
     if (amountToRead) {
         auto spaceLeft = m_bufferSize - m_readPosition;
         if (amountToRead > spaceLeft) {
@@ -536,6 +542,7 @@ void ImapStreamParser::parseStream()
     }
     while (!atCommandEnd()) {
         saveState();
+        stripLeadingSpaces();
         if (hasString()) {
             const auto string = readString();
             if (!insufficientData()) {
@@ -565,7 +572,8 @@ void ImapStreamParser::parseStream()
         } else if (!insufficientData()) {
             //If we get here but didn't run into an insufficient-data condition,
             //then something is wrong.
-            qWarning() << "Inconsistent data: " << buffer();
+            qWarning() << "Inconsistent data: " << buffer().mid(m_position, m_readPosition);
+            qWarning() << "Pos: " << m_position << " Read pos: " << m_readPosition;
             m_socket->close();
             return;
         }
