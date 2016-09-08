@@ -296,11 +296,8 @@ QList<QByteArray> ImapStreamParser::readParenthesizedList()
         } else if (count == 0) {
             QByteArray ba;
             if (hasLiteral()) {
-                while (!atLiteralEnd()) {
+                while (!atLiteralEnd() && !insufficientData()) {
                     ba += readLiteralPart();
-                    if (m_insufficientData) {
-                        return QList<QByteArray>();
-                    }
                 }
             } else if (hasString()) {
                 ba = readString();
@@ -483,16 +480,6 @@ bool ImapStreamParser::waitForMoreData(bool wait)
         }
     }
     return true;
-}
-
-void ImapStreamParser::setData(const QByteArray &data)
-{
-    buffer() = data;
-}
-
-QByteArray ImapStreamParser::data() const
-{
-    return buffer();
 }
 
 bool ImapStreamParser::dataAvailable()

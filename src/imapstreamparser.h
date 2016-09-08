@@ -157,9 +157,6 @@ public:
 
     int availableDataSize() const;
 
-    void setData(const QByteArray &data);
-    QByteArray data() const;
-
     void parseStream();
 
     void saveState();

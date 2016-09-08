@@ -28,6 +28,8 @@
 #include "session_p.h"
 #include "imapstreamparser.h"
 
+#include <QBuffer>
+
 namespace KIMAP2
 {
 class NamespaceJobPrivate : public JobPrivate
@@ -41,8 +43,9 @@ public:
         QList<MailBoxDescriptor> result;
 
         foreach (const QByteArray &namespaceItem, namespaceList) {
-            ImapStreamParser parser(Q_NULLPTR);
-            parser.setData(namespaceItem);
+            QBuffer readSocket(const_cast<QByteArray*>(&namespaceItem));
+            readSocket.open(QBuffer::ReadOnly);
+            ImapStreamParser parser(&readSocket);
 
             QList<QByteArray> parts = parser.readParenthesizedList();
             if (parts.size() < 2) {
