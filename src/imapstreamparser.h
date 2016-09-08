@@ -197,7 +197,6 @@ private:
      */
     bool advanceOver(const char c);
     void advance(int = 1);
-    int readUntil(const char c);
 
     int readFromSocket();
 
@@ -207,7 +206,7 @@ private:
     char at(int pos) const;
     QByteArray mid(int start, int end = -1)  const;
     int length() const;
-    int indexOf(const char, int offset) const;
+    int indexOf(const char);
 
     QByteArray &buffer();
     const QByteArray &buffer() const;

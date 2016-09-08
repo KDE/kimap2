@@ -68,11 +68,6 @@ int ImapStreamParser::length() const
     return m_readPosition;
 }
 
-int ImapStreamParser::indexOf(const char c, int offset) const
-{
-    return buffer().indexOf(c, offset);
-}
-
 QString ImapStreamParser::readUtf8String()
 {
     QByteArray tmp;
@@ -132,21 +127,16 @@ bool ImapStreamParser::hasString()
     return isUnquotedString;
 }
 
-int ImapStreamParser::readUntil(const char c)
+int ImapStreamParser::indexOf(const char c)
 {
-    int end = -1;
-    int extraBytes = 0;
-    while (end == -1) {
-        end = indexOf(c, m_position);
-        extraBytes++;
-        if (end == -1) {
-            if (!dataAvailable(m_position + extraBytes)) {
-                //Couldn't find end, which means we have insufficient data
-                return false;
-            }
+    int index = m_position;
+    while (dataAvailable(index)) {
+        if (at(index) == c) {
+            return index;
         }
+        index++;
     }
-    return end;
+    return -1;
 }
 
 bool ImapStreamParser::hasLiteral()
@@ -158,7 +148,7 @@ bool ImapStreamParser::hasLiteral()
     stripLeadingSpaces();
     if (at(m_position) == '{') {
         //Look for } and read more until we find it or run out of data.
-        int end = readUntil('}');
+        int end = indexOf('}');
         if (end == -1) {
             //Couldn't find end
             m_position = savedPos;
