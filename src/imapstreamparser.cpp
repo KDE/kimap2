@@ -505,12 +505,6 @@ QByteArray ImapStreamParser::data() const
     return buffer();
 }
 
-
-void ImapStreamParser::parse()
-{
-    readFromSocket();
-}
-
 bool ImapStreamParser::dataAvailable()
 {
     return dataAvailable(m_position);

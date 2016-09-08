@@ -73,7 +73,6 @@ private Q_SLOTS:
         QBuffer readSocket(&buffer);
         readSocket.open(QBuffer::ReadOnly);
         ImapStreamParser parser(&readSocket);
-        parser.parse();
 
         QVERIFY(parser.availableDataSize() != 0);
 
@@ -107,7 +106,6 @@ private Q_SLOTS:
         QBuffer readSocket(&buffer);
         readSocket.open(QBuffer::ReadOnly);
         ImapStreamParser parser(&readSocket);
-        parser.parse();
 
         QVERIFY(parser.availableDataSize() != 0);
 
@@ -125,7 +123,6 @@ private Q_SLOTS:
 
         QVERIFY(socket.write(part3) != -1);
         QVERIFY(socket.write(part4) != -1);
-        parser.parse();
 
         QVERIFY(parser.hasList());
         *payload << Message::Part(parser.readParenthesizedList());
@@ -149,7 +146,6 @@ private Q_SLOTS:
         QBuffer readSocket(&buffer);
         readSocket.open(QBuffer::ReadOnly);
         ImapStreamParser parser(&readSocket);
-        parser.parse();
 
         QVERIFY(parser.availableDataSize() != 0);
 

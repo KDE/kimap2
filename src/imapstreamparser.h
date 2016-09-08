@@ -50,7 +50,7 @@ public:
 
     /**
      * Get a string from the message. If the upcoming data is not a quoted string, unquoted string or a literal,
-     * the behavior is undefined. Use @ref hasString to be sure a string comes. This call might block.
+     * the behavior is undefined. Use @ref hasString to be sure a string comes.
      * @return the next string from the message as an utf8 string
      */
     QString readUtf8String();
@@ -63,20 +63,20 @@ public:
 
     /**
      * Get he next parenthesized list. If the upcoming data is not a parenthesized list,
-     * the behavior is undefined. Use @ref hasList to be sure a string comes. This call might block.
+     * the behavior is undefined. Use @ref hasList to be sure a string comes.
      * @return the next parenthesized list.
      */
     QList<QByteArray> readParenthesizedList();
 
     /**
-     * Get the next data as a number. This call might block.
+     * Get the next data as a number.
      * @param ok true if the data found was a number
      * @return the number
      */
     qint64 readNumber(bool *ok = Q_NULLPTR);
 
     /**
-     * Check if the next data is a string or not. This call might block.
+     * Check if the next data is a string or not.
      * @return true if a string follows
      */
     bool hasString();
@@ -84,7 +84,6 @@ public:
     /**
      * Check if the next data is a literal data or not. If a literal is found, the
      * internal position pointer is set to the beginning of the literal data.
-     * This call might block.
      * @return true if a literal follows
      */
     bool hasLiteral();
@@ -104,8 +103,6 @@ public:
      * }
      * @endcode
      *
-     * This call might block.
-     *
      * @return part of a literal data
      */
     QByteArray readLiteralPart();
@@ -117,25 +114,25 @@ public:
     bool atLiteralEnd() const;
 
     /**
-     * Check if the next data is a parenthesized list. This call might block.
+     * Check if the next data is a parenthesized list.
      * @return true if a parenthesized list comes.
     */
     bool hasList();
 
     /**
-    * Check if the next data is a parenthesized list end. This call might block.
+    * Check if the next data is a parenthesized list end.
     * @return true if a parenthesized list end.
      */
     bool atListEnd();
 
     /**
-     * Check if the next data is a response code. This call might block.
+     * Check if the next data is a response code.
      * @return true if a response code comes.
      */
     bool hasResponseCode();
 
     /**
-    * Check if the next data is a response code end. This call might block.
+    * Check if the next data is a response code end.
     * @return true if a response code end.
      */
     bool atResponseCodeEnd();
@@ -163,7 +160,6 @@ public:
     void setData(const QByteArray &data);
     QByteArray data() const;
 
-    void parse();
     void parseStream();
 
     void saveState();
