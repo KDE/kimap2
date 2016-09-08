@@ -55,12 +55,7 @@ const QByteArray &ImapStreamParser::buffer() const
 
 char ImapStreamParser::at(int pos) const
 {
-    return buffer().at(pos);
-}
-
-void ImapStreamParser::append(const QByteArray &b)
-{
-    buffer().append(b);
+    return m_current->constData()[pos];
 }
 
 QByteArray ImapStreamParser::mid(int start, int end)  const
@@ -278,17 +273,12 @@ QList<QByteArray> ImapStreamParser::readParenthesizedList()
             return QList<QByteArray>();
         }
         const auto c = at(m_position);
-        //Count parenthesis
-        if (c == '(') {
+        if (c == '(') { //Count parenthesis
             ++count;
             if (count == 1) {
                 sublistbegin = m_position;
             }
-            continue;
-        }
-        //Count parenthesis
-        if (c == ')')
-        {
+        } else if (c == ')') { //Count parenthesis
             //End of the list
             if (count <= 0) {
                 advance();
@@ -299,40 +289,23 @@ QList<QByteArray> ImapStreamParser::readParenthesizedList()
                 result.append(mid(sublistbegin, m_position - sublistbegin + 1));
             }
             --count;
-            continue;
-        }
-        //Skip over whitespace
-        if (c == ' ')
-        {
-            continue;
-        }
-        //Parse quoted strings
-        if (c == '"')
-        {
-            if (count > 0) {
-                parseQuotedString();
-                continue;
-            }
-        }
-        if (c == '[')
-        {
+        } else if (c == ' ') { //Skip over whitespace
+            //Skip over whitespace
+        } else if (c == '[') {
             concatToLast = true;
             if (result.isEmpty()) {
                 result.append(QByteArray());
             }
             result.last() += '[';
-            continue;
-        }
-        if (c == ']')
-        {
+        } else if (c == ']') {
             concatToLast = false;
             result.last() += ']';
-            continue;
-        }
-        if (count == 0)
-        {
+        } else if (c == '"' && count > 0) { //Parse quoted strings
+            parseQuotedString();
+            m_position--;
+        } else if (count == 0) {
             QByteArray ba;
-            if (c == '{' && hasLiteral()) {
+            if (hasLiteral()) {
                 while (!atLiteralEnd()) {
                     ba += readLiteralPart();
                     if (m_insufficientData) {
@@ -514,9 +487,7 @@ bool ImapStreamParser::waitForMoreData(bool wait)
     if (wait) {
         if (m_socket->bytesAvailable() > 0 ||
                 m_socket->waitForReadyRead(30000)) {
-            const auto data = m_socket->readAll();
-            append(data);
-            m_insufficientData = false;
+            readFromSocket();
         } else {
             return false;
         }
@@ -693,46 +664,39 @@ bool ImapStreamParser::atCommandEnd()
 QByteArray ImapStreamParser::readUntilCommandEnd()
 {
     QByteArray result;
-    int i = m_position;
     int paranthesisBalance = 0;
     Q_FOREVER {
-        parse();
-        if (!dataAvailable(i)) {
+        if (!dataAvailable()) {
             waitForMoreData(true);
         }
-        if (at(i) == '{')
-        {
-            m_position = i - 1;
-            hasLiteral(); //init literal size
-            result.append( mid( i, m_position + 1 ) );
-            while (!atLiteralEnd()) {
-                const auto data = readLiteralPart();
+        auto beforeLiteral = m_position;
+        if (at(m_position) == '{' && hasLiteral()) {
+            result.append(mid(beforeLiteral, m_position - beforeLiteral));
+            QByteArray literal;
+            while (!atLiteralEnd() || m_insufficientData) {
                 if (m_insufficientData) {
                     waitForMoreData(true);
-                } else {
-                    result.append(data);
                 }
+                literal += readLiteralPart();
             }
-            i = m_position;
+            result += literal;
         }
-        if (at(i) == '(')
-        {
+        if (at(m_position) == '(') {
             paranthesisBalance++;
         }
-        if (at(i) == ')')
-        {
+        if (at(m_position) == ')') {
             paranthesisBalance--;
         }
-        if ((i == length() && paranthesisBalance == 0) ||
-                at(i) == '\n'  || at(i) == '\r')
+        if ((m_position == length() && paranthesisBalance == 0) ||
+                at(m_position) == '\n'  || at(m_position) == '\r')
         {
             break; //command end
         }
-        result.append(at(i));
-        ++i;
+        result.append(at(m_position));
+        advance();
     }
-    m_position = i;
     atCommandEnd();
+    trimBuffer();
     return result;
 }
 

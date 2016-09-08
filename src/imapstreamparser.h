@@ -209,7 +209,6 @@ private:
     bool dataAvailable(int pos);
 
     char at(int pos) const;
-    void append(const QByteArray &);
     QByteArray mid(int start, int end = -1)  const;
     int length() const;
     int indexOf(const char, int offset) const;
