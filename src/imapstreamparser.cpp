@@ -380,12 +380,13 @@ QByteArray ImapStreamParser::parseQuotedString()
                 m_position = i;
                 return QByteArray();
             }
-            if (at(i) == '\\') {
+            const auto c = at(i);
+            if (c == '\\') {
                 i += 2;
                 foundSlash = true;
                 continue;
             }
-            if (at(i) == '"') {
+            if (c == '"') {
                 result = mid(m_position, i - m_position);
                 end = i + 1; // skip the '"'
                 break;
@@ -411,7 +412,7 @@ QByteArray ImapStreamParser::parseQuotedString()
                 end = i;
                 break;
             }
-            if (at(i) == '\\') {
+            if (c == '\\') {
                 foundSlash = true;
             }
             i++;
@@ -466,13 +467,9 @@ void ImapStreamParser::stripLeadingSpaces()
     if (!dataAvailable()) {
         return;
     }
-    for (int i = m_position; i < length(); ++i) {
-        if (at(i) != ' ') {
-            m_position = i;
-            return;
-        }
+    while (at(m_position) == ' ' && m_position < length()) {
+        advance();
     }
-    m_position = length();
 }
 
 bool ImapStreamParser::waitForMoreData(bool wait)
