@@ -26,6 +26,7 @@
 #include <QtCore/QByteArray>
 #include <QtCore/QList>
 #include <QtCore/QString>
+#include <QtCore/QScopedPointer>
 #include <functional>
 #include <message_p.h>
 
@@ -207,6 +208,9 @@ private:
 
     QByteArray &buffer();
     const QByteArray &buffer() const;
+
+    QScopedPointer<Message> m_message;
+    QList<Message::Part> *m_currentPayload;
 
     QIODevice *m_socket;
     bool m_isServerModeEnabled;

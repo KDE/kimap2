@@ -525,60 +525,61 @@ int ImapStreamParser::readFromSocket()
 
 void ImapStreamParser::parseStream()
 {
-    Message message;
-    QList<Message::Part> *payload = &message.content;
+    //Start a new message if there is no current message
+    if (!m_message) {
+        m_message.reset(new Message);
+        m_currentPayload = &m_message->content;
+    }
 
     if (!dataAvailable()) {
         return;
     }
-    saveState();
-
     while (!atCommandEnd()) {
+        saveState();
         if (hasString()) {
             const auto string = readString();
             if (!insufficientData()) {
                 if (string == "NIL") {
-                    *payload << Message::Part(QList<QByteArray>());
+                    *m_currentPayload << Message::Part(QList<QByteArray>());
                 } else {
-                    *payload << Message::Part(string);
+                    *m_currentPayload << Message::Part(string);
                 }
             }
         } else if (hasList()) {
             const auto list = readParenthesizedList();
             if (!insufficientData()) {
-                *payload << Message::Part(list);
+                *m_currentPayload << Message::Part(list);
             }
         } else if (hasResponseCode()) {
-            payload = &message.responseCode;
+            m_currentPayload = &m_message->responseCode;
         } else if (atResponseCodeEnd()) {
-            payload = &message.content;
+            m_currentPayload = &m_message->content;
         } else if (hasLiteral()) {
             QByteArray literal;
             while (!atLiteralEnd()) {
                 literal += readLiteralPart();
             }
             if (!insufficientData()) {
-                *payload << Message::Part(literal);
+                *m_currentPayload << Message::Part(literal);
             }
-        } else {
+        } else if (!insufficientData()) {
             //If we get here but didn't run into an insufficient-data condition,
             //then something is wrong.
-            if (!insufficientData()) {
-                qWarning() << "Inconsistent data: " << data();
-                m_socket->close();
-                return;
-            }
-            break;
+            qWarning() << "Inconsistent data: " << buffer();
+            m_socket->close();
+            return;
+        }
+
+        if (insufficientData()) {
+            restoreState();
+            return;
+        } else {
+            trimBuffer();
         }
     }
-
-    if (insufficientData()) {
-        restoreState();
-    } else {
-        trimBuffer();
-        Q_ASSERT(responseReceived);
-        responseReceived(message);
-    }
+    Q_ASSERT(responseReceived);
+    responseReceived(*m_message);
+    m_message.reset(nullptr);
 }
 
 void ImapStreamParser::trimBuffer()
