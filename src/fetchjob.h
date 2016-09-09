@@ -42,6 +42,7 @@ typedef QSharedPointer<KMime::Message> MessagePtr;
 typedef QList<QByteArray> MessageFlags;
 
 typedef QPair<QByteArray, QVariant> MessageAttribute;
+typedef QList<MessageAttribute> MessageAttributes;
 
 /**
  * Fetch message data from the server
@@ -181,6 +182,18 @@ public:
         bool gmailExtensionsEnabled;
     };
 
+    class KIMAP2_EXPORT Result
+    {
+    public:
+        qint64 sequenceNumber;
+        qint64 uid;
+        qint64 size;
+        KIMAP2::MessageFlags flags;
+        KIMAP2::MessagePtr message;
+        KIMAP2::MessageParts parts;
+        KIMAP2::MessageAttributes attributes;
+    };
+
     explicit FetchJob(Session *session);
     virtual ~FetchJob();
 
@@ -230,158 +243,11 @@ public:
     FetchScope scope() const;
 
 Q_SIGNALS:
-    /**
-     * Provides header and message results.
-     *
-     * This signal will be emitted if the requested scope mode
-     * was FetchScope::Full, FetchScope::Flags or
-     * FetchScope::Headers with no parts specified
-     *
-     * This signal may be emitted any number of times before
-     * the result() signal is emitted.  The result() signal will
-     * only be emitted once all results have been reported via
-     * one of the signals.
-     *
-     * Note that, depending on the scope, some of the parameters
-     * of this signal may be empty maps.
-     *
-     * @param mailBox  the name of the mailbox the fetch job was
-     *                 executed on
-     * @param uids     a map from message sequence numbers to message UIDs;
-     *                 this will always be populated
-     * @param sizes    a map from message sequence numbers to message sizes
-     *                 (sizes are in octets and refer to the transfer encoding of
-     *                 the message); populated if the scope is FetchScope::Full or
-     *                 FetchScope::Headers
-     * @param flags    a map from message sequence numbers to message flags;
-     *                 populated if the scope is FetchScope::Flags, FetchScope::Full
-     *                 of FetchScope::Headers
-     * @param messages a map from message sequence numbers to message contents (including
-     *                 headers); populated if the scope is FetchScope::Full,
-     *                 FetchScope::Headers or FetchScope::Structure
-     */
-    void headersReceived(const QString &mailBox,
-                         const QMap<qint64, qint64> &uids,
-                         const QMap<qint64, qint64> &sizes,
-                         const QMap<qint64, KIMAP2::MessageFlags> &flags,
-                         const QMap<qint64, KIMAP2::MessagePtr> &messages);
-
-    /**
-     * An overloaded version of headersReceived(), which includes additional attribute
-     * specified in the FETCH response, but that don't belong to actual content of the
-     * message.
-     *
-     * @param mailBox  the name of the mailbox the fetch job was
-     *                 executed on
-     * @param uids     a map from message sequence numbers to message UIDs;
-     *                 this will always be populated
-     * @param attrs    a map from message sequence numbers to a pair of attribute
-     *                 name and value
-     * @param sizes    a map from message sequence numbers to message sizes
-     *                 (sizes are in octets and refer to the transfer encoding of
-     *                 the message); populated if the scope is FetchScope::Full or
-     *                 FetchScope::Headers
-     * @param flags    a map from message sequence numbers to message flags;
-     *                 populated if the scope is FetchScope::Flags, FetchScope::Full
-     *                 of FetchScope::Headers
-     * @param messages a map from message sequence numbers to message contents (including
-     *                 headers); populated if the scope is FetchScope::Full,
-     *                 FetchScope::Headers or FetchScope::Structure
-     *
-     * @overload
-     */
-    void headersReceived(const QString &mailBox,
-                         const QMap<qint64, qint64> &uids,
-                         const QMap<qint64, qint64> &sizes,
-                         const QMap<qint64, KIMAP2::MessageAttribute > &attrs,
-                         const QMap<qint64, KIMAP2::MessageFlags> &flags,
-                         const QMap<qint64, KIMAP2::MessagePtr> &messages);
-
-    /**
-     * Provides header and message results.
-     *
-     * This signal will be emitted if the requested scope mode
-     * was FetchScope::Content or FetchScope::Headers with no
-     * parts specified or FetchScope::Structure.
-     *
-     * This signal may be emitted any number of times before
-     * the result() signal is emitted.  The result() signal will
-     * only be emitted once all results have been reported via
-     * one of the signals.
-     *
-     *
-     * @param mailBox  the name of the mailbox the fetch job was
-     *                 executed on
-     * @param uids     a map from message sequence numbers to message UIDs
-     * @param messages a map from message sequence numbers to message contents
-     */
-    void messagesReceived(const QString &mailBox,
-                          const QMap<qint64, qint64> &uids,
-                          const QMap<qint64, KIMAP2::MessagePtr> &messages);
-
-    /**
-     * An overloaded version of messagesReceived(), which includes additional attribute
-     * specified in the FETCH response, but that don't belong to actual content of the
-     * message.
-     *
-     * @param mailBox  the name of the mailbox the fetch job was
-     *                 executed on
-     * @param uids     a map from message sequence numbers to message UIDs
-     * @param attrs    a map from message sequence numbers to pair of attribute
-     *                 name and it's value
-     * @param messages a map from message sequence numbers to message contents
-     *
-     * @overload
-     */
-    void messagesReceived(const QString &mailBox,
-                          const QMap<qint64, qint64> &uids,
-                          const QMap<qint64, KIMAP2::MessageAttribute > &attrs,
-                          const QMap<qint64, KIMAP2::MessagePtr> &messages);
-    /**
-     * Provides header and message results.
-     *
-     * This signal will be emitted if the requested scope mode
-     * was FetchScope::Content or FetchScope::Headers with
-     * specified parts.
-     *
-     * This signal may be emitted any number of times before
-     * the result() signal is emitted.  The result() signal will
-     * only be emitted once all results have been reported via
-     * one of the signals.
-     *
-     * @param mailBox  the name of the mailbox the fetch job was
-     *                 executed on
-     * @param uids     a map from message sequence numbers to message UIDs
-     * @param parts    a map from message sequence numbers to message part collections
-     */
-    void partsReceived(const QString &mailBox,
-                       const QMap<qint64, qint64> &uids,
-                       const QMap<qint64, KIMAP2::MessageParts> &parts);
-
-    /**
-      * An overloaded version of partsReceived(), which includes additional attribute
-      * specified in the FETCH response, but that don't belong to actual content of the
-      * message.
-      *
-      * @param mailBox  the name of the mailbox the fetch job was
-      *                 executed on
-      * @param uids     a map from message sequence numbers to message UIDs
-      * @param attrs    a map from message sequence numbers to pair of attribute
-      * @param parts    a map from message sequence numbers to message part collections
-      *
-      * @overload
-      */
-    void partsReceived(const QString &mailBox,
-                       const QMap<qint64, qint64> &uids,
-                       const QMap<qint64, KIMAP2::MessageAttribute > &attrs,
-                       const QMap<qint64, KIMAP2::MessageParts> &parts);
+    void resultReceived(const Result &);
 
 protected:
     void doStart() Q_DECL_OVERRIDE;
     void handleResponse(const Message &response) Q_DECL_OVERRIDE;
-
-private:
-    Q_PRIVATE_SLOT(d_func(), void emitPendings())
 };
 
 }

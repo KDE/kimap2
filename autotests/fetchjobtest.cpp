@@ -27,6 +27,8 @@
 
 Q_DECLARE_METATYPE(KIMAP2::FetchJob::FetchScope)
 
+using namespace KIMAP2;
+
 class FetchJobTest: public QObject
 {
     Q_OBJECT
@@ -39,43 +41,21 @@ private:
     QMap<qint64, KIMAP2::MessageFlags> m_flags;
     QMap<qint64, KIMAP2::MessagePtr> m_messages;
     QMap<qint64, KIMAP2::MessageParts> m_parts;
-    QMap<qint64, KIMAP2::MessageAttribute> m_attrs;
+    QMap<qint64, KIMAP2::MessageAttributes> m_attrs;
 
 public Q_SLOTS:
-    void onHeadersReceived(const QString &/*mailBox*/,
-                           const QMap<qint64, qint64> &uids,
-                           const QMap<qint64, qint64> &sizes,
-                           const QMap<qint64, KIMAP2::MessageAttribute> &attrs,
-                           const QMap<qint64, KIMAP2::MessageFlags> &flags,
-                           const QMap<qint64, KIMAP2::MessagePtr> &messages)
+    void onResultReceived(const FetchJob::Result &result)
     {
+        qDebug() << "Received result " << result.sequenceNumber;
         m_signals << QStringLiteral("headersReceived");
-        m_uids.unite(uids);
-        m_sizes.unite(sizes);
-        m_flags.unite(flags);
-        m_messages.unite(messages);
-        m_attrs.unite(attrs);
-    }
-
-    void onMessagesReceived(const QString &/*mailbox*/,
-                            const QMap<qint64, qint64> uids,
-                            const QMap<qint64, KIMAP2::MessageAttribute> &attrs,
-                            const QMap<qint64, KIMAP2::MessagePtr> &messages)
-    {
-        m_signals << QStringLiteral("messagesReceived");
-        m_uids.unite(uids);
-        m_messages.unite(messages);
-        m_attrs.unite(attrs);
-    }
-
-    void onPartsReceived(const QString &/*mailbox*/,
-                         const QMap<qint64, qint64> &/*uids*/,
-                         const QMap<qint64, KIMAP2::MessageAttribute> &attrs,
-                         const QMap<qint64, KIMAP2::MessageParts> &parts)
-    {
-        m_signals << QStringLiteral("partsReceived");
-        m_attrs.unite(attrs);
-        m_parts.unite(parts);
+        m_uids.insert(result.sequenceNumber, result.uid);
+        m_sizes.insert(result.sequenceNumber, result.size);
+        m_flags.insert(result.sequenceNumber, result.flags);
+        m_messages.insert(result.sequenceNumber, result.message);
+        if (!result.attributes.isEmpty()) {
+            m_attrs.insert(result.sequenceNumber, result.attributes);
+        }
+        m_parts.insert(result.sequenceNumber, result.parts);
     }
 
 private Q_SLOTS:
@@ -182,18 +162,7 @@ private Q_SLOTS:
         job->setSequenceSet(set);
         job->setScope(scope);
 
-        connect(job, SIGNAL(headersReceived(QString,
-                                            QMap<qint64, qint64>,
-                                            QMap<qint64, qint64>,
-                                            QMap<qint64, KIMAP2::MessageAttribute>,
-                                            QMap<qint64, KIMAP2::MessageFlags>,
-                                            QMap<qint64, KIMAP2::MessagePtr>)),
-                this, SLOT(onHeadersReceived(QString,
-                                             QMap<qint64, qint64>,
-                                             QMap<qint64, qint64>,
-                                             QMap<qint64, KIMAP2::MessageAttribute>,
-                                             QMap<qint64, KIMAP2::MessageFlags>,
-                                             QMap<qint64, KIMAP2::MessagePtr>)));
+        connect(job, &FetchJob::resultReceived, this, &FetchJobTest::onResultReceived);
 
         bool result = job->exec();
         QEXPECT_FAIL("connection drop", "Expected failure on connection drop", Continue);
@@ -240,20 +209,16 @@ private Q_SLOTS:
         job->setSequenceSet(KIMAP2::ImapSet(1, 2));
         job->setScope(scope);
 
-        connect(job, SIGNAL(messagesReceived(QString,
-                                             QMap<qint64, qint64>,
-                                             QMap<qint64, KIMAP2::MessageAttribute>,
-                                             QMap<qint64, KIMAP2::MessagePtr>)),
-                this, SLOT(onMessagesReceived(QString,
-                                              QMap<qint64, qint64>,
-                                              QMap<qint64, KIMAP2::MessageAttribute>,
-                                              QMap<qint64, KIMAP2::MessagePtr>)));
+        connect(job, &FetchJob::resultReceived, this, &FetchJobTest::onResultReceived);
 
         bool result = job->exec();
         QVERIFY(result);
         QVERIFY(m_signals.count() > 0);
         QCOMPARE(m_uids.count(), 2);
+        QCOMPARE(m_messages.count(), 2);
+        QVERIFY(m_messages[1]);
         QCOMPARE(m_messages[1]->attachments().count(), 0);
+        QVERIFY(m_messages[2]);
         QCOMPARE(m_messages[2]->attachments().count(), 1);
         QCOMPARE(m_messages[2]->contents().size(), 2);
         QCOMPARE(m_messages[2]->contents()[0]->contents().size(), 2);
@@ -294,26 +259,7 @@ private Q_SLOTS:
         job->setSequenceSet(KIMAP2::ImapSet(2, 2));
         job->setScope(scope);
 
-        connect(job, SIGNAL(headersReceived(QString,
-                                            QMap<qint64, qint64>,
-                                            QMap<qint64, qint64>,
-                                            QMap<qint64, KIMAP2::MessageAttribute>,
-                                            QMap<qint64, KIMAP2::MessageFlags>,
-                                            QMap<qint64, KIMAP2::MessagePtr>)),
-                this, SLOT(onHeadersReceived(QString,
-                                             QMap<qint64, qint64>,
-                                             QMap<qint64, qint64>,
-                                             QMap<qint64, KIMAP2::MessageAttribute>,
-                                             QMap<qint64, KIMAP2::MessageFlags>,
-                                             QMap<qint64, KIMAP2::MessagePtr>)));
-        connect(job, SIGNAL(partsReceived(QString,
-                                          QMap<qint64, qint64>,
-                                          QMap<qint64, KIMAP2::MessageAttribute>,
-                                          QMap<qint64, KIMAP2::MessageParts>)),
-                this, SLOT(onPartsReceived(QString,
-                                           QMap<qint64, qint64>,
-                                           QMap<qint64, KIMAP2::MessageAttribute>,
-                                           QMap<qint64, KIMAP2::MessageParts>)));
+        connect(job, &FetchJob::resultReceived, this, &FetchJobTest::onResultReceived);
 
         bool result = job->exec();
 
