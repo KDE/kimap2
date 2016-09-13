@@ -160,6 +160,63 @@ private Q_SLOTS:
         m_attrs.clear();
     }
 
+    void testFetchFlags()
+    {
+        int count = 5000;
+        int parsedBytes = 0;
+        QList<QByteArray> scenario;
+        scenario << FakeServer::preauth();
+        parsedBytes += scenario.last().size();
+        scenario << "C: A000001 FETCH 1:* (FLAGS UID)";
+        for (int i = 1; i <= count; i++) {
+            scenario << QString("S: * %1 FETCH ( FLAGS (\\Seen) UID %2 )\r\n").arg(i).arg(i).toLatin1();
+            parsedBytes += scenario.last().size();
+        };
+        scenario << "S: A000001 OK fetch done";
+        parsedBytes += scenario.last().size();
+
+        KIMAP2::FetchJob::FetchScope scope;
+        scope.mode = KIMAP2::FetchJob::FetchScope::Flags;
+
+        FakeServer fakeServer;
+        fakeServer.setScenario(scenario);
+        fakeServer.startAndWait();
+
+        KIMAP2::Session session(QStringLiteral("127.0.0.1"), 5989);
+
+        KIMAP2::FetchJob *job = new KIMAP2::FetchJob(&session);
+        job->setUidBased(false);
+        job->setSequenceSet(KIMAP2::ImapSet(1, 0));
+        job->setScope(scope);
+
+        connect(job, &FetchJob::resultReceived, this, &Benchmark::onResultReceived);
+
+        QTime time;
+        time.start();
+
+        bool result = job->exec();
+
+        qWarning() << "Reading " << count << " messages took: " << time.elapsed() << " ms.";
+        qWarning() << parsedBytes << " bytes expected to be parsed";
+
+        QVERIFY(result);
+        QVERIFY(m_signals.count() > 0);
+        QCOMPARE(m_uids.count(), count);
+        QCOMPARE(m_messages.count(), count);
+        QCOMPARE(m_attrs.count(), 0);
+
+        // Check that we received the message header
+
+        fakeServer.quit();
+
+        m_signals.clear();
+        m_uids.clear();
+        m_sizes.clear();
+        m_flags.clear();
+        m_messages.clear();
+        m_attrs.clear();
+    }
+
 };
 
 QTEST_GUILESS_MAIN(Benchmark)
