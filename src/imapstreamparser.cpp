@@ -430,7 +430,12 @@ QByteArray ImapStreamParser::readUntilCommandEnd()
         result = mid(startPos, m_position - startPos - 1);
     });
     Q_FOREVER {
-        m_socket->waitForReadyRead(1000);
+        if (!m_socket->bytesAvailable()) {
+            if (!m_socket->waitForReadyRead(10000)) {
+                qWarning() << "No data available";
+                return result;
+            }
+        }
         parseStream();
         if (!result.isEmpty() && m_currentState == InitState) {
             // qDebug() << "Got a result: " << m_readingLiteral;
