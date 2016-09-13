@@ -26,9 +26,32 @@
 #include "message_p.h"
 #include "rfccodecs.h"
 #include "session_p.h"
-#include "imapstreamparser.h"
 
-#include <QBuffer>
+static QList<QByteArray> parseParenthesizedList(const QByteArray &data)
+{
+    QList<QByteArray> result;
+    if (data.isEmpty()) {
+        return result;
+    }
+    if (data.at(0) != '(') {
+        return result;
+    }
+    bool parsingString = false;
+    int start = 0;
+    for (int pos = 1; pos < data.size(); pos++) {
+        //Match unescaped quotes
+        if (data.at(pos) == '\"' && data.at(pos - 1) != '\\') {
+            if (parsingString) {
+                parsingString = false;
+                result << data.mid(start, pos - start);
+            } else {
+                parsingString = true;
+                start = pos + 1;
+            }
+        }
+    }
+    return result;
+}
 
 namespace KIMAP2
 {
@@ -43,16 +66,9 @@ public:
         QList<MailBoxDescriptor> result;
 
         foreach (const QByteArray &namespaceItem, namespaceList) {
-            QBuffer readSocket(const_cast<QByteArray*>(&namespaceItem));
-            readSocket.open(QBuffer::ReadOnly);
-            ImapStreamParser parser(&readSocket);
-
-            QList<QByteArray> parts;
-            parser.onResponseReceived([&parts](const Message &message) {
-                parts = message.content.at(1).toList();
-            });
-            parser.parseStream();
+            QList<QByteArray> parts = parseParenthesizedList(namespaceItem);
             if (parts.size() < 2) {
+                qWarning() << "Not enough parts in namespace item " << namespaceItem;
                 continue;
             }
             MailBoxDescriptor descriptor;
@@ -60,7 +76,6 @@ public:
             descriptor.separator = QLatin1Char(parts[1][0]);
 
             result << descriptor;
-
         }
 
         return result;
