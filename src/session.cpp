@@ -162,9 +162,6 @@ SessionPrivate::SessionPrivate(Session *session)
 {
     stream->onResponseReceived([this](const Message &message) {
         responseReceived(message);
-        if (stream->availableDataSize() >= 1) {
-            QMetaObject::invokeMethod(this, "readMessage", Qt::QueuedConnection);
-        }
     });
 }
 
@@ -507,6 +504,11 @@ void SessionPrivate::writeDataQueue()
 void SessionPrivate::readMessage()
 {
     stream->parseStream();
+    if (stream->error()) {
+        qCWarning(KIMAP2_LOG) << "Error while parsing";
+        qCDebug(KIMAP2_LOG) << "Current buffer: " << stream->currentBuffer();
+        socket->close();
+    }
 }
 
 void SessionPrivate::closeSocket()

@@ -74,7 +74,7 @@ void Job::setSocketError(QAbstractSocket::SocketError error)
 Job::HandlerResponse Job::handleErrorReplies(const Message &response)
 {
     Q_D(Job);
-//   qCDebug(KIMAP2_LOG) << response.toString();
+    // qCDebug(KIMAP2_LOG) << response.toString();
 
     if (!response.content.isEmpty() &&
             d->tags.contains(response.content.first().toString())) {

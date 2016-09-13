@@ -72,7 +72,7 @@ private Q_SLOTS:
         int parsedBytes = 0;
         QByteArray data;
         for (int i = 1; i <= count; i++) {
-            data += QString("* %1 FETCH (UID %2 FLAGS (\\Seen) BODY[HEADER.FIELDS (TO FROM MESSAGE-ID REFERENCES IN-REPLY-TO SUBJECT DATE)] {154}\r\nFrom: Joe Smith <smith@example.com>\r\nDate: Wed, 2 Mar 2011 11:33:24 +0700\r\nMessage-ID: <1234@example.com>\r\nSubject: hello\r\nTo: Jane <jane@example.com>\r\n\r\n BODY[1.1.1] {28}\r\nHi Jane, nice to meet you!\r\n BODY[1.1.1.MIME] {48}\r\nContent-Type: text/plain; charset=ISO-8859-1\r\n\r\n)\r\n\r\n").arg(i).arg(i).toLatin1();
+            data += QString("* %1 FETCH (UID %2 FLAGS (\\Seen) BODY[HEADER.FIELDS (TO FROM MESSAGE-ID REFERENCES IN-REPLY-TO SUBJECT DATE)] {154}\r\nFrom: Joe Smith <smith@example.com>\r\nDate: Wed, 2 Mar 2011 11:33:24 +0700\r\nMessage-ID: <1234@example.com>\r\nSubject: hello\r\nTo: Jane <jane@example.com>\r\n\r\n BODY[1.1.1] {28}\r\nHi Jane, nice to meet you!\r\n BODY[1.1.1.MIME] {48}\r\nContent-Type: text/plain; charset=ISO-8859-1\r\n\r\n)\r\n").arg(i).arg(i).toLatin1();
         };
         data += "A000001 OK fetch done\r\n";
         parsedBytes = data.size();
@@ -89,7 +89,7 @@ private Q_SLOTS:
         QTime time;
         time.start();
 
-        while (parser.availableDataSize() && !parser.insufficientData()) {
+        while (parser.availableDataSize()) {
             parser.parseStream();
         }
 

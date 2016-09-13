@@ -141,6 +141,20 @@ private Q_SLOTS:
         scope.changedSince = 123456789;
         QTest::newRow("fetch full headers") << false << KIMAP2::ImapSet(11, 11) << 1
                                             << scenario << scope;
+
+        scenario.clear();
+        const auto payloadSize = 32000;
+        QByteArray payload;
+        payload.fill('c', payloadSize);
+        scenario << FakeServer::preauth()
+                 << "C: A000001 FETCH 11 (RFC822.SIZE INTERNALDATE BODY.PEEK[HEADER] FLAGS UID) (CHANGEDSINCE 123456789)"
+                 << QString("S: * 11 FETCH (UID 123 RFC822.SIZE 770 INTERNALDATE \"11-Oct-2010 03:33:50 +0100\" BODY[HEADER] {%1}").arg(payloadSize).toLatin1()
+                 << "S: " + payload + " FLAGS ())"
+                 << "S: A000001 OK fetch done";
+        scope.mode = KIMAP2::FetchJob::FetchScope::FullHeaders;
+        scope.changedSince = 123456789;
+        QTest::newRow("fetch large payload") << false << KIMAP2::ImapSet(11, 11) << 1
+                                            << scenario << scope;
     }
 
     void testFetch()

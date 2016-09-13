@@ -47,7 +47,11 @@ public:
             readSocket.open(QBuffer::ReadOnly);
             ImapStreamParser parser(&readSocket);
 
-            QList<QByteArray> parts = parser.readParenthesizedList();
+            QList<QByteArray> parts;
+            parser.onResponseReceived([&parts](const Message &message) {
+                parts = message.content.at(1).toList();
+            });
+            parser.parseStream();
             if (parts.size() < 2) {
                 continue;
             }
@@ -56,10 +60,6 @@ public:
             descriptor.separator = QLatin1Char(parts[1][0]);
 
             result << descriptor;
-            if (parser.insufficientData()) {
-                qCWarning(KIMAP2_LOG) << "The stream parser raised an exception during namespace list parsing.";
-                qCWarning(KIMAP2_LOG) << "namespacelist:" << namespaceList;
-            }
 
         }
 

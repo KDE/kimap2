@@ -303,36 +303,32 @@ private Q_SLOTS:
 
     void shouldCloseOnInconsistency()
     {
-        for (int count = 0; count < 10; count++) {
-            FakeServer fakeServer;
-            fakeServer.setScenario(QList<QByteArray>()
-                                   << FakeServer::preauth()
-                                   << "C: A000001 DUMMY"
-                                   << "S: * DUMMY %"
-                                   << "S: DUMMY)"
-                                  );
-            fakeServer.startAndWait();
+        FakeServer fakeServer;
+        fakeServer.setScenario(QList<QByteArray>()
+                                << FakeServer::preauth()
+                                << "C: A000001 DUMMY"
+                                << "S: * DUMMY %)"
+                                );
+        fakeServer.startAndWait();
 
-            KIMAP2::Session s(QStringLiteral("127.0.0.1"), 5989);
+        KIMAP2::Session s(QStringLiteral("127.0.0.1"), 5989);
 
-            QSignalSpy spyFail(&s, SIGNAL(connectionFailed()));
-            QSignalSpy spyState(&s, SIGNAL(stateChanged(KIMAP2::Session::State,KIMAP2::Session::State)));
+        QSignalSpy spyFail(&s, SIGNAL(connectionFailed()));
+        QSignalSpy spyState(&s, SIGNAL(stateChanged(KIMAP2::Session::State,KIMAP2::Session::State)));
 
-            MockJob *mock = new MockJob(&s);
-            mock->setTimeout(5000);
-            mock->setCommand("DUMMY");
+        MockJob *mock = new MockJob(&s);
+        mock->setTimeout(5000);
+        mock->setCommand("DUMMY");
 
-            mock->setAutoDelete(false);
-            mock->start();
-            QTest::qWait(250);   // Should be plenty
+        mock->setAutoDelete(false);
+        mock->exec();
 
-            // We expect to get an error here due to the inconsistency
-            QVERIFY(mock->error() != 0);
-            QCOMPARE(spyFail.count(), 0);
-            QCOMPARE(spyState.count(), 2);   // Authenticated, Disconnected
+        // We expect to get an error here due to the inconsistency
+        QVERIFY(mock->error() != 0);
+        QCOMPARE(spyFail.count(), 0);
+        QCOMPARE(spyState.count(), 2);   // Authenticated, Disconnected
 
-            delete mock;
-        }
+        delete mock;
     }
 
 public Q_SLOTS:

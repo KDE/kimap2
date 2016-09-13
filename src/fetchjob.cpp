@@ -245,10 +245,9 @@ void FetchJob::handleResponse(const Message &response)
                     result.message->assemble();
                 } else if (str.startsWith("BODY[")) {     //krazy:exclude=strings
                     if (!str.endsWith(']')) {     // BODY[ ... ] might have been split, skip until we find the ]
-                        while (!(*it).endsWith(']')) {
+                        while (it != content.constEnd() && !(*it).endsWith(']')) {
                             ++it;
                         }
-                        ++it;
                     }
 
                     int index;
