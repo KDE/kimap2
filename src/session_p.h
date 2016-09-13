@@ -28,6 +28,7 @@
 #include <QtCore/QQueue>
 #include <QtCore/QString>
 #include <QtCore/QTimer>
+#include <QtCore/QTime>
 
 class KJob;
 
@@ -120,6 +121,12 @@ private:
     QScopedPointer<ImapStreamParser> stream;
 
     QQueue<QByteArray> dataQueue;
+
+    QTime time;
+    qint64 accumulatedWaitTime;
+    qint64 accumulatedProcessingTime;
+    bool trackTime;
+    bool dumpTraffic;
 };
 
 }

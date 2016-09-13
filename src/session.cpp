@@ -47,6 +47,12 @@ Session::Session(const QString &hostName, quint16 port, QObject *parent)
     if (!qEnvironmentVariableIsEmpty("KIMAP2_LOGFILE")) {
         d->logger.reset(new SessionLogger);
     }
+    if (!qEnvironmentVariableIsEmpty("KIMAP2_TRAFFIC")) {
+        d->dumpTraffic = true;
+    }
+    if (!qEnvironmentVariableIsEmpty("KIMAP2_TIMING")) {
+        d->trackTime = true;
+    }
 
     d->isSocketConnected = false;
     d->state = Disconnected;
@@ -158,7 +164,11 @@ SessionPrivate::SessionPrivate(Session *session)
       tagCount(0),
       socketTimerInterval(30000),   // By default timeouts on 30s
       socket(new QSslSocket),
-      stream(new ImapStreamParser(socket.data()))
+      stream(new ImapStreamParser(socket.data())),
+      accumulatedWaitTime(0),
+      accumulatedProcessingTime(0),
+      trackTime(false),
+      dumpTraffic(false)
 {
     stream->onResponseReceived([this](const Message &message) {
         responseReceived(message);
@@ -195,6 +205,9 @@ void SessionPrivate::doStartNext()
         return;
     }
 
+    if (trackTime) {
+        time.start();
+    }
     restartSocketTimer();
     jobRunning = true;
 
@@ -225,6 +238,9 @@ void SessionPrivate::jobDestroyed(QObject *job)
 
 void SessionPrivate::responseReceived(const Message &response)
 {
+    if (dumpTraffic) {
+        qDebug() << "S: " << response.toString();
+    }
     if (logger && (state == Session::Authenticated || state == Session::Selected)) {
         logger->dataReceived(response.toString());
     }
@@ -353,6 +369,9 @@ void SessionPrivate::sendData(const QByteArray &data)
 {
     restartSocketTimer();
 
+    if (dumpTraffic) {
+        qDebug() << "C: " << data;
+    }
     if (logger && (state == Session::Authenticated || state == Session::Selected)) {
         logger->dataSent(data);
     }
@@ -503,11 +522,20 @@ void SessionPrivate::writeDataQueue()
 
 void SessionPrivate::readMessage()
 {
+    if (trackTime) {
+        accumulatedWaitTime += time.elapsed();
+        time.start();
+    }
     stream->parseStream();
     if (stream->error()) {
         qCWarning(KIMAP2_LOG) << "Error while parsing";
         qCDebug(KIMAP2_LOG) << "Current buffer: " << stream->currentBuffer();
         socket->close();
+    }
+    if (trackTime) {
+        accumulatedProcessingTime += time.elapsed();
+        time.start();
+        qDebug() << "Wait vs process vs total: " << accumulatedWaitTime << accumulatedProcessingTime << accumulatedWaitTime + accumulatedProcessingTime;
     }
 }
 
