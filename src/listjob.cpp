@@ -34,27 +34,11 @@ public:
     ListJobPrivate(ListJob *job, Session *session, const QString &name) : JobPrivate(session, name), q(job), option(ListJob::NoOption) { }
     ~ListJobPrivate() { }
 
-    void emitPendings()
-    {
-        if (pendingDescriptors.isEmpty()) {
-            return;
-        }
-
-        emit q->mailBoxesReceived(pendingDescriptors, pendingFlags);
-
-        pendingDescriptors.clear();
-        pendingFlags.clear();
-    }
-
     ListJob *const q;
 
     ListJob::Option option;
     QList<MailBoxDescriptor> namespaces;
     QByteArray command;
-
-    QTimer emitPendingsTimer;
-    QList<MailBoxDescriptor> pendingDescriptors;
-    QList< QList<QByteArray> > pendingFlags;
 };
 }
 
@@ -64,8 +48,6 @@ ListJob::ListJob(Session *session)
     : Job(*new ListJobPrivate(this, session, "List"))
 {
     Q_D(ListJob);
-    connect(&d->emitPendingsTimer, SIGNAL(timeout()),
-            this, SLOT(emitPendings()));
 }
 
 ListJob::~ListJob()
@@ -112,16 +94,6 @@ QList<MailBoxDescriptor> ListJob::queriedNamespaces() const
     return d->namespaces;
 }
 
-QList<MailBoxDescriptor> ListJob::mailBoxes() const
-{
-    return QList<MailBoxDescriptor>();
-}
-
-QMap< MailBoxDescriptor, QList<QByteArray> > ListJob::flags() const
-{
-    return QMap< MailBoxDescriptor, QList<QByteArray> >();
-}
-
 void ListJob::doStart()
 {
     Q_D(ListJob);
@@ -138,8 +110,6 @@ void ListJob::doStart()
     default:
         d->command = "LSUB";
     }
-
-    d->emitPendingsTimer.start(100);
 
     if (d->namespaces.isEmpty()) {
         d->tags << d->sessionInternal()->sendCommand(d->command, "\"\" *");
@@ -163,15 +133,6 @@ void ListJob::doStart()
 void ListJob::handleResponse(const Message &response)
 {
     Q_D(ListJob);
-
-    // We can predict it'll be handled by handleErrorReplies() so stop
-    // the timer now so that result() will really be the last emitted signal.
-    if (!response.content.isEmpty() &&
-            d->tags.size() == 1 &&
-            d->tags.contains(response.content.first().toString())) {
-        d->emitPendingsTimer.stop();
-        d->emitPendings();
-    }
 
     if (handleErrorReplies(response) == NotHandled) {
         if (response.content.size() >= 5 && response.content[1].toString() == d->command) {
@@ -200,8 +161,7 @@ void ListJob::handleResponse(const Message &response)
             mailBoxDescriptor.name = QString::fromUtf8(fullName);
             convertInboxName(mailBoxDescriptor);
 
-            d->pendingDescriptors << mailBoxDescriptor;
-            d->pendingFlags << flags;
+            emit resultReceived(mailBoxDescriptor, flags);
         }
     }
 }

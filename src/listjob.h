@@ -73,19 +73,14 @@ public:
     void setQueriedNamespaces(const QList<MailBoxDescriptor> &namespaces);
     QList<MailBoxDescriptor> queriedNamespaces() const;
 
-    KIMAP2_DEPRECATED QList<MailBoxDescriptor> mailBoxes() const;
-    KIMAP2_DEPRECATED QMap< MailBoxDescriptor, QList<QByteArray> > flags() const;
-
 Q_SIGNALS:
-    void mailBoxesReceived(const QList<KIMAP2::MailBoxDescriptor> &descriptors,
-                           const QList< QList<QByteArray> > &flags);
+    void resultReceived(const KIMAP2::MailBoxDescriptor &descriptors, const QList<QByteArray> &flags);
 
 protected:
     void doStart() Q_DECL_OVERRIDE;
     void handleResponse(const Message &response) Q_DECL_OVERRIDE;
 
 private:
-    Q_PRIVATE_SLOT(d_func(), void emitPendings())
 
     /**
     * @brief Converts a mailbox descriptor's name to uppercase if it is the Inbox or an Inbox subfolder.
