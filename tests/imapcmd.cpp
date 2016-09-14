@@ -138,10 +138,6 @@ int main(int argc, char **argv)
     }
     qInfo();
 
-    // qInfo() << "Listing mailboxes:";
-    // listFolders(&session);
-    // Q_ASSERT(session.state() == Session::Authenticated);
-
     qInfo() << "Selecting INBOX:";
     SelectJob *select = new SelectJob(&session);
     select->setMailBox(QLatin1String("INBOX"));
@@ -155,28 +151,41 @@ int main(int argc, char **argv)
     qInfo() << "First Unseen Message Index:" << select->firstUnseenIndex();
     qInfo() << "UID validity:" << select->uidValidity();
     qInfo() << "Next UID:" << select->nextUid();
+    qInfo() << "Highest modseq:" << select->highestModSequence();
     qInfo();
 
     QString command = QString::fromLocal8Bit(argv[4]);
+    QTime time;
+    time.start();
     if (command == "search") {
         auto searchJob = new SearchJob(&session);
         searchJob->setTerm(Term(Term::Uid, ImapSet::fromImapSequenceSet("1:*")));
         searchJob->setUidBased(true);
         searchJob->exec();
         qInfo() << "Search result: " << searchJob->results();
-    }
-    if (command == "flags") {
+    } else if (command == "list") {
+        auto job = new ListJob(&session);
+        job->setOption(ListJob::IncludeUnsubscribed);
+        QObject::connect(job, &ListJob::resultReceived, [](const MailBoxDescriptor &descriptor, const QList<QByteArray> &flags) {
+            qInfo() << "* " << descriptor.name
+                    <<  "flags " << flags;
+        });
+        job->exec();
+    } else if (command == "flags") {
         qInfo() << "Fetching flags";
         auto job = new FetchJob(&session);
         FetchJob::FetchScope scope;
         scope.mode = FetchJob::FetchScope::Flags;
         job->setScope(scope);
         job->setUidBased(true);
+        QObject::connect(job, &KIMAP2::FetchJob::resultReceived, [](const KIMAP2::FetchJob::Result &result) {
+            qInfo() << "* " << result.sequenceNumber
+                    << "uid " << result.uid
+                    <<  "flags " << result.flags;
+        });
         job->setSequenceSet(ImapSet::fromImapSequenceSet("1:*"));
         job->exec();
-    }
-
-    if (command == "fetch") {
+    } else if (command == "fetch") {
         qInfo() << "Fetching content";
         auto job = new FetchJob(&session);
         FetchJob::FetchScope scope;
@@ -194,6 +203,7 @@ int main(int argc, char **argv)
         job->exec();
     }
 
+    qInfo() << "Command took: " << time.elapsed() << "ms";
 
     qInfo() << "Logging out...";
     LogoutJob *logout = new LogoutJob(&session);
