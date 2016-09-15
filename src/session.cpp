@@ -24,7 +24,6 @@
 #include "session_p.h"
 
 #include <QtCore/QDebug>
-#include <QtCore/QTimer>
 
 #include "kimap_debug.h"
 

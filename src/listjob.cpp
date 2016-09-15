@@ -19,8 +19,6 @@
 
 #include "listjob.h"
 
-#include <QtCore/QTimer>
-
 #include "job_p.h"
 #include "message_p.h"
 #include "rfccodecs.h"

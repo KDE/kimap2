@@ -19,7 +19,6 @@
 
 #include "fetchjob.h"
 
-#include <QtCore/QTimer>
 #include "kimap_debug.h"
 
 #include "job_p.h"

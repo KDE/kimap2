@@ -187,18 +187,34 @@ int main(int argc, char **argv)
         job->exec();
     } else if (command == "fetch") {
         qInfo() << "Fetching content";
+        if (argc < 6) {
+            qInfo() << "Usage: fetch 1:* [full|headers] ";
+            return;
+        }
         auto job = new FetchJob(&session);
         FetchJob::FetchScope scope;
-        // scope.mode = FetchJob::FetchScope::FullHeaders;
-        scope.mode = FetchJob::FetchScope::Headers;
+        if (argc >= 7) {
+            if (QByteArray(argv[6]).toLower() == "full") {
+                scope.mode = FetchJob::FetchScope::Full;
+            } else if (QByteArray(argv[6]).toLower() == "headers") {
+                scope.mode = FetchJob::FetchScope::Headers;
+            } else {
+                scope.mode = FetchJob::FetchScope::Full;
+            }
+        }
         job->setScope(scope);
         job->setUidBased(true);
-        job->setSequenceSet(ImapSet::fromImapSequenceSet("1:*"));
+        if (argc >= 6) {
+            job->setSequenceSet(ImapSet::fromImapSequenceSet(QByteArray(argv[5])));
+        } else {
+            job->setSequenceSet(ImapSet::fromImapSequenceSet("1:*"));
+        }
         QObject::connect(job, &KIMAP2::FetchJob::resultReceived, [](const KIMAP2::FetchJob::Result &result) {
             qInfo() << "* " << result.sequenceNumber
                     << "uid " << result.uid
                     <<  "size " << result.size
-                    <<  "message size " << result.message->encodedContent().size();
+                    <<  "message size " << result.message->encodedContent().size()
+                    <<  "subject " << result.message->subject()->asUnicode;
         });
         job->exec();
     }
