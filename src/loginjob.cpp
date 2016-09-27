@@ -143,7 +143,6 @@ LoginJob::LoginJob(Session *session)
     : Job(*new LoginJobPrivate(this, session, QString::fromUtf8("Login")))
 {
     Q_D(LoginJob);
-    connect(d->sessionInternal(), SIGNAL(encryptionNegotiationResult(bool)), this, SLOT(sslResponse(bool)));
     qCDebug(KIMAP2_LOG) << this;
 }
 
@@ -219,6 +218,8 @@ void LoginJob::doStart()
     Q_D(LoginJob);
 
     qCDebug(KIMAP2_LOG) << "doStart" << this;
+
+    connect(d->sessionInternal(), SIGNAL(encryptionNegotiationResult(bool)), this, SLOT(sslResponse(bool)));
 
     if (session()->state() == Session::Disconnected) {
         auto guard = new QObject(this);
