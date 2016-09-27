@@ -509,6 +509,13 @@ void SessionPrivate::restartSocketTimer()
 
 void SessionPrivate::onSocketTimeout()
 {
+    qCWarning(KIMAP2_LOG) << "Aborting on socket timeout. " << socketTimerInterval;
+    if (!currentJob && !queue.isEmpty()) {
+        currentJob = queue.takeFirst();
+    }
+    if (currentJob) {
+        currentJob->setErrorMessage("Aborting on socket timeout. Interval" + QString::number(socketTimerInterval));
+    }
     socket->abort();
 }
 
@@ -527,7 +534,7 @@ void SessionPrivate::readMessage()
     }
     stream->parseStream();
     if (stream->error()) {
-        qCWarning(KIMAP2_LOG) << "Error while parsing";
+        qCWarning(KIMAP2_LOG) << "Error while parsing, closing connection.";
         qCDebug(KIMAP2_LOG) << "Current buffer: " << stream->currentBuffer();
         socket->close();
     }
@@ -540,6 +547,7 @@ void SessionPrivate::readMessage()
 
 void SessionPrivate::closeSocket()
 {
+    qCDebug(KIMAP2_LOG) << "Closing socket.";
     socket->close();
 }
 

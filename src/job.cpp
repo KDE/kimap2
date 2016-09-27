@@ -60,8 +60,9 @@ void Job::handleResponse(const Message &response)
 
 void Job::connectionLost()
 {
+    Q_D(Job);
     setError(KJob::UserDefinedError);
-    setErrorText("Connection to server lost.");
+    setErrorText("Connection to server lost: " + d->m_errorMessage);
     emitResult();
 }
 
@@ -69,6 +70,12 @@ void Job::setSocketError(QAbstractSocket::SocketError error)
 {
     Q_D(Job);
     d->m_socketError = error;
+}
+
+void Job::setErrorMessage(const QString &msg)
+{
+    Q_D(Job);
+    d->m_errorMessage = msg;
 }
 
 Job::HandlerResponse Job::handleErrorReplies(const Message &response)

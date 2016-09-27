@@ -52,6 +52,7 @@ private:
     virtual void handleResponse(const Message &response);
     virtual void connectionLost();
     void setSocketError(QAbstractSocket::SocketError);
+    void setErrorMessage(const QString &message);
 
 protected:
     enum HandlerResponse {

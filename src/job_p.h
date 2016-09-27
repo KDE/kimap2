@@ -50,6 +50,7 @@ public:
     QList<QByteArray> tags;
     Session *m_session;
     QString m_name;
+    QString m_errorMessage;
     QAbstractSocket::SocketError m_socketError;
 };
 
