@@ -189,7 +189,7 @@ int main(int argc, char **argv)
         qInfo() << "Fetching content";
         if (argc < 6) {
             qInfo() << "Usage: fetch 1:* [full|headers] ";
-            return;
+            return -1;
         }
         auto job = new FetchJob(&session);
         FetchJob::FetchScope scope;
@@ -213,8 +213,7 @@ int main(int argc, char **argv)
             qInfo() << "* " << result.sequenceNumber
                     << "uid " << result.uid
                     <<  "size " << result.size
-                    <<  "message size " << result.message->encodedContent().size()
-                    <<  "subject " << result.message->subject()->asUnicode;
+                    <<  "message size " << result.message->encodedContent().size();
         });
         job->exec();
     }
