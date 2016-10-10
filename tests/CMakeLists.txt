@@ -11,6 +11,8 @@ target_link_libraries(imapcmd KIMAP2 Qt5::Test Qt5::Network KF5::CoreAddons)
 # add_executable(testimapserver testimapserver.cpp)
 # target_link_libraries(testimapserver KIMAP2 Qt5::Test Qt5::Network KF5::CoreAddons)
 
+include_directories(../autotests)
+
 include(ECMMarkAsTest)
 
 remove_definitions(-DQT_USE_QSTRINGBUILDER)
