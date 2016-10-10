@@ -19,8 +19,8 @@
 #include <qtest.h>
 
 #include "kimap2test/fakeserver.h"
-#include "kimap/session.h"
-#include "kimap/setmetadatajob.h"
+#include "kimap2/session.h"
+#include "kimap2/setmetadatajob.h"
 
 #include <QtTest>
 

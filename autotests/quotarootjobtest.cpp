@@ -19,8 +19,8 @@
 #include <qtest.h>
 
 #include "kimap2test/fakeserver.h"
-#include "kimap/session.h"
-#include "kimap/getquotarootjob.h"
+#include "kimap2/session.h"
+#include "kimap2/getquotarootjob.h"
 
 #include <QtTest>
 

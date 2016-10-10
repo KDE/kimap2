@@ -22,9 +22,9 @@
 #include <qtest.h>
 
 #include "kimap2test/fakeserver.h"
-#include "kimap/loginjob.h"
-#include "kimap/session.h"
-#include "kimap/selectjob.h"
+#include "kimap2/loginjob.h"
+#include "kimap2/session.h"
+#include "kimap2/selectjob.h"
 
 #include <QtTest>
 

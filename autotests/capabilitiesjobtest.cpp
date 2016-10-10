@@ -22,8 +22,8 @@
 #include <qtest.h>
 
 #include "kimap2test/fakeserver.h"
-#include "kimap/session.h"
-#include "kimap/capabilitiesjob.h"
+#include "kimap2/session.h"
+#include "kimap2/capabilitiesjob.h"
 
 #include <QtTest>
 

@@ -20,8 +20,8 @@
 #include <qtest.h>
 
 #include "kimap2test/fakeserver.h"
-#include "kimap/session.h"
-#include "kimap/listjob.h"
+#include "kimap2/session.h"
+#include "kimap2/listjob.h"
 
 #include <QtTest>
 

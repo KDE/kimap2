@@ -17,8 +17,8 @@
 */
 
 #include "kimap2test/fakeserver.h"
-#include "kimap/session.h"
-#include "kimap/idjob.h"
+#include "kimap2/session.h"
+#include "kimap2/idjob.h"
 
 #include <QTcpSocket>
 #include <QtTest>
