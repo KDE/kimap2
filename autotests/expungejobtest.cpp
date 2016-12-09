@@ -18,9 +18,9 @@
 
 #include <qtest.h>
 
-#include "kimaptest/fakeserver.h"
-#include "kimap/session.h"
-#include "kimap/expungejob.h"
+#include "kimap2test/fakeserver.h"
+#include "kimap2/session.h"
+#include "kimap2/expungejob.h"
 
 #include <QtTest>
 
@@ -71,9 +71,9 @@ private Q_SLOTS:
         fakeServer.setScenario(scenario);
         fakeServer.startAndWait();
 
-        KIMAP::Session session(QStringLiteral("127.0.0.1"), 5989);
+        KIMAP2::Session session(QStringLiteral("127.0.0.1"), 5989);
 
-        KIMAP::ExpungeJob *job = new KIMAP::ExpungeJob(&session);
+        KIMAP2::ExpungeJob *job = new KIMAP2::ExpungeJob(&session);
         bool result = job->exec();
         QEXPECT_FAIL("bad" , "Expected failure on BAD response", Continue);
         QEXPECT_FAIL("no" , "Expected failure on NO response", Continue);
