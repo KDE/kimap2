@@ -203,11 +203,11 @@ private Q_SLOTS:
         KIMAP2::Session session(QStringLiteral("127.0.0.1"), 5989);
 
         KIMAP2::ListJob *job = new KIMAP2::ListJob(&session);
-        job->setIncludeUnsubscribed(unsubscribed);
+        if (unsubscribed) {
+            job->setOption(KIMAP2::ListJob::IncludeUnsubscribed);
+        }
 
-        QSignalSpy spy(job,
-                       SIGNAL(mailBoxesReceived(const QList<KIMAP2::MailBoxDescriptor> &,
-                                                const QList< QList<QByteArray> > &)));
+        QSignalSpy spy(job, &KIMAP2::ListJob::resultReceived);
 
         bool result = job->exec();
         QEXPECT_FAIL("bad" , "Expected failure on BAD response", Continue);
@@ -218,7 +218,7 @@ private Q_SLOTS:
             QList<KIMAP2::MailBoxDescriptor> mailBoxes;
 
             for (int i = 0; i < spy.count(); ++i) {
-                mailBoxes += spy.at(i).at(0).value< QList<KIMAP2::MailBoxDescriptor> >();
+                mailBoxes += spy.at(i).at(0).value<KIMAP2::MailBoxDescriptor>();
             }
 
             //qDebug() << mailBoxes.first().name;

@@ -24,6 +24,8 @@
 #include "rfccodecs.h"
 #include "session_p.h"
 
+static const int _kimap_mailBoxDescriptorId = qRegisterMetaType<KIMAP2::MailBoxDescriptor>();
+
 namespace KIMAP2
 {
 class ListJobPrivate : public JobPrivate

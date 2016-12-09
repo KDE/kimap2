@@ -93,4 +93,6 @@ private:
 
 }
 
+Q_DECLARE_METATYPE(KIMAP2::MailBoxDescriptor)
+
 #endif
