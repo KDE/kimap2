@@ -16,6 +16,7 @@ include(KDEInstallDirs)
 include(KDECMakeSettings)
 include(KDEFrameworkCompilerSettings NO_POLICY_SCOPE)
 include(ECMQtDeclareLoggingCategory)
+include(ECMCoverageOption)
 
 set(KIMAP2_LIB_VERSION "0.0.1")
 ecm_setup_version(${KIMAP2_LIB_VERSION} VARIABLE_PREFIX KIMAP2

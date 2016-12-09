@@ -30,6 +30,7 @@ set(kimap_SRCS
    loginjob.cpp
    logoutjob.cpp
    metadatajobbase.cpp
+   movejob.cpp
    myrightsjob.cpp
    namespacejob.cpp
    quotajobbase.cpp
@@ -48,7 +49,7 @@ set(kimap_SRCS
    unsubscribejob.cpp
 )
 
-ecm_qt_declare_logging_category(kimap_SRCS HEADER kimap_debug.h IDENTIFIER KIMAP2_LOG CATEGORY_NAME log_kimap2)
+ecm_qt_declare_logging_category(kimap_SRCS HEADER kimap_debug.h IDENTIFIER KIMAP2_LOG CATEGORY_NAME org.kde.pim.kimap2)
 
 add_library(KIMAP2 ${kimap_SRCS})
 
@@ -99,6 +100,7 @@ ecm_generate_headers(KIMAP2_CamelCase_HEADERS
   LoginJob
   LogoutJob
   MetaDataJobBase
+  MoveJob
   MyRightsJob
   NamespaceJob
   QuotaJobBase

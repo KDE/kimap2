@@ -31,6 +31,7 @@ KIMAP2_UNIT_TESTS(
   selectjobtest
   createjobtest
   deletejobtest
+  expungejobtest
   fetchjobtest
   renamejobtest
   subscribejobtest
@@ -47,4 +48,5 @@ KIMAP2_UNIT_TESTS(
   setmetadatajobtest
   appendjobtest
   statusjobtest
+  movejobtest
 )

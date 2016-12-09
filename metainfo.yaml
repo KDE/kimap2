@@ -1,0 +1,19 @@
+fancyname: KIMAP2
+maintainer: cmollekopf
+description: A job-based API for interacting with IMAP servers
+tier: 3
+type: functional
+platforms:
+    - name: All
+portingAid: false
+deprecated: false
+release: false
+libraries:
+ - qmake: KIMAP2
+   cmake: "KIMAP2"
+cmakename: KIMAP2
+
+public_lib: true
+group: kdepim
+platforms:
+    - name: Linux
