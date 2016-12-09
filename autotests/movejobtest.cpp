@@ -18,9 +18,9 @@
 
 #include <qtest.h>
 
-#include "kimaptest/fakeserver.h"
-#include "kimap/session.h"
-#include "kimap/imapset.h"
+#include "kimap2test/fakeserver.h"
+#include "kimap2/session.h"
+#include "kimap2/imapset.h"
 #include "../src/movejob.h"
 
 #include <QtTest>
@@ -70,15 +70,15 @@ private Q_SLOTS:
         fakeServer.setScenario(scenario);
         fakeServer.startAndWait();
 
-        KIMAP::Session session(QStringLiteral("127.0.0.1"), 5989);
+        KIMAP2::Session session(QStringLiteral("127.0.0.1"), 5989);
 
-        auto job = new KIMAP::MoveJob(&session);
+        auto job = new KIMAP2::MoveJob(&session);
         job->setMailBox(mailbox);
         job->setUidBased(uidBased);
-        job->setSequenceSet(KIMAP::ImapSet(id));
+        job->setSequenceSet(KIMAP2::ImapSet(id));
         bool result = job->exec();
         QVERIFY(result);
-        QCOMPARE(job->resultingUids(), KIMAP::ImapSet(resultUid));
+        QCOMPARE(job->resultingUids(), KIMAP2::ImapSet(resultUid));
 
         fakeServer.quit();
     }

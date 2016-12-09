@@ -115,7 +115,7 @@ public:
 
 protected:
     void doStart() Q_DECL_OVERRIDE;
-    void handleResponse(const KIMAP::Message &response) Q_DECL_OVERRIDE;
+    void handleResponse(const KIMAP2::Message &response) Q_DECL_OVERRIDE;
 };
 
 }
