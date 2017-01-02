@@ -63,7 +63,7 @@ PUBLIC
   KF5::Mime
   KF5::CoreAddons
 PRIVATE
-  Qt5Network
+  Qt5::Network
   KF5::Codecs
   ${Sasl2_LIBRARIES}
 )
