@@ -45,12 +45,15 @@ Session::Session(const QString &hostName, quint16 port, QObject *parent)
 {
     if (!qEnvironmentVariableIsEmpty("KIMAP2_LOGFILE")) {
         d->logger.reset(new SessionLogger);
+        qCInfo(KIMAP2_LOG) << "Logging traffic to: " << QLatin1String(qgetenv("KIMAP2_LOGFILE"));
     }
-    if (!qEnvironmentVariableIsEmpty("KIMAP2_TRAFFIC")) {
+    if (qEnvironmentVariableIsSet("KIMAP2_TRAFFIC")) {
         d->dumpTraffic = true;
+        qCInfo(KIMAP2_LOG) << "Dumping traffic.";
     }
-    if (!qEnvironmentVariableIsEmpty("KIMAP2_TIMING")) {
+    if (qEnvironmentVariableIsSet("KIMAP2_TIMING")) {
         d->trackTime = true;
+        qCInfo(KIMAP2_LOG) << "Tracking timings.";
     }
 
     d->isSocketConnected = false;
@@ -238,7 +241,7 @@ void SessionPrivate::jobDestroyed(QObject *job)
 void SessionPrivate::responseReceived(const Message &response)
 {
     if (dumpTraffic) {
-        qDebug() << "S: " << response.toString();
+        qCInfo(KIMAP2_LOG) << "S: " << response.toString();
     }
     if (logger && (state == Session::Authenticated || state == Session::Selected)) {
         logger->dataReceived(response.toString());
@@ -369,7 +372,7 @@ void SessionPrivate::sendData(const QByteArray &data)
     restartSocketTimer();
 
     if (dumpTraffic) {
-        qDebug() << "C: " << data;
+        qCInfo(KIMAP2_LOG) << "C: " << data;
     }
     if (logger && (state == Session::Authenticated || state == Session::Selected)) {
         logger->dataSent(data);
@@ -452,7 +455,7 @@ void SessionPrivate::startSsl(QSsl::SslProtocol protocol)
         Q_ASSERT(socket->mode() == QSslSocket::UnencryptedMode);
         socket->startClientEncryption();
     } else {
-        qWarning() << "The socket is not yet connected";
+        qCWarning(KIMAP2_LOG) << "The socket is not yet connected";
     }
 }
 
@@ -541,7 +544,7 @@ void SessionPrivate::readMessage()
     if (trackTime) {
         accumulatedProcessingTime += time.elapsed();
         time.start();
-        qDebug() << "Wait vs process vs total: " << accumulatedWaitTime << accumulatedProcessingTime << accumulatedWaitTime + accumulatedProcessingTime;
+        qCDebug(KIMAP2_LOG) << "Wait vs process vs total: " << accumulatedWaitTime << accumulatedProcessingTime << accumulatedWaitTime + accumulatedProcessingTime;
     }
 }
 
