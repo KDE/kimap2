@@ -63,6 +63,7 @@ Q_SIGNALS:
 
 private Q_SLOTS:
     void onSocketTimeout();
+    void onSocketProgressTimeout();
 
     void doStartNext();
     void jobDone(KJob *);
@@ -113,6 +114,8 @@ private:
 
     int socketTimerInterval;
     QTimer socketTimer;
+    int socketProgressInterval;
+    QTimer socketProgressTimer;
 
     QString hostName;
     quint16 port;

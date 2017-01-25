@@ -89,6 +89,10 @@ Session::Session(const QString &hostName, quint16 port, QObject *parent)
     connect(&d->socketTimer, &QTimer::timeout,
             d, &SessionPrivate::onSocketTimeout);
 
+    d->socketProgressTimer.setSingleShot(false);
+    connect(&d->socketProgressTimer, &QTimer::timeout,
+            d, &SessionPrivate::onSocketProgressTimeout);
+
     d->startSocketTimer();
 
     QMetaObject::invokeMethod(d, "reconnect", Qt::QueuedConnection);
@@ -165,6 +169,7 @@ SessionPrivate::SessionPrivate(Session *session)
       currentJob(Q_NULLPTR),
       tagCount(0),
       socketTimerInterval(30000),   // By default timeouts on 30s
+      socketProgressInterval(3000),   // mention we're still alive every 3s
       socket(new QSslSocket),
       stream(new ImapStreamParser(socket.data())),
       accumulatedWaitTime(0),
@@ -493,6 +498,7 @@ void SessionPrivate::startSocketTimer()
     Q_ASSERT(!socketTimer.isActive());
 
     socketTimer.start(socketTimerInterval);
+    socketProgressTimer.start(socketProgressInterval);
 }
 
 void SessionPrivate::stopSocketTimer()
@@ -502,6 +508,7 @@ void SessionPrivate::stopSocketTimer()
     }
 
     socketTimer.stop();
+    socketProgressTimer.stop();
 }
 
 void SessionPrivate::restartSocketTimer()
@@ -520,6 +527,12 @@ void SessionPrivate::onSocketTimeout()
         currentJob->setErrorMessage("Aborting on socket timeout. Interval" + QString::number(socketTimerInterval));
     }
     socket->abort();
+    socketProgressTimer.stop();
+}
+
+void SessionPrivate::onSocketProgressTimeout()
+{
+    qCDebug(KIMAP2_LOG) << "Processing job: " << (currentJob ? currentJob->metaObject()->className() : "No job");
 }
 
 void SessionPrivate::writeDataQueue()
