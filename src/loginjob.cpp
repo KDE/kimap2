@@ -235,7 +235,7 @@ void LoginJob::doStart()
         //We wait for the server greeting
         return;
     } else {
-        qCDebug(KIMAP2_LOG) << "Session is ready, carring on";
+        qCInfo(KIMAP2_LOG) << "Session is ready, carring on";
         //The session is ready, we can carry on.
         d->login();
     }
@@ -254,7 +254,7 @@ void LoginJobPrivate::login()
 
     if (startTls) {
         //With STARTTLS we have to try to upgrade our connection before the login
-        qCDebug(KIMAP2_LOG) << "Starting with tls";
+        qCInfo(KIMAP2_LOG) << "Starting with tls";
         authState = LoginJobPrivate::StartTls;
         tags << sessionInternal()->sendCommand("STARTTLS");
         return;
@@ -269,7 +269,7 @@ void LoginJobPrivate::login()
 
 void LoginJobPrivate::sslResponse(bool response)
 {
-    qCWarning(KIMAP2_LOG) << "Got an ssl response " << response;
+    qCDebug(KIMAP2_LOG) << "Got an ssl response " << response;
     if (response) {
         retrieveCapabilities();
     } else {
@@ -361,7 +361,7 @@ void LoginJob::handleResponse(const Message &response)
                 }
                 ++p;
             }
-            qCDebug(KIMAP2_LOG) << "Capabilities updated: " << d->capabilities;
+            qCInfo(KIMAP2_LOG) << "Capabilities updated: " << d->capabilities;
         }
         break;
 
@@ -472,7 +472,7 @@ bool LoginJobPrivate::startAuthentication()
 
     int result = sasl_client_new("imap", m_session->hostName().toLatin1(), Q_NULLPTR, nullptr, callbacks, 0, &conn);
     if (result != SASL_OK) {
-        qCDebug(KIMAP2_LOG) << "sasl_client_new failed with:" << result;
+        qCWarning(KIMAP2_LOG) << "sasl_client_new failed with:" << result;
         q->setError(LoginJob::UserDefinedError);
         q->setErrorText(QString::fromUtf8(sasl_errdetail(conn)));
         return false;
@@ -491,7 +491,7 @@ bool LoginJobPrivate::startAuthentication()
     } while (result == SASL_INTERACT);
 
     if (result != SASL_CONTINUE && result != SASL_OK) {
-        qCDebug(KIMAP2_LOG) << "sasl_client_start failed with:" << result;
+        qCWarning(KIMAP2_LOG) << "sasl_client_start failed with:" << result;
         q->setError(LoginJob::UserDefinedError);
         q->setErrorText(QString::fromUtf8(sasl_errdetail(conn)));
         sasl_dispose(&conn);
@@ -542,7 +542,7 @@ bool LoginJobPrivate::answerChallenge(const QByteArray &data)
     } while (result == SASL_INTERACT);
 
     if (result != SASL_CONTINUE && result != SASL_OK) {
-        qCDebug(KIMAP2_LOG) << "sasl_client_step failed with:" << result;
+        qCWarning(KIMAP2_LOG) << "sasl_client_step failed with:" << result;
         q->setError(LoginJob::UserDefinedError);   //TODO: check up the actual error
         q->setErrorText(QString::fromUtf8(sasl_errdetail(conn)));
         sasl_dispose(&conn);

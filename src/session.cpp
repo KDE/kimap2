@@ -389,14 +389,14 @@ void SessionPrivate::sendData(const QByteArray &data)
 
 void SessionPrivate::socketConnected()
 {
-    qCDebug(KIMAP2_LOG) << "Socket connected.";
+    qCInfo(KIMAP2_LOG) << "Socket connected.";
     isSocketConnected = true;
     startNext();
 }
 
 void SessionPrivate::socketDisconnected()
 {
-    qCDebug(KIMAP2_LOG) << "Socket disconnected." << isSocketConnected;
+    qCInfo(KIMAP2_LOG) << "Socket disconnected." << isSocketConnected;
     stopSocketTimer();
 
     if (logger && (state == Session::Authenticated || state == Session::Selected)) {
@@ -421,12 +421,14 @@ void SessionPrivate::socketActivity()
 
 void SessionPrivate::socketError(QAbstractSocket::SocketError error)
 {
-    qCDebug(KIMAP2_LOG) << "Socket error." << error;
+    qCDebug(KIMAP2_LOG) << "Socket error: " << error;
     stopSocketTimer();
 
     if (currentJob) {
+        qCWarning(KIMAP2_LOG) << "Socket error:" << error;
         currentJob->setSocketError(error);
     } else if (!queue.isEmpty()) {
+        qCWarning(KIMAP2_LOG) << "Socket error:" << error;
         currentJob = queue.takeFirst();
         currentJob->setSocketError(error);
     }
