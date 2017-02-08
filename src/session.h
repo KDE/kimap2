@@ -49,6 +49,10 @@ public:
     QString hostName() const;
     quint16 port() const;
     State state() const;
+    /**
+     * Returns true if the session is in either Authenticated or Selected state
+     */
+    bool isConnected() const;
 
     /**
      * Returns the name that has been set with LoginJob::setUserName()

@@ -245,7 +245,7 @@ void LoginJob::doStart()
 void LoginJobPrivate::login()
 {
     // Don't authenticate on a session in the authenticated state
-    if (q->session()->state() == Session::Authenticated || q->session()->state() == Session::Selected) {
+    if (q->session()->isConnected()) {
         q->setError(LoginJob::UserDefinedError);
         q->setErrorText(QString::fromUtf8("IMAP session in the wrong state for authentication"));
         q->emitResult();

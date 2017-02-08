@@ -119,6 +119,11 @@ Session::State Session::state() const
     return d->state;
 }
 
+bool Session::isConnected() const
+{
+    return (d->state == Authenticated || d->state == Selected);
+}
+
 QString Session::userName() const
 {
     return d->userName;
@@ -245,9 +250,9 @@ void SessionPrivate::jobDestroyed(QObject *job)
 void SessionPrivate::responseReceived(const Message &response)
 {
     if (dumpTraffic) {
-        qCInfo(KIMAP2_LOG) << "S: " << response.toString();
+        qCInfo(KIMAP2_LOG) << "S: " << QString::fromLatin1(response.toString());
     }
-    if (logger && (state == Session::Authenticated || state == Session::Selected)) {
+    if (logger && q->isConnected()) {
         logger->dataReceived(response.toString());
     }
 
@@ -378,7 +383,7 @@ void SessionPrivate::sendData(const QByteArray &data)
     if (dumpTraffic) {
         qCInfo(KIMAP2_LOG) << "C: " << data;
     }
-    if (logger && (state == Session::Authenticated || state == Session::Selected)) {
+    if (logger && q->isConnected()) {
         logger->dataSent(data);
     }
 
@@ -398,7 +403,7 @@ void SessionPrivate::socketDisconnected()
     qCInfo(KIMAP2_LOG) << "Socket disconnected." << isSocketConnected;
     stopSocketTimer();
 
-    if (logger && (state == Session::Authenticated || state == Session::Selected)) {
+    if (logger && q->isConnected()) {
         logger->disconnectionOccured();
     }
 
