@@ -28,7 +28,6 @@
 #include "kimap_debug.h"
 
 #include "job.h"
-#include "loginjob.h"
 #include "message_p.h"
 #include "sessionlogger_p.h"
 #include "rfccodecs.h"
