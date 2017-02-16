@@ -223,6 +223,7 @@ void SessionPrivate::doStartNext()
     jobRunning = true;
 
     currentJob = queue.dequeue();
+    qCDebug(KIMAP2_LOG) << "Starting job: " << currentJob->metaObject()->className();
     currentJob->doStart();
 }
 
@@ -230,6 +231,7 @@ void SessionPrivate::jobDone(KJob *job)
 {
     Q_UNUSED(job);
     Q_ASSERT(job == currentJob);
+    qCDebug(KIMAP2_LOG) << "Job done: " << job->metaObject()->className();
 
     stopSocketTimer();
 
@@ -332,7 +334,7 @@ void SessionPrivate::responseReceived(const Message &response)
     }
 
     // If a job is running forward it the response
-    if (currentJob != Q_NULLPTR) {
+    if (currentJob) {
         restartSocketTimer();
         currentJob->handleResponse(response);
     } else {
@@ -420,7 +422,10 @@ void SessionPrivate::socketDisconnected()
 
 void SessionPrivate::socketActivity()
 {
-    restartSocketTimer();
+    //This slot can be called after the job has already finished, in that case we don't want to restart the timer
+    if (currentJob) {
+        restartSocketTimer();
+    }
 }
 
 void SessionPrivate::socketError(QAbstractSocket::SocketError error)
@@ -509,10 +514,6 @@ void SessionPrivate::startSocketTimer()
 
 void SessionPrivate::stopSocketTimer()
 {
-    if (socketTimerInterval < 0) {
-        return;
-    }
-
     socketTimer.stop();
     socketProgressTimer.stop();
 }
@@ -530,6 +531,7 @@ void SessionPrivate::onSocketTimeout()
         currentJob = queue.takeFirst();
     }
     if (currentJob) {
+        qCWarning(KIMAP2_LOG) << "Current job: " << currentJob->metaObject()->className();
         currentJob->setErrorMessage("Aborting on socket timeout. Interval" + QString::number(socketTimerInterval));
     }
     socket->abort();
