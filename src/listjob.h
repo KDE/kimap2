@@ -64,9 +64,6 @@ public:
     explicit ListJob(Session *session);
     virtual ~ListJob();
 
-    KIMAP2_DEPRECATED void setIncludeUnsubscribed(bool include);
-    KIMAP2_DEPRECATED bool isIncludeUnsubscribed() const;
-
     void setOption(Option option);
     Option option() const;
 

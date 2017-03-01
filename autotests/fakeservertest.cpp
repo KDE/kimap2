@@ -56,7 +56,7 @@ private Q_SLOTS:
         KIMAP2::Session session(QStringLiteral("127.0.0.1"), 5989);
 
         KIMAP2::ListJob *job = new KIMAP2::ListJob(&session);
-        job->setIncludeUnsubscribed(true);
+        job->setOption(KIMAP2::ListJob::IncludeUnsubscribed);
         QVERIFY(job->exec());
 
         fakeServer.quit();

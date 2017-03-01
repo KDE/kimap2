@@ -76,7 +76,7 @@ void dumpContentHelper(KMime::Content *part, const QString &partId = QString())
 void listFolders(Session *session, bool includeUnsubscribed = false, const QString &nameFilter = QLatin1String(""))
 {
     ListJob *list = new ListJob(session);
-    list->setIncludeUnsubscribed(includeUnsubscribed);
+    list->setOption(KIMAP2::ListJob::IncludeUnsubscribed);
     list->exec();
     Q_ASSERT_X(list->error() == 0, "ListJob", list->errorString().toLocal8Bit().constData());
     int count = list->mailBoxes().size();
