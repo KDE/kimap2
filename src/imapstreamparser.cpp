@@ -1,6 +1,7 @@
 /*
     Copyright (c) 2006 - 2007 Volker Krause <vkrause@kde.org>
     Copyright (c) 2009 Andras Mantia <amantia@kde.org>
+    Copyright (c) 2017 Christian Mollekopf <mollekopf@kolabsys.com>
 
     Copyright (c) 2010 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
     Author: Kevin Ottens <kevin@kdab.com>
