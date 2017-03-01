@@ -85,10 +85,23 @@ public:
     int jobQueueSize() const;
 
     void close();
+
+    /**
+     * Use to ignore specific ssl errrs.
+     *
+     * Use in conjunction with @see sslErrors
+     */
     void ignoreErrors(const QList<QSslError> &errors);
 
 Q_SIGNALS:
     void jobQueueSizeChanged(int queueSize);
+
+    /**
+     * Emitted when ssl errors occur.
+     *
+     * Use in conjunction with  @see ignoreErrors to ignore an error as it appears.
+     * Note that ignore errors must be called synchronously directly in the callback.
+     */
     void sslErrors(const QList<QSslError> &errors);
 
     /**
