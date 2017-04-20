@@ -83,6 +83,11 @@ Session::Session(const QString &hostName, quint16 port, QObject *parent)
         if (state == QAbstractSocket::UnconnectedState) {
             d->socketDisconnected();
         }
+        if (state == QAbstractSocket::HostLookupState) {
+            d->hostLookupInProgress = true;
+        } else {
+            d->hostLookupInProgress = false;
+        }
     });
 
     d->socketTimer.setSingleShot(true);
@@ -170,6 +175,7 @@ SessionPrivate::SessionPrivate(Session *session)
     : QObject(session),
       q(session),
       state(Session::Disconnected),
+      hostLookupInProgress(false),
       logger(Q_NULLPTR),
       currentJob(Q_NULLPTR),
       tagCount(0),
@@ -410,13 +416,18 @@ void SessionPrivate::socketDisconnected()
         logger->disconnectionOccured();
     }
 
+    isSocketConnected = false;
+
     if (state != Session::Disconnected) {
         setState(Session::Disconnected);
     } else {
+        //If we timeout during host lookup we don't receive an explicit host lookup error
+        if (hostLookupInProgress) {
+            socketError(QAbstractSocket::HostNotFoundError);
+            hostLookupInProgress = false;
+        }
         emit q->connectionFailed();
     }
-
-    isSocketConnected = false;
 
     clearJobQueue();
 }
@@ -450,10 +461,10 @@ void SessionPrivate::socketError(QAbstractSocket::SocketError error)
 
 void SessionPrivate::clearJobQueue()
 {
-    if (currentJob) {
-        currentJob->connectionLost();
-    } else if (!queue.isEmpty()) {
+    if (!currentJob && !queue.isEmpty()) {
         currentJob = queue.takeFirst();
+    }
+    if (currentJob) {
         currentJob->connectionLost();
     }
 
@@ -539,9 +550,33 @@ void SessionPrivate::onSocketTimeout()
     socketProgressTimer.stop();
 }
 
+QString SessionPrivate::getStateName() const 
+{
+    if (hostLookupInProgress) {
+        return "Host lookup";
+    }
+    switch (state) {
+        case Session::Disconnected:
+            return "Disconnected";
+        case Session::NotAuthenticated:
+            return "NotAuthenticated";
+        case Session::Authenticated:
+            return "Authenticated";
+        case Session::Selected:
+        default:
+            break;
+    }
+    return "Unknown State";
+}
+
 void SessionPrivate::onSocketProgressTimeout()
 {
-    qCDebug(KIMAP2_LOG) << "Processing job: " << (currentJob ? currentJob->metaObject()->className() : "No job");
+    if (currentJob) {
+        qCDebug(KIMAP2_LOG) << "Processing job: " << currentJob->metaObject()->className();
+    } else {
+        qCDebug(KIMAP2_LOG) << "Next job: " << (queue.isEmpty() ? "No job" : queue.head()->metaObject()->className());
+    }
+    qCDebug(KIMAP2_LOG) << "Current state: " << getStateName();
 }
 
 void SessionPrivate::writeDataQueue()
@@ -580,9 +615,10 @@ void SessionPrivate::reconnect()
 {
     if (socket->state() == QSslSocket::ConnectedState &&
         socket->state() == QSslSocket::ConnectingState) {
+        qCDebug(KIMAP2_LOG) << "Reconnecting to: " << hostName << port;
+    } else {
         qCDebug(KIMAP2_LOG) << "Connecting to: " << hostName << port;
     }
-    qCDebug(KIMAP2_LOG) << "Connecting to: " << hostName << port;
     socket->connectToHost(hostName, port);
 }
 

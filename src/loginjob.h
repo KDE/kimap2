@@ -57,7 +57,8 @@ public:
 
     enum ErrorCode {
         ERR_COULD_NOT_CONNECT = KJob::UserDefinedError + 23, // same as in kio
-        ERR_SSL_HANDSHAKE_FAILED = KJob::UserDefinedError + 24
+        ERR_SSL_HANDSHAKE_FAILED = KJob::UserDefinedError + 24,
+        ERR_HOST_NOT_FOUND
     };
 
     explicit LoginJob(Session *session);

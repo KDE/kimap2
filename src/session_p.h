@@ -91,11 +91,13 @@ private:
     void startSocketTimer();
     void stopSocketTimer();
     void restartSocketTimer();
+    QString getStateName() const;
 
     Session *const q;
 
     bool isSocketConnected;
     Session::State state;
+    bool hostLookupInProgress;
 
     QScopedPointer<SessionLogger> logger;
 

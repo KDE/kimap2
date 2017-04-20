@@ -263,6 +263,8 @@ void LoginJobPrivate::login()
         //If this is unecrypted we can retrieve capabilties. Otherwise we wait for the sslResponse.
         if (encryptionMode == QSsl::UnknownProtocol) {
             retrieveCapabilities();
+        } else {
+            qCInfo(KIMAP2_LOG) << "Waiting for encryption before retrieveing capabilities.";
         }
     }
 
@@ -283,6 +285,7 @@ void LoginJobPrivate::sslResponse(bool response)
 
 void LoginJobPrivate::retrieveCapabilities()
 {
+    qCDebug(KIMAP2_LOG) << "Retrieving capabilities.";
     authState = LoginJobPrivate::Capability;
     tags << sessionInternal()->sendCommand("CAPABILITY");
 }
@@ -604,6 +607,10 @@ void LoginJob::connectionLost()
     if (d->m_socketError == QSslSocket::SslHandshakeFailedError) {
         setError(ERR_SSL_HANDSHAKE_FAILED);
         setErrorText(QString::fromUtf8("SSL handshake failed."));
+        emitResult();
+    } else if (d->m_socketError == QSslSocket::HostNotFoundError) {
+        setError(ERR_HOST_NOT_FOUND);
+        setErrorText(QString::fromUtf8("Host not found."));
         emitResult();
     } else {
         setError(ERR_COULD_NOT_CONNECT);
