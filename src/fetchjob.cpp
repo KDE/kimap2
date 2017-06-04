@@ -35,6 +35,7 @@ public:
         : JobPrivate(session, name)
         , q(job)
         , uidBased(false)
+        , avoidParsing(false)
     { }
 
     ~FetchJobPrivate()
@@ -52,6 +53,7 @@ public:
     bool uidBased;
     FetchJob::FetchScope scope;
     QString selectedMailBox;
+    bool avoidParsing;
 };
 }
 
@@ -73,6 +75,12 @@ FetchJob::FetchJob(Session *session)
 
 FetchJob::~FetchJob()
 {
+}
+
+void FetchJob::setAvoidParsing(bool avoid)
+{
+    Q_D(FetchJob);
+    d->avoidParsing = avoid;
 }
 
 void FetchJob::setSequenceSet(const ImapSet &set)
@@ -285,7 +293,7 @@ void FetchJob::handleResponse(const Message &response)
                 }
             }
 
-            if (result.message && shouldParseMessage) {
+            if (result.message && shouldParseMessage && !d->avoidParsing) {
                 result.message->parse();
             }
             emit resultReceived(result);

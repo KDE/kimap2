@@ -243,6 +243,11 @@ public:
      */
     FetchScope scope() const;
 
+    /**
+     * Avoid calling parse() on returned KMime::Messages
+     */
+    void setAvoidParsing(bool);
+
 Q_SIGNALS:
     void resultReceived(const Result &);
 
