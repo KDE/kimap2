@@ -18,7 +18,7 @@ include(KDEFrameworkCompilerSettings NO_POLICY_SCOPE)
 include(ECMQtDeclareLoggingCategory)
 include(ECMCoverageOption)
 
-set(KIMAP2_LIB_VERSION "0.1.1")
+set(KIMAP2_LIB_VERSION "0.2.0")
 ecm_setup_version(${KIMAP2_LIB_VERSION} VARIABLE_PREFIX KIMAP2
                         VERSION_HEADER "${CMAKE_CURRENT_BINARY_DIR}/kimap2_version.h"
                         PACKAGE_VERSION_FILE "${CMAKE_CURRENT_BINARY_DIR}/KIMAP2ConfigVersion.cmake"
