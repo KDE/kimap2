@@ -164,7 +164,7 @@ void StoreJob::doStart()
 
     QByteArray parameters = d->set.toImapSequenceSet() + ' ';
 
-    if (!d->flags.isEmpty()) {
+    if (!d->flags.isEmpty() || d->mode == SetFlags) {
         parameters += d->addFlags("FLAGS", d->flags);
     }
     if (!d->gmLabels.isEmpty()) {

@@ -60,6 +60,16 @@ private Q_SLOTS:
         QTest::newRow("uid based") << true << qint64(3) << qint64(1096)
                                    << (QList<QByteArray>() << "\\Seen" << "\\Foo")
                                    << scenario;
+
+        scenario.clear();
+        scenario << FakeServer::preauth()
+                 << "C: A000001 UID STORE 1096 FLAGS ()"
+                 << "S: * 3 FETCH (FLAGS () UID 1096)"
+                 << "S: A000001 OK STORE completed";
+
+        QTest::newRow("set emtpy flag set") << true << qint64(3) << qint64(1096)
+                                   << QList<QByteArray>()
+                                   << scenario;
     }
 
     void testStore()
