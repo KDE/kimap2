@@ -47,10 +47,13 @@ public:
         return m_session->d;
     }
 
+    void sendCommand(const QByteArray &command, const QByteArray &args);
+
     QList<QByteArray> tags;
     Session *m_session;
     QString m_name;
     QString m_errorMessage;
+    QString m_currentCommand;
     QAbstractSocket::SocketError m_socketError;
 };
 

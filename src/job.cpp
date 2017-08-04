@@ -26,6 +26,12 @@
 
 using namespace KIMAP2;
 
+void JobPrivate::sendCommand(const QByteArray &command, const QByteArray &args)
+{
+    tags << sessionInternal()->sendCommand(command, args);
+    m_command = command + "" + args;
+}
+
 Job::Job(Session *session)
     : KJob(session), d_ptr(new JobPrivate(session, "Job"))
 {
@@ -89,7 +95,7 @@ Job::HandlerResponse Job::handleErrorReplies(const Message &response)
             setErrorText(QString("%1 failed, malformed reply from the server.").arg(d->m_name));
         } else if (response.content[1].toString() != "OK") {
             setError(UserDefinedError);
-            setErrorText(QString("%1 failed, server replied: %2").arg(d->m_name).arg(QLatin1String(response.toString().constData())));
+            setErrorText(QString("%1 failed, server replied: %2.\n Sent command: %3").arg(d->m_name).arg(QLatin1String(response.toString().constData())).arg(QString(d->m_currentCommand)));
         }
         d->tags.removeAll(response.content.first().toString());
         if (d->tags.isEmpty()) {   // Only emit result when the last command returned

@@ -181,7 +181,7 @@ void StoreJob::doStart()
         command = "UID " + command;
     }
 
-    d->tags << d->sessionInternal()->sendCommand(command, parameters);
+    d->sendCommand(command, parameters);
 }
 
 void StoreJob::handleResponse(const Message &response)
