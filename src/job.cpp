@@ -29,7 +29,7 @@ using namespace KIMAP2;
 void JobPrivate::sendCommand(const QByteArray &command, const QByteArray &args)
 {
     tags << sessionInternal()->sendCommand(command, args);
-    m_command = command + "" + args;
+    m_currentCommand = command + "" + args;
 }
 
 Job::Job(Session *session)
