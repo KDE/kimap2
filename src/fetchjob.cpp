@@ -190,7 +190,7 @@ void FetchJob::doStart()
     }
 
     d->selectedMailBox = d->m_session->selectedMailBox();
-    d->tags << d->sessionInternal()->sendCommand(command, parameters);
+    d->sendCommand(command, parameters);
 }
 
 void FetchJob::handleResponse(const Message &response)

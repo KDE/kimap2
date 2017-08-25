@@ -50,7 +50,7 @@ SubscribeJob::~SubscribeJob()
 void SubscribeJob::doStart()
 {
     Q_D(SubscribeJob);
-    d->tags << d->sessionInternal()->sendCommand("SUBSCRIBE", '\"' + KIMAP2::encodeImapFolderName(d->mailBox.toUtf8()) + '\"');
+    d->sendCommand("SUBSCRIBE", '\"' + KIMAP2::encodeImapFolderName(d->mailBox.toUtf8()) + '\"');
 }
 
 void SubscribeJob::setMailBox(const QString &mailBox)

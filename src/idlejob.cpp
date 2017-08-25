@@ -99,7 +99,7 @@ void IdleJob::doStart()
     Q_D(IdleJob);
     d->originalSocketTimeout = d->sessionInternal()->socketTimeout();
     d->sessionInternal()->setSocketTimeout(-1);
-    d->tags << d->sessionInternal()->sendCommand("IDLE");
+    d->sendCommand("IDLE", {});
 }
 
 void IdleJob::handleResponse(const Message &response)

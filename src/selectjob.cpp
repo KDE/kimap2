@@ -162,7 +162,7 @@ void SelectJob::doStart()
         params += " (CONDSTORE)";
     }
 
-    d->tags << d->sessionInternal()->sendCommand(command, params);
+    d->sendCommand(command, params);
 }
 
 void SelectJob::handleResponse(const Message &response)

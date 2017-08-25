@@ -51,7 +51,7 @@ void DeleteAclJob::doStart()
 {
     Q_D(DeleteAclJob);
 
-    d->tags << d->sessionInternal()->sendCommand("DELETEACL", '\"' + KIMAP2::encodeImapFolderName(d->mailBox.toUtf8()) + "\" \"" + d->id);
+    d->sendCommand("DELETEACL", '\"' + KIMAP2::encodeImapFolderName(d->mailBox.toUtf8()) + "\" \"" + d->id);
 }
 
 void DeleteAclJob::setIdentifier(const QByteArray &identifier)

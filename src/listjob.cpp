@@ -96,7 +96,7 @@ void ListJob::doStart()
     }
 
     if (d->namespaces.isEmpty()) {
-        d->tags << d->sessionInternal()->sendCommand(d->command, "\"\" *");
+        d->sendCommand(d->command, "\"\" *");
     } else {
         foreach (const MailBoxDescriptor &descriptor, d->namespaces) {
             QString parameters = QStringLiteral("\"\" \"%1\"");
@@ -104,11 +104,11 @@ void ListJob::doStart()
             if (descriptor.name.endsWith(descriptor.separator)) {
                 QString name = encodeImapFolderName(descriptor.name);
                 name.chop(1);
-                d->tags << d->sessionInternal()->sendCommand(d->command,
+                d->sendCommand(d->command,
                         parameters.arg(name).toUtf8());
             }
 
-            d->tags << d->sessionInternal()->sendCommand(d->command,
+            d->sendCommand(d->command,
                     parameters.arg(descriptor.name + QLatin1Char('*')).toUtf8());
         }
     }

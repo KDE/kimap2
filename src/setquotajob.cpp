@@ -65,7 +65,7 @@ void SetQuotaJob::doStart()
 
     qCDebug(KIMAP2_LOG) << "SETQUOTA " << '\"' + d->root + "\" " + s;
     //XXX: [alexmerry, 2010-07-24]: should d->root be quoted properly?
-    d->tags << d->sessionInternal()->sendCommand("SETQUOTA", '\"' + d->root + "\" " + s);
+    d->sendCommand("SETQUOTA", '\"' + d->root + "\" " + s);
 }
 
 void SetQuotaJob::handleResponse(const Message &response)

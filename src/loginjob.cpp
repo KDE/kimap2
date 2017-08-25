@@ -257,7 +257,7 @@ void LoginJobPrivate::login()
         //With STARTTLS we have to try to upgrade our connection before the login
         qCInfo(KIMAP2_LOG) << "Starting with tls";
         authState = LoginJobPrivate::StartTls;
-        tags << sessionInternal()->sendCommand("STARTTLS");
+        sendCommand("STARTTLS", {});
         return;
     } else {
         //If this is unecrypted we can retrieve capabilties. Otherwise we wait for the sslResponse.
@@ -287,7 +287,7 @@ void LoginJobPrivate::retrieveCapabilities()
 {
     qCDebug(KIMAP2_LOG) << "Retrieving capabilities.";
     authState = LoginJobPrivate::Capability;
-    tags << sessionInternal()->sendCommand("CAPABILITY");
+    sendCommand("CAPABILITY", {});
 }
 
 void LoginJob::handleResponse(const Message &response)
@@ -506,9 +506,9 @@ bool LoginJobPrivate::startAuthentication()
     QByteArray challenge = tmp.toBase64();
 
     if (challenge.isEmpty()) {
-        tags << sessionInternal()->sendCommand("AUTHENTICATE", authMode.toLatin1());
+        sendCommand("AUTHENTICATE", authMode.toLatin1());
     } else {
-        tags << sessionInternal()->sendCommand("AUTHENTICATE", authMode.toLatin1() + ' ' + challenge);
+        sendCommand("AUTHENTICATE", authMode.toLatin1() + ' ' + challenge);
     }
 
     return true;
@@ -518,7 +518,7 @@ void LoginJobPrivate::sendPlainLogin()
 {
     authState = LoginJobPrivate::Login;
     qCDebug(KIMAP2_LOG) << "sending LOGIN";
-    tags << sessionInternal()->sendCommand("LOGIN",
+    sendCommand("LOGIN",
             '"' + quoteIMAP(userName).toUtf8() + '"' +
             ' ' +
             '"' + quoteIMAP(password).toUtf8() + '"');

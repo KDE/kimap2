@@ -113,7 +113,7 @@ void MoveJob::doStart()
         command = "UID " + command;
     }
 
-    d->tags << d->sessionInternal()->sendCommand(command, parameters);
+    d->sendCommand(command, parameters);
 }
 
 void MoveJob::handleResponse(const Message &response)

@@ -47,7 +47,7 @@ LogoutJob::~LogoutJob()
 void LogoutJob::doStart()
 {
     Q_D(LogoutJob);
-    d->tags << d->sessionInternal()->sendCommand("LOGOUT");
+    d->sendCommand("LOGOUT", {});
 }
 
 void LogoutJob::connectionLost()

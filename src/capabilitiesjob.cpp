@@ -55,7 +55,7 @@ QStringList CapabilitiesJob::capabilities() const
 void CapabilitiesJob::doStart()
 {
     Q_D(CapabilitiesJob);
-    d->tags << d->sessionInternal()->sendCommand("CAPABILITY");
+    d->sendCommand("CAPABILITY", {});
 }
 
 void CapabilitiesJob::handleResponse(const Message &response)

@@ -127,7 +127,7 @@ void AppendJob::doStart()
 
     parameters += " {" + QByteArray::number(d->content.size()) + '}';
 
-    d->tags << d->sessionInternal()->sendCommand("APPEND", parameters);
+    d->sendCommand("APPEND", parameters);
 }
 
 void AppendJob::handleResponse(const Message &response)

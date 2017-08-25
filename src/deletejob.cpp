@@ -50,7 +50,7 @@ DeleteJob::~DeleteJob()
 void DeleteJob::doStart()
 {
     Q_D(DeleteJob);
-    d->tags << d->sessionInternal()->sendCommand("DELETE", '\"' + KIMAP2::encodeImapFolderName(d->mailBox.toUtf8()) + '\"');
+    d->sendCommand("DELETE", '\"' + KIMAP2::encodeImapFolderName(d->mailBox.toUtf8()) + '\"');
 }
 
 void DeleteJob::setMailBox(const QString &mailBox)

@@ -65,7 +65,7 @@ void IdJob::doStart()
     }
     command.chop(1);
     command += ")";
-    d->tags << d->sessionInternal()->sendCommand(command);
+    d->sendCommand(command, {});
 }
 
 void IdJob::handleResponse(const Message &response)

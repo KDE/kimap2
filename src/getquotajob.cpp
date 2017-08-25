@@ -50,7 +50,7 @@ void GetQuotaJob::doStart()
 {
     Q_D(GetQuotaJob);
     //XXX: [alexmerry, 2010-07-24]: should d->root be quoted properly?
-    d->tags << d->sessionInternal()->sendCommand("GETQUOTA", '\"' + d->root + '\"');
+    d->sendCommand("GETQUOTA", '\"' + d->root + '\"');
 }
 
 void GetQuotaJob::handleResponse(const Message &response)

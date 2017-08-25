@@ -53,7 +53,7 @@ void GetAclJob::doStart()
 {
     Q_D(GetAclJob);
 
-    d->tags << d->sessionInternal()->sendCommand("GETACL", '\"' + KIMAP2::encodeImapFolderName(d->mailBox.toUtf8()) + '\"');
+    d->sendCommand("GETACL", '\"' + KIMAP2::encodeImapFolderName(d->mailBox.toUtf8()) + '\"');
 }
 
 void GetAclJob::handleResponse(const Message &response)

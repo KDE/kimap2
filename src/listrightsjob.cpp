@@ -54,7 +54,7 @@ void ListRightsJob::doStart()
 {
     Q_D(ListRightsJob);
 
-    d->tags << d->sessionInternal()->sendCommand("LISTRIGHTS", '\"' + KIMAP2::encodeImapFolderName(d->mailBox.toUtf8()) + "\" \"" + d->id + "\"");
+    d->sendCommand("LISTRIGHTS", '\"' + KIMAP2::encodeImapFolderName(d->mailBox.toUtf8()) + "\" \"" + d->id + "\"");
 }
 
 void ListRightsJob::handleResponse(const Message &response)

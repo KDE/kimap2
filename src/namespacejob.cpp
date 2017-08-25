@@ -135,7 +135,7 @@ bool NamespaceJob::containsEmptyNamespace() const
 void NamespaceJob::doStart()
 {
     Q_D(NamespaceJob);
-    d->tags << d->sessionInternal()->sendCommand("NAMESPACE");
+    d->sendCommand("NAMESPACE", {});
 }
 
 void NamespaceJob::handleResponse(const Message &response)

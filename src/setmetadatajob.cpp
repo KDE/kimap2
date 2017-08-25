@@ -101,7 +101,7 @@ void SetMetaDataJob::doStart()
         parameters += ')';
     }
 
-    d->tags << d->sessionInternal()->sendCommand(command, parameters);
+    d->sendCommand(command, parameters);
 //   qCDebug(KIMAP2_LOG) << "SENT: " << command << " " << parameters;
 }
 

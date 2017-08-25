@@ -47,5 +47,5 @@ CloseJob::~CloseJob()
 void CloseJob::doStart()
 {
     Q_D(CloseJob);
-    d->tags << d->sessionInternal()->sendCommand("CLOSE");
+    d->sendCommand("CLOSE", {});
 }

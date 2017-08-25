@@ -108,7 +108,7 @@ void CopyJob::doStart()
         command = "UID " + command;
     }
 
-    d->tags << d->sessionInternal()->sendCommand(command, parameters);
+    d->sendCommand(command, parameters);
 }
 
 void CopyJob::handleResponse(const Message &response)
