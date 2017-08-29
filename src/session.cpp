@@ -544,7 +544,7 @@ void SessionPrivate::onSocketTimeout()
     }
     if (currentJob) {
         qCWarning(KIMAP2_LOG) << "Current job: " << currentJob->metaObject()->className();
-        currentJob->setErrorMessage("Aborting on socket timeout. Interval" + QString::number(socketTimerInterval));
+        currentJob->setErrorMessage("Aborting on socket timeout. Interval " + QString::number(socketTimerInterval) + " ms");
     }
     socket->abort();
     socketProgressTimer.stop();
