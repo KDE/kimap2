@@ -98,12 +98,10 @@ private:
     int m_position;
     int m_readPosition;
     qint64 m_literalSize;
-    bool m_insufficientData;
     QByteArray m_data1;
     QByteArray m_data2;
     QByteArray *m_current;
     int m_bufferSize;
-    int m_readBlockSize;
 
     enum States {
         InitState,

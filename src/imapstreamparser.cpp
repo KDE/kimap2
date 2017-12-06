@@ -39,7 +39,6 @@ ImapStreamParser::ImapStreamParser(QIODevice *socket, bool serverModeEnabled)
     m_readPosition(0),
     m_literalSize(0),
     m_bufferSize(16000),
-    m_readBlockSize(100),
     m_currentState(InitState),
     m_listCounter(0),
     m_stringStartPos(0),
