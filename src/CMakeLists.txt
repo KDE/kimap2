@@ -55,8 +55,8 @@ add_library(KIMAP2 ${kimap_SRCS})
 
 generate_export_header(KIMAP2 BASE_NAME kimap2)
 
-target_include_directories(KIMAP2 INTERFACE "$<INSTALL_INTERFACE:${KDE_INSTALL_INCLUDEDIR}/KIMAP2;${Sasl2_INCLUDE_DIR}>")
-target_include_directories(KIMAP2 PUBLIC "$<BUILD_INTERFACE:${KIMAP2_SOURCE_DIR}/src;${KIMAP2_BINARY_DIR}/src>")
+target_include_directories(KIMAP2 INTERFACE "$<INSTALL_INTERFACE:${KDE_INSTALL_INCLUDEDIR}/KIMAP2;${Sasl2_INCLUDE_DIRS}>")
+target_include_directories(KIMAP2 PUBLIC "$<BUILD_INTERFACE:${KIMAP2_SOURCE_DIR}/src;${KIMAP2_BINARY_DIR}/src;${Sasl2_INCLUDE_DIRS}>")
 
 target_link_libraries(KIMAP2
 PUBLIC

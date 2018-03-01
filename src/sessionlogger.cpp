@@ -22,7 +22,11 @@
 
 #include "kimap_debug.h"
 
-#include <unistd.h>
+#ifdef WIN32
+#include <process.h>
+#else
+#include <unistd.h> //for getpid()
+#endif
 
 using namespace KIMAP2;
 
@@ -33,7 +37,12 @@ SessionLogger::SessionLogger()
     m_id = ++nextId;
 
     m_file.setFileName(QLatin1String(qgetenv("KIMAP2_LOGFILE"))
-                       + QLatin1Char('.') + QString::number(getpid())
+                       + QLatin1Char('.')
+#ifdef WIN32
+                       + QString::number(_getpid())
+#else
+                       + QString::number(getpid())
+#endif
                        + QLatin1Char('.') + QString::number(m_id));
     if (!m_file.open(QFile::WriteOnly)) {
         qCDebug(KIMAP2_LOG) << " m_file can be open in write only";
