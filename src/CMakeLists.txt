@@ -67,6 +67,9 @@ PRIVATE
   KF5::Codecs
   ${Sasl2_LIBRARIES}
 )
+if(WIN32)
+    target_link_libraries(KIMAP2 PRIVATE ws2_32)
+endif()
 
 set_target_properties(KIMAP2 PROPERTIES
     VERSION ${KIMAP2_VERSION_STRING}
