@@ -572,9 +572,9 @@ QString SessionPrivate::getStateName() const
 void SessionPrivate::onSocketProgressTimeout()
 {
     if (currentJob) {
-        qCDebug(KIMAP2_LOG) << "Processing job: " << currentJob->metaObject()->className() << "Current state: " << getStateName() << (socket ? socket->state() : "");
+        qCDebug(KIMAP2_LOG) << "Processing job: " << currentJob->metaObject()->className() << "Current state: " << getStateName() << (socket ? socket->state() : QAbstractSocket::UnconnectedState);
     } else {
-        qCDebug(KIMAP2_LOG) << "Next job: " << (queue.isEmpty() ? "No job" : queue.head()->metaObject()->className()) << "Current state: " << getStateName() << (socket ? socket->state() : "");
+        qCDebug(KIMAP2_LOG) << "Next job: " << (queue.isEmpty() ? "No job" : queue.head()->metaObject()->className()) << "Current state: " << getStateName() << (socket ? socket->state() : QAbstractSocket::UnconnectedState);
     }
 }
 
