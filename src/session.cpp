@@ -24,7 +24,7 @@
 #include "session.h"
 #include "session_p.h"
 
-#include <QtCore/QDebug>
+#include <QDebug>
 
 #include "kimap_debug.h"
 
@@ -572,11 +572,10 @@ QString SessionPrivate::getStateName() const
 void SessionPrivate::onSocketProgressTimeout()
 {
     if (currentJob) {
-        qCDebug(KIMAP2_LOG) << "Processing job: " << currentJob->metaObject()->className();
+        qCDebug(KIMAP2_LOG) << "Processing job: " << currentJob->metaObject()->className() << "Current state: " << getStateName() << (socket ? socket->state() : "");
     } else {
-        qCDebug(KIMAP2_LOG) << "Next job: " << (queue.isEmpty() ? "No job" : queue.head()->metaObject()->className());
+        qCDebug(KIMAP2_LOG) << "Next job: " << (queue.isEmpty() ? "No job" : queue.head()->metaObject()->className()) << "Current state: " << getStateName() << (socket ? socket->state() : "");
     }
-    qCDebug(KIMAP2_LOG) << "Current state: " << getStateName();
 }
 
 void SessionPrivate::writeDataQueue()
