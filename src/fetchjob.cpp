@@ -70,7 +70,6 @@ FetchJob::FetchScope::FetchScope():
 FetchJob::FetchJob(Session *session)
     : Job(*new FetchJobPrivate(this, session, "Fetch"))
 {
-    Q_D(FetchJob);
 }
 
 FetchJob::~FetchJob()
