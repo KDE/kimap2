@@ -173,7 +173,7 @@ private:
     void setupCallbacks();
 
     QList<QByteArray> *m_list;
-    QScopedPointer<QByteArray> m_literalData;
+    QByteArray m_literalData;
 };
 
 }

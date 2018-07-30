@@ -44,8 +44,7 @@ ImapStreamParser::ImapStreamParser(QIODevice *socket, bool serverModeEnabled)
     m_stringStartPos(0),
     m_readingLiteral(false),
     m_error(false),
-    m_list(nullptr),
-    m_literalData(new QByteArray)
+    m_list(nullptr)
 {
     m_data1.resize(m_bufferSize);
     m_data2.resize(m_bufferSize);
@@ -86,12 +85,11 @@ int ImapStreamParser::length() const
 int ImapStreamParser::readFromSocket()
 {
     if (m_readingLiteral && !m_isServerModeEnabled) {
-        Q_ASSERT(m_literalData);
         const auto amountToRead = qMin(m_socket->bytesAvailable(), m_literalSize);
         Q_ASSERT(amountToRead >= 0);
-        auto pos = m_literalData->size();
-        m_literalData->resize(m_literalData->size() + amountToRead);
-        const auto readBytes = m_socket->read(m_literalData->data() + pos, amountToRead);
+        auto pos = m_literalData.size();
+        m_literalData.resize(m_literalData.size() + amountToRead);
+        const auto readBytes = m_socket->read(m_literalData.data() + pos, amountToRead);
         m_literalSize -= readBytes;
         if (readBytes < 0) {
             qWarning() << "Failed to read data";
@@ -158,16 +156,14 @@ void ImapStreamParser::setupCallbacks()
         }
     });
     onLiteralStart([&](const int size) {
-        m_literalData->clear();
-        m_literalData->reserve(size);
+        m_literalData.clear();
+        m_literalData.reserve(size);
     });
     onLiteralPart([&](const char *data, const int size) {
-        Q_ASSERT(m_literalData);
-        m_literalData->append(QByteArray::fromRawData(data, size));
+        m_literalData.append(QByteArray::fromRawData(data, size));
     });
     onLiteralEnd([&]() {
-        Q_ASSERT(m_literalData);
-        string(m_literalData->constData(), m_literalData->size());
+        string(m_literalData.constData(), m_literalData.size());
     });
     onLineEnd([&]() {
         if (m_list || m_listCounter != 0) {
@@ -439,7 +435,7 @@ QByteArray ImapStreamParser::readUntilCommandEnd()
         parseStream();
         if (!result.isEmpty() && m_currentState == InitState) {
             // qDebug() << "Got a result: " << m_readingLiteral;
-            // result.append(*m_literalData);
+            // result.append(m_literalData);
             break;
         }
     }
