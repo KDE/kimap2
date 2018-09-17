@@ -37,7 +37,7 @@ enum ErrorCodes {
     ConnectionLost = KJob::UserDefinedError + 1,
     CommandFailed,
     CouldNotConnect,
-    SSLHandshakeFailed,
+    SslHandshakeFailed,
     HostNotFound,
     LoginFailed,
     LastError

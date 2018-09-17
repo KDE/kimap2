@@ -607,7 +607,7 @@ void LoginJob::connectionLost()
 
     qCWarning(KIMAP2_LOG) << "Connection to server lost " << d->m_socketError;
     if (d->m_socketError == QSslSocket::SslHandshakeFailedError) {
-        setError(SSLHandshakeFailed);
+        setError(SslHandshakeFailed);
         setErrorText(QString::fromUtf8("SSL handshake failed."));
         emitResult();
     } else if (d->m_socketError == QSslSocket::HostNotFoundError) {
