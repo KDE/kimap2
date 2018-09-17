@@ -47,7 +47,6 @@ using namespace KIMAP2;
 ListJob::ListJob(Session *session)
     : Job(*new ListJobPrivate(this, session, "List"))
 {
-    Q_D(ListJob);
 }
 
 ListJob::~ListJob()
