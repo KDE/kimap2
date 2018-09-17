@@ -67,7 +67,7 @@ void Job::handleResponse(const Message &response)
 void Job::connectionLost()
 {
     Q_D(Job);
-    setError(KJob::UserDefinedError);
+    setError(ConnectionLost);
     setErrorText("Connection to server lost: " + d->m_errorMessage);
     emitResult();
 }
@@ -94,7 +94,7 @@ Job::HandlerResponse Job::handleErrorReplies(const Message &response)
         if (response.content.size() < 2) {
             setErrorText(QString("%1 failed, malformed reply from the server.").arg(d->m_name));
         } else if (response.content[1].toString() != "OK") {
-            setError(UserDefinedError);
+            setError(CommandFailed);
             setErrorText(QString("%1 failed, server replied: %2.\n Sent command: %3").arg(d->m_name).arg(QLatin1String(response.toString().constData())).arg(QString(d->m_currentCommand)));
         }
         d->tags.removeAll(response.content.first().toString());

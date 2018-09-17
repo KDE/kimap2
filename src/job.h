@@ -33,6 +33,16 @@ class SessionPrivate;
 class JobPrivate;
 struct Message;
 
+enum ErrorCodes {
+    ConnectionLost = KJob::UserDefinedError + 1,
+    CommandFailed,
+    CouldNotConnect,
+    SSLHandshakeFailed,
+    HostNotFound,
+    LoginFailed,
+    LastError
+};
+
 class KIMAP2_EXPORT Job : public KJob
 {
     Q_OBJECT

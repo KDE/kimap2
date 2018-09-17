@@ -286,7 +286,7 @@ private Q_SLOTS:
 
             //For some reason only connecting to tlsv1 results in an ssl handshake error, with the wrong version only the server detects the error and disconnects
 //     QTest::newRow( "ssl v3 v2" ) << scenario << static_cast<int>(QSsl::SslV3) << static_cast<int>(KIMAP2::LoginJob::SslV2) << static_cast<int>(KJob::UserDefinedError);
-            QTest::newRow("ssl tlsv1 v3") << scenario << static_cast<int>(QSsl::SslV3) << static_cast<int>(QSsl::TlsV1_0) << static_cast<int>(KIMAP2::LoginJob::ERR_SSL_HANDSHAKE_FAILED);
+            QTest::newRow("ssl tlsv1 v3") << scenario << static_cast<int>(QSsl::SslV3) << static_cast<int>(QSsl::TlsV1_0) << static_cast<int>(KIMAP2::SSLHandshakeFailed);
         }
     }
 

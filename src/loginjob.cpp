@@ -276,7 +276,7 @@ void LoginJobPrivate::sslResponse(bool response)
     if (response) {
         retrieveCapabilities();
     } else {
-        q->setError(LoginJob::ERR_LOGIN_FAILED);
+        q->setError(LoginFailed);
         q->setErrorText(QString::fromUtf8("Login failed, TLS negotiation failed."));
         encryptionMode = QSsl::UnknownProtocol;
         q->emitResult();
@@ -348,7 +348,7 @@ void LoginJob::handleResponse(const Message &response)
             sasl_dispose(&d->conn);
         }
 
-        setError(ERR_LOGIN_FAILED);
+        setError(LoginFailed);
         setErrorText(QString("%1 failed, server replied: %2").arg(commandName).arg(QLatin1String(response.toString().constData())));
         emitResult();
         return;
@@ -411,7 +411,7 @@ void LoginJob::handleResponse(const Message &response)
             //cleartext login, if enabled
             if (d->authMode.isEmpty()) {
                 if (d->plainLoginDisabled) {
-                    setError(ERR_LOGIN_FAILED);
+                    setError(LoginFailed);
                     setErrorText(QString("Login failed, plain login is disabled by the server."));
                     emitResult();
                 } else {
@@ -433,7 +433,7 @@ void LoginJob::handleResponse(const Message &response)
                     }
                 }
                 if (!authModeSupported) {
-                    setError(ERR_LOGIN_FAILED);
+                    setError(LoginFailed);
                     setErrorText(QString("Login failed, authentication mode %1 is not supported by the server.").arg(d->authMode));
                     emitResult();
                 } else if (!d->startAuthentication()) {
@@ -464,7 +464,7 @@ bool LoginJobPrivate::startAuthentication()
 {
     //SASL authentication
     if (!initSASL()) {
-        q->setError(LoginJob::ERR_LOGIN_FAILED);
+        q->setError(LoginFailed);
         q->setErrorText(QString("Login failed, client cannot initialize the SASL library."));
         return false;
     }
@@ -477,7 +477,7 @@ bool LoginJobPrivate::startAuthentication()
     int result = sasl_client_new("imap", m_session->hostName().toLatin1(), Q_NULLPTR, nullptr, callbacks, 0, &conn);
     if (result != SASL_OK) {
         qCWarning(KIMAP2_LOG) << "sasl_client_new failed with:" << result;
-        q->setError(LoginJob::ERR_LOGIN_FAILED);
+        q->setError(LoginFailed);
         q->setErrorText(QString::fromUtf8(sasl_errdetail(conn)));
         return false;
     }
@@ -488,7 +488,7 @@ bool LoginJobPrivate::startAuthentication()
         if (result == SASL_INTERACT) {
             if (!sasl_interact()) {
                 sasl_dispose(&conn);
-                q->setError(LoginJob::ERR_LOGIN_FAILED);   //TODO: check up the actual error
+                q->setError(LoginFailed);   //TODO: check up the actual error
                 q->setErrorText(QString("sasl_interact failed"));
                 return false;
             }
@@ -497,7 +497,7 @@ bool LoginJobPrivate::startAuthentication()
 
     if (result != SASL_CONTINUE && result != SASL_OK) {
         qCWarning(KIMAP2_LOG) << "sasl_client_start failed with:" << result;
-        q->setError(LoginJob::ERR_LOGIN_FAILED);
+        q->setError(LoginFailed);
         q->setErrorText(QString::fromUtf8(sasl_errdetail(conn)));
         sasl_dispose(&conn);
         return false;
@@ -539,7 +539,7 @@ bool LoginJobPrivate::answerChallenge(const QByteArray &data)
 
         if (result == SASL_INTERACT) {
             if (!sasl_interact()) {
-                q->setError(LoginJob::ERR_LOGIN_FAILED);   //TODO: check up the actual error
+                q->setError(LoginFailed);   //TODO: check up the actual error
                 q->setErrorText(QString("sasl_interact failed"));
                 sasl_dispose(&conn);
                 return false;
@@ -549,7 +549,7 @@ bool LoginJobPrivate::answerChallenge(const QByteArray &data)
 
     if (result != SASL_CONTINUE && result != SASL_OK) {
         qCWarning(KIMAP2_LOG) << "sasl_client_step failed with:" << result;
-        q->setError(LoginJob::ERR_LOGIN_FAILED);   //TODO: check up the actual error
+        q->setError(LoginFailed);   //TODO: check up the actual error
         q->setErrorText(QString::fromUtf8(sasl_errdetail(conn)));
         sasl_dispose(&conn);
         return false;
@@ -607,15 +607,15 @@ void LoginJob::connectionLost()
 
     qCWarning(KIMAP2_LOG) << "Connection to server lost " << d->m_socketError;
     if (d->m_socketError == QSslSocket::SslHandshakeFailedError) {
-        setError(ERR_SSL_HANDSHAKE_FAILED);
+        setError(SSLHandshakeFailed);
         setErrorText(QString::fromUtf8("SSL handshake failed."));
         emitResult();
     } else if (d->m_socketError == QSslSocket::HostNotFoundError) {
-        setError(ERR_HOST_NOT_FOUND);
+        setError(HostNotFound);
         setErrorText(QString::fromUtf8("Host not found."));
         emitResult();
     } else {
-        setError(ERR_COULD_NOT_CONNECT);
+        setError(CouldNotConnect);
         setErrorText(QString::fromUtf8("Connection to server lost."));
         emitResult();
     }
