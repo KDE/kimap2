@@ -86,6 +86,7 @@ public:
     AuthState authState;
     QStringList capabilities;
     bool plainLoginDisabled;
+    bool connectionIsEncrypted = false;
 
     sasl_conn_t *conn;
     sasl_interact_t *client_interact;
@@ -260,8 +261,8 @@ void LoginJobPrivate::login()
         sendCommand("STARTTLS", {});
         return;
     } else {
-        //If this is unecrypted we can retrieve capabilties. Otherwise we wait for the sslResponse.
-        if (encryptionMode == QSsl::UnknownProtocol) {
+        //If this is supposed to be unecrypted or already encrypted we can retrieve capabilties. Otherwise we wait for the sslResponse.
+        if (encryptionMode == QSsl::UnknownProtocol || connectionIsEncrypted) {
             retrieveCapabilities();
         } else {
             qCInfo(KIMAP2_LOG) << "Waiting for encryption before retrieveing capabilities.";
@@ -273,8 +274,14 @@ void LoginJobPrivate::login()
 void LoginJobPrivate::sslResponse(bool response)
 {
     qCDebug(KIMAP2_LOG) << "Got an ssl response " << response;
+    connectionIsEncrypted = response;
     if (response) {
-        retrieveCapabilities();
+        //It's possible that we receive the ssl info before we receive the server greeting.
+        //In that case we're still in the Disconnected state and shouldn't retrieve the capabilities just yet.
+        //We'll try again via login once the state changes.
+        if (m_session->state() != Session::Disconnected) {
+            retrieveCapabilities();
+        }
     } else {
         q->setError(LoginFailed);
         q->setErrorText(QString::fromUtf8("Login failed, TLS negotiation failed."));
