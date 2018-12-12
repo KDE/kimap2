@@ -57,7 +57,7 @@ public:
         Authenticate
     };
 
-    LoginJobPrivate(LoginJob *job, Session *session, const QString &name) : JobPrivate(session, name), q(job), encryptionMode(QSsl::UnknownProtocol), startTls(false), authState(Login), plainLoginDisabled(false)
+    LoginJobPrivate(LoginJob *job, Session *session, const QString &name) : JobPrivate(session, name), q(job)
     {
         conn = Q_NULLPTR;
         client_interact = Q_NULLPTR;
@@ -80,12 +80,12 @@ public:
     QString password;
     QString serverGreeting;
 
-    QSsl::SslProtocol encryptionMode;
-    bool startTls;
+    QSsl::SslProtocol encryptionMode = QSsl::UnknownProtocol;
+    bool startTls = false;
     QString authMode;
-    AuthState authState;
+    AuthState authState = Login;
     QStringList capabilities;
-    bool plainLoginDisabled;
+    bool plainLoginDisabled = false;
     bool connectionIsEncrypted = false;
 
     sasl_conn_t *conn;
