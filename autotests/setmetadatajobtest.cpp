@@ -152,8 +152,11 @@ private Q_SLOTS:
         setMetadataJob->setMailBox(mailbox);
         foreach (const QByteArray &entry, annotations.keys()) {
             if (legacyMode) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
                 setMetadataJob->setEntry(entry);
                 setMetadataJob->addMetaData("value.shared", annotations[entry]);
+#pragma clang diagnostic pop
             } else {
                 setMetadataJob->addMetaData(QByteArray("/shared") + entry, annotations[entry]);
             }

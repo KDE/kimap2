@@ -294,6 +294,7 @@ private Q_SLOTS:
     {
         QFETCH(QList<QByteArray>, scenario);
         QFETCH(int, serverEncryption);
+        Q_UNUSED(serverEncryption);
         QFETCH(int, clientEncryption);
         QFETCH(int, expectedErrorCode);
 

@@ -66,7 +66,7 @@ void FakeServer::dataAvailable()
     QMutexLocker locker(&m_mutex);
 
     QTcpSocket *socket = qobject_cast<QTcpSocket *>(sender());
-    Q_ASSERT(socket != 0);
+    Q_ASSERT(socket);
 
     int scenarioNumber = m_clientSockets.indexOf(socket);
 

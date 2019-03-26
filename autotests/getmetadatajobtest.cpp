@@ -101,7 +101,10 @@ private Q_SLOTS:
         const QMap <QByteArray, QByteArray> &allMetaData = getMetadataJob->allMetaData();
         QCOMPARE(allMetaData.size(), expectedAnnotations.size());
         foreach (const QByteArray &entry, expectedAnnotations.keys()) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
             QCOMPARE(getMetadataJob->metaData(mailbox, entry), expectedAnnotations.value(entry));
+#pragma clang diagnostic pop
             QCOMPARE(getMetadataJob->metaData(entry), expectedAnnotations.value(entry));
             QCOMPARE(allMetaData.value(entry), expectedAnnotations.value(entry));
         }

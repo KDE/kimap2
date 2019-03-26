@@ -56,7 +56,7 @@ public Q_SLOTS:
 
     void onMessagesReceived(const QString &/*mailbox*/,
                             const QMap<qint64, qint64> uids,
-                            const QMap<qint64, KIMAP2::MessageAttribute> &attrs,
+                            const QMap<qint64, KIMAP2::MessageAttribute> &/*attrs*/,
                             const QMap<qint64, KIMAP2::MessagePtr> &messages)
     {
         m_signals << QStringLiteral("messagesReceived");
@@ -81,7 +81,7 @@ private Q_SLOTS:
         buffer.open(QIODevice::ReadOnly);
         KIMAP2::ImapStreamParser parser(&buffer);
         int resultCount = 0;
-        parser.onResponseReceived([&resultCount](const KIMAP2::Message &m) {
+        parser.onResponseReceived([&resultCount](const KIMAP2::Message &) {
             resultCount++;
         });
 
