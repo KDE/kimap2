@@ -245,8 +245,8 @@ void ImapSet::add(const QVector<Id> &values)
 {
     QVector<Id> vals = values;
     qSort(vals);
-    for (int i = 0; i < vals.count(); ++i) {
-        const int begin = vals[i];
+    for (auto i = 0; i < vals.count(); ++i) {
+        const auto begin = vals[i];
         Q_ASSERT(begin >= 0);
         if (i == vals.count() - 1) {
             d->intervals << ImapInterval(begin, begin);
