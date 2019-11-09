@@ -328,6 +328,22 @@ private Q_SLOTS:
         delete mock;
     }
 
+    void shouldAbortJobWhenDisconnected()
+    {
+        KIMAP2::Session session(QStringLiteral("0.0.0.0"), 1234);
+
+        //The first job get's aborted when the session disconnects
+        {
+            MockJob *job = new MockJob(&session);
+            QVERIFY(!job->exec());
+        }
+        //The second job needs to be aborted by the session automatically
+        {
+            MockJob *job = new MockJob(&session);
+            QVERIFY(!job->exec());
+        }
+    }
+
 public Q_SLOTS:
     void jobDone(KJob *job)
     {

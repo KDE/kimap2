@@ -56,7 +56,6 @@ Session::Session(const QString &hostName, quint16 port, QObject *parent)
         qCInfo(KIMAP2_LOG) << "Tracking timings.";
     }
 
-    d->isSocketConnected = false;
     d->state = Disconnected;
     d->jobRunning = false;
     d->hostName = hostName;
@@ -100,7 +99,7 @@ Session::Session(const QString &hostName, quint16 port, QObject *parent)
 
     d->startSocketTimer();
 
-    QMetaObject::invokeMethod(d, "reconnect", Qt::QueuedConnection);
+    d->reconnect();
 }
 
 Session::~Session()
@@ -219,7 +218,20 @@ void SessionPrivate::startNext()
 
 void SessionPrivate::doStartNext()
 {
-    if (queue.isEmpty() || jobRunning || !isSocketConnected) {
+    //Wait until we are ready to process
+    if (queue.isEmpty()
+        || jobRunning
+        || socket->state() == QSslSocket::ConnectingState
+        || socket->state() == QSslSocket::HostLookupState) {
+        return;
+    }
+
+    currentJob = queue.dequeue();
+
+    //Since we aren't connecting we may never get back. Cancel the job
+    if (socket->state() == QSslSocket::UnconnectedState) {
+        qCDebug(KIMAP2_LOG) << "Cancelling job due to lack of connection: " << currentJob->metaObject()->className();
+        currentJob->connectionLost();
         return;
     }
 
@@ -228,9 +240,6 @@ void SessionPrivate::doStartNext()
     }
     restartSocketTimer();
     jobRunning = true;
-
-    currentJob = queue.dequeue();
-    qCDebug(KIMAP2_LOG) << "Starting job: " << currentJob->metaObject()->className();
     currentJob->doStart();
 }
 
@@ -403,20 +412,17 @@ void SessionPrivate::sendData(const QByteArray &data)
 void SessionPrivate::socketConnected()
 {
     qCInfo(KIMAP2_LOG) << "Socket connected.";
-    isSocketConnected = true;
     startNext();
 }
 
 void SessionPrivate::socketDisconnected()
 {
-    qCInfo(KIMAP2_LOG) << "Socket disconnected." << isSocketConnected;
+    qCInfo(KIMAP2_LOG) << "Socket disconnected.";
     stopSocketTimer();
 
     if (logger && q->isConnected()) {
         logger->disconnectionOccured();
     }
-
-    isSocketConnected = false;
 
     if (state != Session::Disconnected) {
         setState(Session::Disconnected);
@@ -454,9 +460,7 @@ void SessionPrivate::socketError(QAbstractSocket::SocketError error)
         currentJob->setSocketError(error);
     }
 
-    if (isSocketConnected) {
-        closeSocket();
-    }
+    closeSocket();
 }
 
 void SessionPrivate::clearJobQueue()
