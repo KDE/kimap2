@@ -156,10 +156,7 @@ private Q_SLOTS:
         j3->start();
         j1->start();
 
-        m_expectedCalls = 4;
-        m_eventLoop.exec();
-
-        QCOMPARE(m_jobs.size(), 4);
+        QTRY_COMPARE(m_jobs.size(), 4);
         QCOMPARE(m_jobs[0], j4);
         QCOMPARE(m_jobs[1], j2);
         QCOMPARE(m_jobs[2], j3);
