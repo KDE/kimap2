@@ -235,8 +235,9 @@ private Q_SLOTS:
                      << "C: A000002 LOGIN \"user\" \"password\""
                      << "S: A000002 OK";
 
-            QTest::newRow("sslv3") << scenario << static_cast<int>(QSsl::SslV3) << static_cast<int>(QSsl::SslV3) << false;
-            //sslv2 is not supported anymore on my system
+            //sslv3 is no longer supported by qsslsocket
+            // QTest::newRow("sslv3") << scenario << static_cast<int>(QSsl::SslV3) << static_cast<int>(QSsl::SslV3) << false;
+            //sslv2 is no longer supported by qsslsocket
             // QTest::newRow("sslv2") << scenario << static_cast<int>(QSsl::SslV2) << static_cast<int>(KIMAP2::LoginJob::SslV2);
             //AnyProtocol doesn't mean the server can force a specific version (e.g. openssl always starts with a sslv2 hello)
             QTest::newRow("any protocol with anyssl version") << scenario << static_cast<int>(QSsl::AnyProtocol) << static_cast<int>(QSsl::AnyProtocol) << false;
