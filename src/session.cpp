@@ -98,8 +98,8 @@ Session::Session(const QString &hostName, quint16 port, QObject *parent)
             d, &SessionPrivate::onSocketProgressTimeout);
 
     d->startSocketTimer();
-
-    d->reconnect();
+    qCDebug(KIMAP2_LOG) << "Connecting to: " << hostName << port;
+    d->socket->connectToHost(hostName, port);
 }
 
 Session::~Session()
@@ -612,17 +612,6 @@ void SessionPrivate::closeSocket()
 {
     qCDebug(KIMAP2_LOG) << "Closing socket.";
     socket->close();
-}
-
-void SessionPrivate::reconnect()
-{
-    if (socket->state() == QSslSocket::ConnectedState &&
-        socket->state() == QSslSocket::ConnectingState) {
-        qCDebug(KIMAP2_LOG) << "Reconnecting to: " << hostName << port;
-    } else {
-        qCDebug(KIMAP2_LOG) << "Connecting to: " << hostName << port;
-    }
-    socket->connectToHost(hostName, port);
 }
 
 #include "moc_session.cpp"
