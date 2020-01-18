@@ -376,6 +376,25 @@ private Q_SLOTS:
         QVERIFY(!parser.error());
     }
 
+    void testRecursiveParse()
+    {
+        QByteArray buffer;
+        QBuffer socket(&buffer);
+        socket.open(QBuffer::WriteOnly);
+        QVERIFY(socket.write("* 230 FOO\r\n") != -1);
+
+        QBuffer readSocket(&buffer);
+        readSocket.open(QBuffer::ReadOnly);
+        ImapStreamParser parser(&readSocket);
+
+        parser.onResponseReceived([&](const Message &) {
+            parser.parseStream();
+        });
+        parser.parseStream();
+        QVERIFY(parser.availableDataSize() == 0);
+        QVERIFY(!parser.error());
+    }
+
 };
 
 QTEST_GUILESS_MAIN(StreamParserTest)
