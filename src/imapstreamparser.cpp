@@ -25,8 +25,6 @@
 
 #include "imapstreamparser.h"
 
-#include <ctype.h>
-#include <stdlib.h>
 #include <QIODevice>
 #include <QDebug>
 

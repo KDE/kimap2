@@ -26,7 +26,6 @@
 
 #include <QtCore/QByteArray>
 #include <QtCore/QList>
-#include <QtCore/QString>
 #include <QtCore/QScopedPointer>
 #include <functional>
 #include <message_p.h>
