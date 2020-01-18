@@ -137,13 +137,19 @@ void ImapStreamParser::setupCallbacks()
 
     onListStart([&]() {
         m_listCounter++;
-        if (!m_list) {
-            m_list = new QList<QByteArray>;
+        if (m_listCounter > 1) {
+            //Parse sublists as string
+            setState(SublistString);
+            m_stringStartPos = m_position;
+        } else {
+            if (!m_list) {
+                m_list = new QList<QByteArray>;
+            }
         }
     });
 
     onListEnd([&]() {
-        if (m_listCounter == 0) {
+        if (m_listCounter <= 0) {
             qWarning() << "Brackets are off";
             m_error = true;
             return;
@@ -232,14 +238,7 @@ void ImapStreamParser::processBuffer()
         switch (m_currentState) {
             case InitState:
                 if (c == '(') {
-                    if (m_listCounter >= 1) {
-                        //Parse sublists as string
-                        setState(SublistString);
-                        m_stringStartPos = m_position;
-                        m_listCounter++;
-                    } else {
-                        listStart();
-                    }
+                    listStart();
                 } else if (c == ')') {
                     listEnd();
                 } else if (c == '[') {
