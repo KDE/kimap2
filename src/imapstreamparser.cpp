@@ -93,12 +93,12 @@ int ImapStreamParser::readFromSocket()
         auto pos = m_literalData.size();
         m_literalData.resize(m_literalData.size() + amountToRead);
         const auto readBytes = m_socket->read(m_literalData.data() + pos, amountToRead);
-        m_literalSize -= readBytes;
         if (readBytes < 0) {
             qWarning() << "Failed to read data";
             return 0;
         }
         // qDebug() << "Read literal data: " << readBytes << m_literalSize;
+        m_literalSize -= readBytes;
         Q_ASSERT(m_literalSize >= 0);
         return readBytes;
     } else {
