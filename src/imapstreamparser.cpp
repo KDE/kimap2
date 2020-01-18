@@ -86,6 +86,8 @@ int ImapStreamParser::length() const
 int ImapStreamParser::readFromSocket()
 {
     if (m_readingLiteral && !m_isServerModeEnabled) {
+        Q_ASSERT(m_currentState == LiteralStringState);
+        Q_ASSERT(m_literalSize > 0);
         const auto amountToRead = qMin(m_socket->bytesAvailable(), m_literalSize);
         Q_ASSERT(amountToRead > 0);
         auto pos = m_literalData.size();
