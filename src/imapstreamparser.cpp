@@ -87,17 +87,17 @@ int ImapStreamParser::readFromSocket()
 {
     if (m_readingLiteral && !m_isServerModeEnabled) {
         const auto amountToRead = qMin(m_socket->bytesAvailable(), m_literalSize);
-        Q_ASSERT(amountToRead >= 0);
+        Q_ASSERT(amountToRead > 0);
         auto pos = m_literalData.size();
         m_literalData.resize(m_literalData.size() + amountToRead);
         const auto readBytes = m_socket->read(m_literalData.data() + pos, amountToRead);
         m_literalSize -= readBytes;
         if (readBytes < 0) {
             qWarning() << "Failed to read data";
-            m_error = true;
             return 0;
         }
         // qDebug() << "Read literal data: " << readBytes << m_literalSize;
+        Q_ASSERT(m_literalSize >= 0);
         return readBytes;
     } else {
         if (m_readPosition == m_bufferSize) {
@@ -105,11 +105,10 @@ int ImapStreamParser::readFromSocket()
             trimBuffer();
         }
         const auto amountToRead = qMin(m_socket->bytesAvailable(), qint64(m_bufferSize - m_readPosition));
-        Q_ASSERT(amountToRead >= 0);
+        Q_ASSERT(amountToRead > 0);
         const auto readBytes = m_socket->read(buffer().data() + m_readPosition, amountToRead);
         if (readBytes < 0) {
             qWarning() << "Failed to read data";
-            m_error = true;
             return 0;
         }
         m_readPosition += readBytes;
@@ -386,7 +385,15 @@ void ImapStreamParser::parseStream()
     }
     m_processing = true;
     while (m_socket->bytesAvailable()) {
-        readFromSocket();
+        if (readFromSocket() <= 0) {
+            //If we're not making progress we could loop forever,
+            //and given that we check beforehand if there is data,
+            //this should never happen.
+            qWarning() << "Read nothing from the socket.";
+            m_error = true;
+            Q_ASSERT(false);
+            return;
+        };
         processBuffer();
     }
     m_processing = false;
