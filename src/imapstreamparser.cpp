@@ -134,21 +134,21 @@ void ImapStreamParser::setupCallbacks()
             *m_currentPayload << Message::Part(QByteArray(data, size));
         }
     });
-    onListStart([&](const char c) {
-        if (c == '[') {
-            m_currentPayload = &m_message->responseCode;
-            return;
-        }
+
+    onListStart([&]() {
+        m_listCounter++;
         if (!m_list) {
             m_list = new QList<QByteArray>;
         }
     });
 
-    onListEnd([&](const char c) {
-        if (c == ']') {
-            m_currentPayload = &m_message->content;
+    onListEnd([&]() {
+        if (m_listCounter == 0) {
+            qWarning() << "Brackets are off";
+            m_error = true;
             return;
         }
+        m_listCounter--;
         if (m_listCounter == 0) {
             Q_ASSERT(m_currentPayload);
             Q_ASSERT(m_list);
@@ -157,16 +157,28 @@ void ImapStreamParser::setupCallbacks()
             m_list = nullptr;
         }
     });
+
+    onResponseCodeStart([&]() {
+        m_currentPayload = &m_message->responseCode;
+    });
+
+    onResponseCodeEnd([&]() {
+        m_currentPayload = &m_message->content;
+    });
+
     onLiteralStart([&](const int size) {
         m_literalData.clear();
         m_literalData.reserve(size);
     });
+
     onLiteralPart([&](const char *data, const int size) {
         m_literalData.append(QByteArray::fromRawData(data, size));
     });
+
     onLiteralEnd([&]() {
         string(m_literalData.constData(), m_literalData.size());
     });
+
     onLineEnd([&]() {
         if (m_list || m_listCounter != 0) {
             qWarning() << "List parsing in progress: " << m_listCounter;
@@ -226,29 +238,20 @@ void ImapStreamParser::processBuffer()
                         m_stringStartPos = m_position;
                         m_listCounter++;
                     } else {
-                        m_listCounter++;
-                        listStart(c);
+                        listStart();
                     }
                 } else if (c == ')') {
-                    if (m_listCounter == 0) {
-                        qWarning() << "Brackets are off";
-                        m_error = true;
-                        return;
-                    }
-                    m_listCounter--;
-                    listEnd(c);
+                    listEnd();
                 } else if (c == '[') {
                     if (m_listCounter >= 1) {
                         //Inside lists angle brackets are parsed as strings
                         setState(AngleBracketStringState);
                         m_stringStartPos = m_position;
                     } else {
-                        //Response code start
-                        listStart(c);
+                        responseCodeStart();
                     }
                 } else if (c == ']') {
-                    //Response code end
-                    listEnd(c);
+                    responseCodeEnd();
                 } else if (c == ' ') {
                     //Skip whitespace
                     setState(WhitespaceState);

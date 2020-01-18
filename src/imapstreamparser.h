@@ -127,8 +127,10 @@ private:
     bool m_error;
 
     std::function<void(const char *data, const int size)> string;
-    std::function<void(const char c)> listStart;
-    std::function<void(const char c)> listEnd;
+    std::function<void()> listStart;
+    std::function<void()> listEnd;
+    std::function<void()> responseCodeStart;
+    std::function<void()> responseCodeEnd;
     std::function<void(int size)> literalStart;
     std::function<void(const char *data, const int size)> literalPart;
     std::function<void()> literalEnd;
@@ -139,14 +141,24 @@ private:
         string = f;
     }
 
-    void onListStart(std::function<void(const char c)> f)
+    void onListStart(std::function<void()> f)
     {
         listStart = f;
     }
 
-    void onListEnd(std::function<void(const char c)> f)
+    void onListEnd(std::function<void()> f)
     {
         listEnd = f;
+    }
+
+    void onResponseCodeStart(std::function<void()> f)
+    {
+        responseCodeStart = f;
+    }
+
+    void onResponseCodeEnd(std::function<void()> f)
+    {
+        responseCodeEnd = f;
     }
 
     void onLiteralStart(std::function<void(int size)> f)
