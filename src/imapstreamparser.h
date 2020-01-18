@@ -95,6 +95,7 @@ private:
 
     QIODevice *m_socket;
     bool m_isServerModeEnabled;
+    bool m_processing;
     int m_position;
     int m_readPosition;
     qint64 m_literalSize;

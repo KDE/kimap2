@@ -35,6 +35,7 @@ using namespace KIMAP2;
 ImapStreamParser::ImapStreamParser(QIODevice *socket, bool serverModeEnabled)
     : m_socket(socket),
     m_isServerModeEnabled(serverModeEnabled),
+    m_processing(false),
     m_position(0),
     m_readPosition(0),
     m_literalSize(0),
@@ -376,14 +377,19 @@ void ImapStreamParser::processBuffer()
 
 void ImapStreamParser::parseStream()
 {
+    if (m_processing) {
+        return;
+    }
     if (m_error) {
         qWarning() << "An error occurred";
         return;
     }
+    m_processing = true;
     while (m_socket->bytesAvailable()) {
         readFromSocket();
         processBuffer();
     }
+    m_processing = false;
 }
 
 void ImapStreamParser::trimBuffer()
