@@ -100,6 +100,7 @@ void CopyJob::doStart()
 {
     Q_D(CopyJob);
 
+    d->set.optimize();
     QByteArray parameters = d->set.toImapSequenceSet() + ' ';
     parameters += '\"' + KIMAP2::encodeImapFolderName(d->mailBox.toUtf8()) + '\"';
 

@@ -213,7 +213,9 @@ Term::Term(Term::SequenceSearchKey key, const ImapSet &set)
     case SequenceNumber:
         break;
     }
-    d->command += " " + set.toImapSequenceSet();
+    auto optimizedSet = set;
+    optimizedSet.optimize();
+    d->command += " " + optimizedSet.toImapSequenceSet();
 }
 
 Term::Term(const Term &other)
