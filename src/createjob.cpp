@@ -53,6 +53,33 @@ void CreateJob::doStart()
     d->sendCommand("CREATE", '\"' + KIMAP2::encodeImapFolderName(d->mailBox.toUtf8()) + '\"');
 }
 
+void CreateJob::handleResponse(const Message &response)
+{
+    Q_D(CreateJob);
+
+    if (!response.content.isEmpty() &&
+        d->tags.contains(response.content.first().toString())) {
+        if (response.content.size() >= 2 &&
+            response.content[1].toString() == "NO") {
+            for (auto it = response.responseCode.cbegin(), end = response.responseCode.cend();
+                 it != end; ++it) {
+                // ALREADYEXISTS can be considered a success during CREATE
+                // cf. https://tools.ietf.org/html/rfc5530#section-3
+                if (it->toString() == "ALREADYEXISTS") {
+                    // Code copied from handleErrorReplies:
+                    d->tags.removeAll(response.content.first().toString());
+                    if (d->tags.isEmpty()) {   // Only emit result when the last command returned
+                        emitResult();
+                    }
+                    return;
+                }
+            }
+        }
+    }
+
+    handleErrorReplies(response);
+}
+
 void CreateJob::setMailBox(const QString &mailBox)
 {
     Q_D(CreateJob);
