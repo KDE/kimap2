@@ -244,7 +244,7 @@ void ImapSet::add(Id value)
 void ImapSet::add(const QVector<Id> &values)
 {
     QVector<Id> vals = values;
-    qSort(vals);
+    std::sort(vals.begin(), vals.end());
     for (auto i = 0; i < vals.count(); ++i) {
         const auto begin = vals[i];
         Q_ASSERT(begin >= 0);
