@@ -187,6 +187,8 @@ SessionPrivate::SessionPrivate(Session *session)
       trackTime(false),
       dumpTraffic(false)
 {
+    //For windows this needs to be set before connecting according to the docs
+    socket->setSocketOption(QAbstractSocket::KeepAliveOption, 1);
     stream->onResponseReceived([this](const Message &message) {
         responseReceived(message);
     });
@@ -412,6 +414,8 @@ void SessionPrivate::sendData(const QByteArray &data)
 void SessionPrivate::socketConnected()
 {
     qCInfo(KIMAP2_LOG) << "Socket connected.";
+    //Detect if the connection is no longer available
+    socket->setSocketOption(QAbstractSocket::KeepAliveOption, 1);
     startNext();
 }
 
