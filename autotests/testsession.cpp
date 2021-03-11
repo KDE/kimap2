@@ -64,7 +64,7 @@ private Q_SLOTS:
 
     void shouldFailForInvalidHosts()
     {
-        KIMAP2::Session s(QStringLiteral("0.0.0.0"), 1234);
+        KIMAP2::Session s(QStringLiteral("192.0.2.1"), 1234);
         s.setTimeout(1);   // 1 second timout
 
         QSignalSpy spyFail(&s, SIGNAL(connectionFailed()));
