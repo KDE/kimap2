@@ -2,9 +2,11 @@
 # SPDX-License-Identifier: CC0-1.0
 
 Dependencies:
-- 'on': ['@all']
+- 'on': ['Linux/Qt5', 'FreeBSD/Qt5', 'Windows/Qt5']
   'require':
     'frameworks/extra-cmake-modules': '@latest'
-    'pim/kmime' : '@same'
     'frameworks/kcoreaddons': '@latest'
-    'frameworks/kcodecs': '@latest'
+    'pim/kmime' : '@same'
+
+Options:
+  require-passing-tests-on: [ 'Linux/Qt5']
