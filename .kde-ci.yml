@@ -6,7 +6,7 @@ Dependencies:
   'require':
     'frameworks/extra-cmake-modules': '@latest'
     'frameworks/kcoreaddons': '@latest'
-    'pim/kmime' : '@same'
+    'pim/kmime' : '@stable'
 
 Options:
   require-passing-tests-on: [ 'Linux/Qt5']
